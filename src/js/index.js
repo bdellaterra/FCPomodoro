@@ -1,4 +1,4 @@
-import now from './now'
+import now from 'present'
 
 alert(now())
 
