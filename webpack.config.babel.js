@@ -1,10 +1,8 @@
 import webpack from 'webpack'
-import {resolve} from 'path'
+import { resolve } from 'path'
 import merge from 'webpack-merge'
 
-import htmlConfig from './conf/webpack/htmlConfig'
-import imgConfig from './conf/webpack/imgConfig'
-import devServerConfig from './conf/webpack/devServerConfig'
+import modules from './conf/webpack'
 
 const DefinePlugin = new webpack.DefinePlugin({
   'PRODUCTION': JSON.stringify(false),
@@ -23,9 +21,4 @@ const baseConfig = {
   ]
 }
 
-export default merge(
-  baseConfig,
-  htmlConfig,
-  imgConfig,
-)
-
+export default merge(baseConfig, modules)

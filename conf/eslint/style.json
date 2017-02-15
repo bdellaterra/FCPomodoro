@@ -100,10 +100,11 @@
     "object-property-newline": [ "warn", {
       "allowMultiplePropertiesPerLine": true
     }],
-    "object-shorthand": [ "warn", "always", {
-      "avoidQuotes": true,
-      "ignoreConstructors": true
-    }],
+    // ESLint produces error with this...
+    //"object-shorthand": [ "warn", "always", {
+    //  "avoidQuotes": true,
+    //  "ignoreConstructors": true
+    //}],
     "one-var-declaration-per-line": [ "warn", "initializations" ],
     "operator-linebreak": [ "warn", "before" ],
     "prefer-arrow-callback": [ "warn", {
