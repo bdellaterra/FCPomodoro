@@ -6,13 +6,9 @@ const context = canvas.getContext('2d')
 const centerX = canvas.width / 2
 const centerY = canvas.height / 2
 
-var timeStart = 0
-var timeElapsed = timeStart
-var timeEnd = 180
 const start = -0.5 * Math.PI
 const end = 1.5 * Math.PI
-var tock = false
-var pos = start
+var tock = 0
 var radius = 200
 var lineWidth = 15
 
@@ -78,7 +74,8 @@ const drawSecondsLine = (t) => {
   // console.log(mpos)
   context.beginPath()
   context.lineWidth = 2
-  context.arc(centerX, centerY, radius - (lineWidth / 2), start + mpos, start + mpos + pos)
+  context.arc( centerX, centerY, radius - (lineWidth / 2),
+               start + mpos, start + mpos + pos )
   context.strokeStyle = 'rgba(0, 0, 0, 0.75)'
   context.stroke()
 }
@@ -88,8 +85,11 @@ const drawHand = (t) => {
   let pos = degToRadians(timeToDegrees(t))
   context.beginPath()
   context.lineWidth = lineWidth + 1
-  context.arc( centerX, centerY, radius, start + pos - 0.01, start + pos + 0.01 )
-  context.strokeStyle = tock ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.00)'
+  context.arc( centerX, centerY, radius,
+               start + pos - 0.01, start + pos + 0.01 )
+  context.strokeStyle = tock
+    ? 'rgba(0, 0, 0, 0.75)'
+    : 'rgba(255, 255, 255, 0.00)'
   context.stroke()
 }
 
