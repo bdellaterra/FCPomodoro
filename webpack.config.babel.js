@@ -18,16 +18,7 @@ const baseConfig = {
   },
   plugins: [
     DefinePlugin
-  ],
-  module: {
-    loaders: [
-      {
-        test:    /\.jsx?$/,
-        include: resolve('src', 'js'),
-        loader:  'babel-loader'
-      }
-    ]
-  }
+  ]
 }
 
 export default merge(baseConfig, modules)
