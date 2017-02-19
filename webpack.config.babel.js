@@ -14,10 +14,23 @@ const baseConfig = {
   entry:  resolve('src', 'js'),
   output: {
     path:     resolve('dist'),
-    filename: 'bundle.js'
+    filename: '[chunkhash].[name].js'
   },
+  // devtool: 'cheap-eval-source-map',
   plugins: [
-    DefinePlugin
+    DefinePlugin,
+    new webpack.optimize.CommonsChunkPlugin({
+      name:      'vendor',
+      minChunks: ({ userRequest }) => (
+        userRequest
+        && userRequest.indexOf('node_modules') >= 0
+        && userRequest.match(/\.js$/)
+      )
+    })
+    // new webpack.optimize.UglifyJsPlugin({
+    //  sourceMap: false,
+    //  compress:  { warnings: false }
+    // })
   ]
 }
 

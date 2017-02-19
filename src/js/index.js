@@ -1,6 +1,9 @@
 import '../css/styles.css'
-import _ from 'lodash'
+import pick from 'lodash/pick'
 import now from 'present'
+
+const assign = Object.assign
+const keys = Object.keys
 
 console.clear()
 console.log('-----------------------------------')
@@ -17,7 +20,7 @@ const makePauser = (spec) => {
     onPause:   Function.prototype,
     onUnpause: Function.prototype
   })
-  _.assign(state, _.pick(spec, _.keys(state)))
+  assign(state, pick(spec, keys(state)))
   return Object.freeze({
     isPaused: () => state.isPaused,
     pause:    () => {
@@ -32,13 +35,13 @@ const makePauser = (spec) => {
 }
 
 const makeTimer = (spec) => {
-  let pauser = makePauser(spec)
-  let initState = {
+  const pauser = makePauser(spec)
+  const initState = {
     time:     0,
     lastTick: 0
   }
   const state = Object.seal({ ...initState })
-  _.assign(state, _.pick(spec, _.keys(state)))
+  assign(state, pick(spec, keys(state)))
   return Object.freeze({
     ...pauser,
     read:   () => state.time,
@@ -55,7 +58,7 @@ const makeTimer = (spec) => {
     stop:  pauser.pause,
     reset: () => {
       pauser.pause()
-      _.assign(state, initState)
+      assign(state, initState)
     }
   })
 }
@@ -63,7 +66,7 @@ const makeTimer = (spec) => {
 const timer = makeTimer({ time: 5000 })
 
 const makeDisplayElement = (spec) => {
-  let initState = {
+  const initState = {
     name: '',
     x:    canvas.width / 2,
     y:    canvas.height / 2,
@@ -73,7 +76,7 @@ const makeDisplayElement = (spec) => {
     }
   }
   const state = Object.seal({ ...initState })
-  _.assign(state, _.pick(spec, _.keys(state)))
+  assign(state, pick(spec, keys(state)))
   return Object.freeze({
     getName: () => state.name,
     setName: (v) => state.name = v,
@@ -86,12 +89,12 @@ const makeDisplayElement = (spec) => {
 }
 
 const makeArc = (spec) => {
-  let displayElement = makeDisplayElement( _.omit(spec, ['draw']) )
-  let initState = {
+  const displayElement = makeDisplayElement(spec)
+  const state = Object.seal({
     start:       -0.5 * Math.PI,
     end:         1.5 * Math.PI,
-    radius:      200,
-    lineWidth:   15,
+    radius:      100,
+    lineWidth:   5,
     strokeStyle: 'blue',
     draw:        () => {
       console.log('Draw Arc!')
@@ -103,27 +106,43 @@ const makeArc = (spec) => {
       context.strokeStyle = state.strokeStyle
       context.stroke()
     }
-  }
-  const state = Object.seal({ ...initState })
-  _.assign(state, _.pick(spec, _.keys(state)))
+  })
+  assign(state, pick(spec, keys(state)))
   return Object.freeze({
     ...displayElement,
+    draw:         () => state.draw(), // override
     getStart:     () => state.start,
     setStart:     (v) => state.start = v,
     getEnd:       () => state.end,
-    setEnd:       (v) => state.y = end,
+    setEnd:       (v) => state.end = v,
     getRadius:    () => state.radius,
     setRadius:    (v) => state.radius = v,
     getLineWidth: () => state.lineWidth,
-    setLineWidth: (v) => state.lineWidth = v,
-    draw:         () => state.draw()
+    setLineWidth: (v) => state.lineWidth = v
   })
 }
 
-let a = makeArc()
+const makeMinuteArc = (spec) => {
+  const arc = makeArc({
+    radius:      200,
+    lineWidth:   15,
+    strokeStyle: 'rgba(0, 0, 255, 0.30)',
+    ...spec
+  })
+  return Object.freeze({
+    ...arc,
+    set: (m) => {
+      arc.setEnd(
+        arc.getStart() + degToRadians(timeToDegrees(m))
+      )
+    }
+  })
+}
+
+let a = makeMinuteArc()
+a.set(30)
 a.draw()
 console.dir(a)
-
 
 // // Draw thick line to indicate time remaining
 // const drawTime = (t) => {
