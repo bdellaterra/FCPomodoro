@@ -11,7 +11,10 @@ const DefinePlugin = new webpack.DefinePlugin({
 })
 
 const baseConfig = {
-  entry:  resolve('src', 'js'),
+  entry: [
+    'babel-regenerator-runtime',
+    resolve('src', 'js')
+  ],
   output: {
     path:     resolve('dist'),
     filename: '[chunkhash].[name].js'
