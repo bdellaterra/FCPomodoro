@@ -29,11 +29,11 @@ const baseConfig = {
         && userRequest.indexOf('node_modules') >= 0
         && userRequest.match(/\.js$/)
       )
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+     sourceMap: false,
+     compress:  { warnings: false }
     })
-    // new webpack.optimize.UglifyJsPlugin({
-    //  sourceMap: false,
-    //  compress:  { warnings: false }
-    // })
   ]
 }
 
