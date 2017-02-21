@@ -1,148 +1,90 @@
+/* global DEBUG */
 import '../css/styles.css'
-import pick from 'lodash/pick'
+
 import now from 'present'
+import { canvas, context } from './canvas'
+import { degToRadians, msecsToHours, msecsToMinutes,
+         msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
+import { assign, frozen, keys, pick, sealed } from './fn'
 
-const assign = Object.assign
-const keys = Object.keys
+import makePauser from './pauser'
+import makeTimer from './timer'
+import makeEntity from './entity'
+import makeDisplayer from './displayer'
+import makeArc from './arc'
+import makeArcTimer from './arcTimer'
 
-console.clear()
-console.log('-----------------------------------')
-const canvas = document.getElementById('canvas'),
-      context = canvas.getContext('2d')
+DEBUG && console.clear()
 
-// Conversion functions
-const degToRadians = (deg) => deg * Math.PI / 180
-const timeToDegrees = (t) => t * 6
 
-const makePauser = (spec) => {
-  const state = Object.seal({
-    isPaused:  false,
-    onPause:   Function.prototype,
-    onUnpause: Function.prototype
-  })
-  assign(state, pick(spec, keys(state)))
-  return Object.freeze({
-    isPaused: () => state.isPaused,
-    pause:    () => {
-      state.isPaused = true
-      state.onPause()
-    },
-    unpause: () => {
-      state.isPaused = false
-      state.onUnpause()
-    }
-  })
+let t = makeTimer({ time: 5000 })
+t.start()
+console.log(t.update())
+
+let m = makeArcTimer({ timer: t })
+
+function sleep(ms) {
+  return new Promise((res) => setTimeout(res, ms))
 }
 
-const makeTimer = (spec) => {
-  const pauser = makePauser(spec)
-  const initState = {
-    time:     0,
-    lastTick: 0
+let z = sleep(3000)
+z.then(
+  () => {
+    console.log(msecsToSeconds(m.update()))
+    m.draw()
   }
-  const state = Object.seal({ ...initState })
-  assign(state, pick(spec, keys(state)))
-  return Object.freeze({
-    ...pauser,
-    read:   () => state.time,
-    update: () => {
-      if (!state.isPaused) {
-        const tick = now()
-        const delta = tick - state.lastTick
-        state.time = Math.max(state.time - delta, 0)
-        state.lastTick = tick
-      }
-      return state.time
-    },
-    start: pauser.unpause,
-    stop:  pauser.pause,
-    reset: () => {
-      pauser.pause()
-      assign(state, initState)
-    }
-  })
-}
+)
 
-const timer = makeTimer({ time: 5000 })
 
-const makeDisplayElement = (spec) => {
-  const initState = {
-    name: '',
-    x:    canvas.width / 2,
-    y:    canvas.height / 2,
-    draw: () => {
-      console.log('Draw Element!')
-      context.clearRect(0, 0, canvas.width, canvas.height)
-    }
-  }
-  const state = Object.seal({ ...initState })
-  assign(state, pick(spec, keys(state)))
-  return Object.freeze({
-    getName: () => state.name,
-    setName: (v) => state.name = v,
-    getX:    () => state.x,
-    setX:    (v) => state.x = v,
-    getY:    () => state.y,
-    setY:    (v) => state.y = v,
-    draw:    () => state.draw()
-  })
-}
-
-const makeArc = (spec) => {
-  const displayElement = makeDisplayElement(spec)
-  const state = Object.seal({
-    start:       -0.5 * Math.PI,
-    end:         1.5 * Math.PI,
-    radius:      100,
-    lineWidth:   5,
-    strokeStyle: 'blue',
-    draw:        () => {
-      console.log('Draw Arc!')
-      displayElement.draw() // Clear the canvas
-      context.beginPath()
-      context.lineWidth = state.lineWidth
-      context.arc( displayElement.getX(), displayElement.getY(),
-                   state.radius, state.start, state.end )
-      context.strokeStyle = state.strokeStyle
-      context.stroke()
-    }
-  })
-  assign(state, pick(spec, keys(state)))
-  return Object.freeze({
-    ...displayElement,
-    draw:         () => state.draw(), // override
-    getStart:     () => state.start,
-    setStart:     (v) => state.start = v,
-    getEnd:       () => state.end,
-    setEnd:       (v) => state.end = v,
-    getRadius:    () => state.radius,
-    setRadius:    (v) => state.radius = v,
-    getLineWidth: () => state.lineWidth,
-    setLineWidth: (v) => state.lineWidth = v
-  })
-}
-
-const makeMinuteArc = (spec) => {
-  const arc = makeArc({
-    radius:      200,
-    lineWidth:   15,
-    strokeStyle: 'rgba(0, 0, 255, 0.30)',
+const makeSecondsArc = (spec) => {
+  const arcTimer = makeArcTimer({
+    radius:      192,
+    lineWidth:   2,
+    strokeStyle: 'rgba(0, 0, 0, 0.75)',
     ...spec
   })
-  return Object.freeze({
-    ...arc,
-    set: (m) => {
-      arc.setEnd(
-        arc.getStart() + degToRadians(timeToDegrees(m))
-      )
+  const timer = arcTimer.getTimer()
+  const baseStart = arcTimer.getStart()
+  const baseEnd = arcTimer.getEnd()
+  return frozen({
+    ...arcTimer,
+    update: (t) => {
+      let time = timeToRadians( t !== undefined ? t : timer.update() )
+      arcTimer.setStart(baseStart)
+      arcTimer.setEnd( baseStart + time )
+      return time
     }
   })
 }
 
-let a = makeMinuteArc()
-a.set(30)
-a.draw()
-console.dir(a)
+const makeBlinkingCursor = (spec) => {
+  const arcTimer = makeArcTimer({
+    radius:      200,
+    lineWidth:   16,
+    strokeStyle: 'rgba(0, 0, 0, 0.75)',
+    ...spec
+  })
+  const timer = arcTimer.getTimer()
+  const baseStart = arcTimer.getStart()
+  return frozen({
+    ...arcTimer,
+    update: (t) => {
+      let time = timeToRadians( t !== undefined ? t : timer.update() )
+      arcTimer.setStart( baseStart + time - 0.01 )
+      arcTimer.setEnd( baseStart + time + 0.01 )
+      return time
+    }
+  })
+}
+
+
+// let s = makeSecondsArc({ timer: t })
+// s.update(0)
+// s.draw()
+//
+// let c = makeBlinkingCursor()
+// c.update(59)
+// c.draw()
 
 // // Draw thick line to indicate time remaining
 // const drawTime = (t) => {
