@@ -134,7 +134,7 @@
       "before": false,
       "after": true
     }],
-    "sort-imports": "warn",
+    //"sort-imports": "warn",
     "space-before-blocks": [ "warn", "always" ],
     "space-before-function-paren": [ "warn", "never" ],
     //"space-in-parens": [ "warn", "never", {
