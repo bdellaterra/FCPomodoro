@@ -3,7 +3,7 @@ import { assign, frozen, keys, pick, sealed } from './fn'
 import makePauser from './pauser'
 
 const makeTimer = (spec) => {
-  const pauser = makePauser(spec)
+  const pauser = makePauser({ isPaused: true, ...spec })
   const initState = {
     time:     0,
     lastTick: 0
@@ -24,9 +24,10 @@ const makeTimer = (spec) => {
     },
     start: pauser.unpause,
     stop:  pauser.pause,
-    reset: () => {
+    reset: (t) => {
       pauser.pause()
       assign(state, initState)
+      if (t !== undefined) { state.timer = t }
     }
   })
 }
