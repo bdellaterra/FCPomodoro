@@ -1,4 +1,5 @@
 import makeArc from './arc'
+import makeTimer from './timer'
 import { assign, frozen, keys, pick, sealed } from './fn'
 import { degToRadians, msecsToHours, msecsToMinutes,
          msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
@@ -12,7 +13,7 @@ const makeArcTimer = (spec) => {
     getTimer: () => state.timer,
     setTimer: (v) => state.timer = v,
     update:   (t) => {
-      let time = t !== undefined ? t : state.timer.update()
+      let time = t !== undefined ? t : state.timer.read()
       arc.setEnd( arc.getStart() + timeToRadians(msecsToSeconds(time)) )
       return time
     }
