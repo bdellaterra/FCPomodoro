@@ -75,8 +75,8 @@ test('Pausing timer stops countdown', async (t) => {
 })
 
 test('Unpausing timer resumes countdown', async (t) => {
-  let initTime = jiffy * 2,
-      interval = jiffy,
+  let initTime = jiffy * 3,
+      interval = jiffy * 2,
       timer = makeTimer({ time: initTime })
   timer.start()
   await sleep(interval)
@@ -98,6 +98,17 @@ test('Timer resets to a zero-time/paused state', async (t) => {
   await sleep(interval)
   timer.update()
   t.true( timer.read() === 0 )
+  t.true( timer.isPaused() === true )
+})
+
+test('Time remaining can be reset to a specified value', async (t) => {
+  let timer = makeTimer({ time: jiffy })
+  timer.start()
+  await sleep(jiffy)
+  timer.reset(3000)
+  await sleep(jiffy)
+  timer.update()
+  t.true( timer.read() === 3000 )
   t.true( timer.isPaused() === true )
 })
 
