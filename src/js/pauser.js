@@ -1,22 +1,12 @@
 import { assign, frozen, keys, pick, sealed } from './fn'
 
 const makePauser = (spec) => {
-  const state = sealed({
-    isPaused:  false,
-    onPause:   Function.prototype,
-    onUnpause: Function.prototype
-  })
+  const state = sealed({ isPaused: false })
   assign(state, pick(spec, keys(state)))
   return frozen({
     isPaused: () => state.isPaused,
-    pause:    () => {
-      state.isPaused = true
-      state.onPause()
-    },
-    unpause: () => {
-      state.isPaused = false
-      state.onUnpause()
-    }
+    pause:    () => state.isPaused = true,
+    unpause:  () => state.isPaused = false
   })
 }
 
