@@ -50,18 +50,16 @@
     "source": [
       "**/*.{js,jsx}",
       "!dist/**/*"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "es2015",
-      "stage-0"
     ],
-    "ignore": "*test.js",
-    "env": {
-      "development": {
-        "sourceMaps": "inline"
-      }
+    "require": "babel-register",
+    "babel": {
+      "presets": [
+        "es2015",
+        "stage-0"
+      ],
+      "plugins": [
+        "transform-runtime"
+      ]
     }
   },
   "nyc": {
