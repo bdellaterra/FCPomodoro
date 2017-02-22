@@ -1,81 +1,81 @@
 /* global DEBUG */
 import '../css/styles.css'
 
-import now from 'present'
-import { canvas, context } from './canvas'
+import { assign, frozen, keys, pick, sealed } from './fn'
 import { degToRadians, msecsToHours, msecsToMinutes,
          msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
-import { assign, frozen, keys, pick, sealed } from './fn'
+import { sleep } from './util'
 
-import makePauser from './pauser'
 import makeTimer from './timer'
-import makeEntity from './entity'
-import makeDisplayer from './displayer'
-import makeArc from './arc'
 import makeArcTimer from './arcTimer'
-
-DEBUG && console.clear()
 
 
 let t = makeTimer({ time: 5000 })
-t.start()
-console.log(t.update())
 
-let m = makeArcTimer({ timer: t })
-
-function sleep(ms) {
-  return new Promise((res) => setTimeout(res, ms))
-}
-
-let z = sleep(3000)
-z.then(
-  () => {
-    console.log(msecsToSeconds(m.update()))
-    m.draw()
+async function atest() {
+  try {
+    t.start()
+    console.log(t.read())
+    await sleep(2000)
+    t.update()
+    console.log(t.read())
+  } catch (err) {
+    console.err(err)
   }
-)
-
-
-const makeSecondsArc = (spec) => {
-  const arcTimer = makeArcTimer({
-    radius:      192,
-    lineWidth:   2,
-    strokeStyle: 'rgba(0, 0, 0, 0.75)',
-    ...spec
-  })
-  const timer = arcTimer.getTimer()
-  const baseStart = arcTimer.getStart()
-  const baseEnd = arcTimer.getEnd()
-  return frozen({
-    ...arcTimer,
-    update: (t) => {
-      let time = timeToRadians( t !== undefined ? t : timer.update() )
-      arcTimer.setStart(baseStart)
-      arcTimer.setEnd( baseStart + time )
-      return time
-    }
-  })
 }
 
-const makeBlinkingCursor = (spec) => {
-  const arcTimer = makeArcTimer({
-    radius:      200,
-    lineWidth:   16,
-    strokeStyle: 'rgba(0, 0, 0, 0.75)',
-    ...spec
-  })
-  const timer = arcTimer.getTimer()
-  const baseStart = arcTimer.getStart()
-  return frozen({
-    ...arcTimer,
-    update: (t) => {
-      let time = timeToRadians( t !== undefined ? t : timer.update() )
-      arcTimer.setStart( baseStart + time - 0.01 )
-      arcTimer.setEnd( baseStart + time + 0.01 )
-      return time
-    }
-  })
-}
+atest()
+
+
+// let z = sleep(2000)
+// z.then(
+// () => {
+//   console.log(msecsToSeconds(m.update()))
+//   m.draw()
+// }
+// )
+
+
+// const makeSecondsArc = (spec) => {
+//  const arcTimer = makeArcTimer({
+//    radius:      192,
+//    lineWidth:   2,
+//    strokeStyle: 'rgba(0, 0, 0, 0.75)',
+//    ...spec
+//  })
+//  const timer = arcTimer.getTimer()
+//  const baseStart = arcTimer.getStart()
+//  const baseEnd = arcTimer.getEnd()
+//  return frozen({
+//    ...arcTimer,
+//    update: (t) => {
+//      let time = timeToRadians( t !== undefined ? t : timer.update() )
+//      arcTimer.setStart(baseStart)
+//      arcTimer.setEnd( baseStart + time )
+//      return time
+//    }
+//  })
+// }
+//
+// const makeBlinkingCursor = (spec) => {
+//  const arcTimer = makeArcTimer({
+//    radius:      200,
+//    lineWidth:   16,
+//    strokeStyle: 'rgba(0, 0, 0, 0.75)',
+//    ...spec
+//  })
+//  const timer = arcTimer.getTimer()
+//  const baseStart = arcTimer.getStart()
+//  return frozen({
+//    ...arcTimer,
+//    update: (t) => {
+//      let time = timeToRadians( t !== undefined ? t : timer.update() )
+//      arcTimer.setStart( baseStart + time - 0.01 )
+//      arcTimer.setEnd( baseStart + time + 0.01 )
+//      return time
+//    }
+//  })
+// }
 
 
 // let s = makeSecondsArc({ timer: t })

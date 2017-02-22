@@ -12,7 +12,8 @@
     "build": "webpack",
     "lint": "eslint . --cache --ignore-path .gitignore",
     "coverage": "cross-env JS_TEST_LIB=ava nyc ava",
-    "test": "cross-env JS_TEST_LIB=ava ava --tap",
+    "tap": "cross-env JS_TEST_LIB=ava ava --tap",
+    "test": "cross-env JS_TEST_LIB=ava ava",
     "watch": "cross-env JS_TEST_LIB=ava ava --watch"
   },
   "devDependencies": {
