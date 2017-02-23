@@ -50,15 +50,17 @@ export const makeCountdown = () => {
 }
 
 // Returns a function that runs an iterator at the specified pace.
-export const makePacer = (iter) => {
-  var countdown = makeCountdown(),
+export const makeFeeder = (iter) => {
+  var keeptime = makeKeepTimer(),
+      lastTime = 0,
       pace = 0
-  return (r) => {
-    let remaining = countdown(r),
+  return (p) => {
+    let time = keeptime(),
+        delta = time - lastTime,
         result = null
-    if (r !== undefined) { pace = remaining }
-    if (remaining === 0) {
-      countdown(pace)
+    if (p !== undefined) { pace = p }
+    if (delta / pace > 1) {  // 0 / 0 = NaN which is not greater than 1
+      lastTime = time
       result = iter.next()
     }
     return result
@@ -66,47 +68,47 @@ export const makePacer = (iter) => {
 }
 
 
-// Create a time keeper that dispatches callbacks at set intervals.
-// Time is measured in miliseconds.
-export const makePacer2 = (spec) => {
-
-  // Default state
-  const state = sealed({
-    startTick:      now(),  // time when tracking began
-    time:           0,      // time elapsed
-    updateInterval: 1, // delay between notifications
-    schedule:       {}
-  })
-
-  // Update time every animation frame.
-  // Dispatch at set intervals. (Default is every frame.)
-  const run = () => {
-    window.requestAnimationFrame(run)
-    state.time = now() - state.startTick
-    // if (state.time / state.updateInterval > 1) {
-    //  dispatch()
-    // }
-  }
-
-  const dispatch = () => {
-    console.log('Updates at:', state.time)
-  }
-
-  // Adjust default state to spec.
-  assign(state, pick(spec, keys(state)))
-
-  // Start in running state
-  run()
-
-  return frozen({
-
-    // As above
-    run,
-
-    getTime: () => state.time,
-    reset:   () => state.startTick = now()
-
-  })
-
-}
+// // Create a time keeper that dispatches callbacks at set intervals.
+// // Time is measured in miliseconds.
+// export const makePacer2 = (spec) => {
+//
+//   // Default state
+//   const state = sealed({
+//     startTick:      now(),  // time when tracking began
+//     time:           0,      // time elapsed
+//     updateInterval: 1, // delay between notifications
+//     schedule:       {}
+//   })
+//
+//   // Update time every animation frame.
+//   // Dispatch at set intervals. (Default is every frame.)
+//   const run = () => {
+//     window.requestAnimationFrame(run)
+//     state.time = now() - state.startTick
+//     // if (state.time / state.updateInterval > 1) {
+//     //  dispatch()
+//     // }
+//   }
+//
+//   const dispatch = () => {
+//     console.log('Updates at:', state.time)
+//   }
+//
+//   // Adjust default state to spec.
+//   assign(state, pick(spec, keys(state)))
+//
+//   // Start in running state
+//   run()
+//
+//   return frozen({
+//
+//     // As above
+//     run,
+//
+//     getTime: () => state.time,
+//     reset:   () => state.startTick = now()
+//
+//   })
+//
+// }
 

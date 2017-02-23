@@ -2,7 +2,7 @@ var test = require(process.env.JS_TEST_LIB).test
 
 import now from 'present'
 import { sleep, makeDeltaTimer, makeKeepTimer,
-         makeCountdown, makePacer } from '../src/js/time'
+         makeCountdown, makeFeeder } from '../src/js/time'
 
 // Minimum milisecond delay for safely testing asyncronous timing
 const jiffy = 50
@@ -124,8 +124,8 @@ test('countdown() resets time remaining to argument provided.', async (t) => {
 // Pace
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-test('pacer() can run a counter at specified time interval.', async (t) => {
-  let pace = makePacer(countTo(3))
+test('feeder() can run a counter at specified time interval.', async (t) => {
+  let pace = makeFeeder(countTo(3))
   t.true(pace(jiffy) === null)
   await sleep(pad(jiffy))
   t.true(pace().value === 1)
@@ -137,8 +137,8 @@ test('pacer() can run a counter at specified time interval.', async (t) => {
   t.true(pace().done)
 })
 
-test('pacer() returns null during wait for next interval.', async (t) => {
-  let pace = makePacer(countTo(3))
+test('feeder() returns null during wait for next interval.', async (t) => {
+  let pace = makeFeeder(countTo(3))
   t.true(pace(jiffy) === null)
   t.true(pace() === null)
   t.true(pace() === null)
@@ -147,3 +147,4 @@ test('pacer() returns null during wait for next interval.', async (t) => {
   t.true(pace().value === 1)
   t.true(pace() === null)
 })
+
