@@ -49,7 +49,8 @@ export const makeCountdown = () => {
   }
 }
 
-// Returns a function that runs an iterator at the specified pace.
+// Returns a function that feeds iteration results at no
+// faster than the specified pace.
 export const makeFeeder = (iter) => {
   var keeptime = makeKeepTimer(),
       lastTime = 0,
