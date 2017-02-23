@@ -49,10 +49,26 @@ export const makeCountdown = () => {
   }
 }
 
+// Returns a function that runs an iterator at the specified pace.
+export const makePacer = (iter) => {
+  var countdown = makeCountdown(),
+      pace = 0
+  return (r) => {
+    let remaining = countdown(r),
+        result = null
+    if (r !== undefined) { pace = remaining }
+    if (remaining === 0) {
+      countdown(pace)
+      result = iter.next()
+    }
+    return result
+  }
+}
+
 
 // Create a time keeper that dispatches callbacks at set intervals.
 // Time is measured in miliseconds.
-export const makePacer = (spec) => {
+export const makePacer2 = (spec) => {
 
   // Default state
   const state = sealed({
