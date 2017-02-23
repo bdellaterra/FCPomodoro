@@ -4,27 +4,43 @@ import '../css/styles.css'
 import { assign, frozen, keys, pick, sealed } from './fn'
 import { degToRadians, msecsToHours, msecsToMinutes,
          msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
-import { sleep } from './util'
+import { sleep, jiffy, delta } from './time'
 
-import makeTimer from './timer'
-import makeArcTimer from './arcTimer'
+import makePacer from './time'
+// import makeTimer from './timer'
+// import makeArcTimer from './arcTimer'
 
+console.log(delta())
+console.log(delta())
+console.log(delta())
+console.log(delta())
 
-let t = makeTimer({ time: 5000 })
+// let p = makePacer()
+// console.log(p.getTime())
+// async function ptest() {
+//  try {
+//    await sleep(3000)
+//    console.log(p.getTime())
+//  } catch (err) {
+//    console.err(err)
+//  }
+// }
+// ptest()
 
-async function atest() {
-  try {
-    t.start()
-    console.log(t.read())
-    await sleep(2000)
-    t.update()
-    console.log(t.read())
-  } catch (err) {
-    console.err(err)
-  }
-}
-
-atest()
+// let t = makeTimer({ time: 5000 })
+// async function ttest() {
+//  try {
+//    t.start()
+//    console.log(t.read())
+//    await sleep(2000)
+//    t.update()
+//    console.log(t.read())
+//  } catch (err) {
+//    console.err(err)
+//  }
+// }
+//
+// ttest()
 
 
 // let z = sleep(2000)

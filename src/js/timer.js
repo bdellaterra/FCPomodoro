@@ -68,10 +68,13 @@ const makeTimer = (spec) => {
     reset: (t) => {
       pauser.pause()
       assign(state, initState)
-      if (t !== undefined) { state.time = t }
+      if (t !== undefined) {
+        state.time = t
+      }
     }
 
   })
+
 }
 
 export default makeTimer

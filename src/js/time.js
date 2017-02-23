@@ -2,12 +2,9 @@ import { assign, frozen, keys, pick, sealed } from './fn'
 import now from 'present'
 import makeTimer from './timer'
 
-// Minimum milisecond delay for safely testing asyncronous timing
-export const jiffy = 50
-
 // Returns a promise that resolves after specified timeout in miliseconds
-export function sleep(ms) {
-  return new Promise((res) => setTimeout(res, ms))
+export function sleep(m) {
+  return new Promise((res) => setTimeout(res, m))
 }
 
 // Creates a function that returns the amount of time since it was last called.
@@ -21,6 +18,34 @@ export const makeDeltaTimer = () => {
     let delta = lastTick ? tick - lastTick : 0
     lastTick = tick
     return delta
+  }
+}
+
+// Accumulates time since first call.
+// Accumulates from optional argument, if provided.
+export const makeKeepTimer = () => {
+  var delta = makeDeltaTimer(),
+      time = 0
+  return (t) => {
+    if (t !== undefined) { time = 0 }
+    time += delta(t)
+    return time
+  }
+}
+
+// Counts down from supplied time value, stopping at zero.
+// Optional argument resets the timer to specified value in miliseconds.
+export const makeCountdown = () => {
+  var keeptime = makeKeepTimer(),
+      remaining = 0
+  return (r) => {
+    if (r !== undefined) {
+      keeptime(now())
+    } else {
+      r = remaining - keeptime()
+    }
+    remaining = Math.max(r, 0)
+    return remaining
   }
 }
 
