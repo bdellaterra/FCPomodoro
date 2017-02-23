@@ -50,23 +50,19 @@ export const makeCountdown = () => {
 }
 
 // Returns a function that feeds iteration results at no
-// faster than the specified pace.
+// faster than the specified pace. The pace can be changed
+// at any time but doing so does not reset the timer.
+// A pace of zero allows iteration with zero delay.
 export const makeFeeder = (iter) => {
   var keeptime = makeKeepTimer(),
       lastTime = 0,
-      pace = 0,
-      reset = (p) => {
-        pace = p
-        keeptime(now())
-        return null
-      }
+      pace = 0
   return (p) => {
     let time = keeptime(),
         delta = time - lastTime,
         result = null
-    if (p !== undefined) {
-      reset(p)
-    } else if (delta / pace > 1) {  // 0 / 0 = NaN which is not greater than 1
+    if (p !== undefined) { pace = p }
+    if (!pace || delta / pace > 1) {
       lastTime = time
       result = iter.next()
     }
