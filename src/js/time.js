@@ -54,13 +54,19 @@ export const makeCountdown = () => {
 export const makeFeeder = (iter) => {
   var keeptime = makeKeepTimer(),
       lastTime = 0,
-      pace = 0
+      pace = 0,
+      reset = (p) => {
+        pace = p
+        keeptime(now())
+        return null
+      }
   return (p) => {
     let time = keeptime(),
         delta = time - lastTime,
         result = null
-    if (p !== undefined) { pace = p }
-    if (delta / pace > 1) {  // 0 / 0 = NaN which is not greater than 1
+    if (p !== undefined) {
+      reset(p)
+    } else if (delta / pace > 1) {  // 0 / 0 = NaN which is not greater than 1
       lastTime = time
       result = iter.next()
     }

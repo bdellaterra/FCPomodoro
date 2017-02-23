@@ -121,30 +121,30 @@ test('countdown() resets time remaining to argument provided.', async (t) => {
 })
 
 
-// Pace
+// Feed
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-test('feeder() can run a counter at specified time interval.', async (t) => {
-  let pace = makeFeeder(countTo(3))
-  t.true(pace(jiffy) === null)
+test('feed() can run a counter at specified time interval.', async (t) => {
+  let feed = makeFeeder(countTo(3))
+  t.true(feed(jiffy) === null)
   await sleep(pad(jiffy))
-  t.true(pace().value === 1)
+  t.true(feed().value === 1)
   await sleep(pad(jiffy))
-  t.true(pace().value === 2)
+  t.true(feed().value === 2)
   await sleep(pad(jiffy))
-  t.true(pace().value === 3)
+  t.true(feed().value === 3)
   await sleep(pad(jiffy))
-  t.true(pace().done)
+  t.true(feed().done)
 })
 
-test('feeder() returns null during wait for next interval.', async (t) => {
-  let pace = makeFeeder(countTo(3))
-  t.true(pace(jiffy) === null)
-  t.true(pace() === null)
-  t.true(pace() === null)
-  t.true(pace() === null)
+test('feed() returns null during wait for next interval.', async (t) => {
+  let feed = makeFeeder(countTo(3))
+  t.true(feed(jiffy) === null)
+  t.true(feed() === null)
+  t.true(feed() === null)
+  t.true(feed() === null)
   await sleep(pad(jiffy))
-  t.true(pace().value === 1)
-  t.true(pace() === null)
+  t.true(feed().value === 1)
+  t.true(feed() === null)
 })
 
