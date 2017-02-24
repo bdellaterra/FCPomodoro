@@ -4,15 +4,16 @@ import now from 'present'
 import { sleep, makeDeltaTimer, makeKeepTimer,
          makeCountdown, makeFeeder } from '../src/js/time'
 
-// Minimum milisecond delay for safely testing asyncronous timing
-const jiffy = 50
+const jiffy = 50,               // Safe delay for testing async timing
+      microJiffy = jiffy / 10,  // for shift from multiple operations
+      nanoJiffy = jiffy / 100   // for close-to-exact values
 
 // Pad timing results to account for margin of error
-const pad = (t) => Math.ceil(t + jiffy / 10)
+const pad = (t) => Math.ceil(t + nanoJiffy)
 
 // Returns natural numbers up to specified count.
 // Used to test iteration behavior.
-function *countTo(limit) {
+function* countTo(limit) {
   let x = 1
   while (x <= limit) { yield x++ }
 }
@@ -44,7 +45,7 @@ test('delta() returns time since last call.', async (t) => {
   delta()
   await sleep(jiffy)
   let elapsed = delta()
-  t.true(jiffy % pad(elapsed) === jiffy)
+  t.true(pad(elapsed) / jiffy > 1)
   await sleep(jiffy)
   t.true(delta() > delta())
 })
@@ -56,6 +57,13 @@ test('delta() returns time since argument provided.', async (t) => {
   delta()
   await sleep(jiffy)
   t.true(delta() < delta(startTime))
+})
+
+test('Resetting delta() by passing in now() returns zero.', async (t) => {
+  let delta = makeDeltaTimer()
+  let startTime = now()
+  await sleep(jiffy)
+  t.true(delta(now()) < nanoJiffy)
 })
 
 

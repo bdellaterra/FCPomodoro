@@ -1,28 +1,29 @@
 import { assign, frozen, keys, pick, sealed } from './fn'
 import now from 'present'
-import makeTimer from './timer'
+import { nullIterator } from './util'
 
-// Returns a promise that resolves after specified timeout in miliseconds
+// USAGE NOTE: Unless otherwise stated, all time values are in miliseconds.
+
+// Returns a promise that resolves after specified timeout
 export function sleep(m) {
   return new Promise((res) => setTimeout(res, m))
 }
 
 // Creates a function that returns the amount of time since it was last called.
-// Time is measured in miliseconds. Returns zero on first call.
-// If optional argument is provided it returns time since argument.
+// Returns zero on first call. Returns time since argument, if provided.
 export const makeDeltaTimer = () => {
-  var lastTick
+  var lastTime
   return (t) => {
-    if (t !== undefined) { lastTick = t }
-    let tick = now()
-    let delta = lastTick ? tick - lastTick : 0
-    lastTick = tick
+    if (t !== undefined) { lastTime = t }
+    let time = now()
+    let delta = lastTime ? time - lastTime : 0
+    lastTime = time
     return delta
   }
 }
 
 // Accumulates time since first call.
-// Accumulates from optional argument, if provided.
+// Accumulates from specified time, if provided.
 export const makeKeepTimer = () => {
   var delta = makeDeltaTimer(),
       time = 0
@@ -33,8 +34,8 @@ export const makeKeepTimer = () => {
   }
 }
 
-// Counts down from supplied time value, stopping at zero.
-// Optional argument resets the timer to specified value in miliseconds.
+// Counts down from supplied time value.
+// Specifying a value resets the timer.
 export const makeCountdown = () => {
   var keeptime = makeKeepTimer(),
       remaining = 0
@@ -70,6 +71,30 @@ export const makeFeeder = (iter) => {
   }
 }
 
+export const makePacer = (spec) => {
+  const state = sealed({
+    frameInterval: 0,
+    schedule:      {}
+  })
+  assign(state, pick(spec, keys(state)))
+  return frozen({
+    getFrameInterval: () => state.frameInterval,
+    setFrameInterval: (v) => state.frameInterval = v,
+    dispatch:         () => {
+      schedule.keys().foreach(() => {
+      })
+    }
+  })
+}
+
+export const makeLooper = (p) => {
+  const pace = (p !== undefined) ? p : makePacer(),
+        loop = () => {
+          window.requestAnimationFrame(loop)
+          pace()
+        }
+  return loop
+}
 
 // // Create a time keeper that dispatches callbacks at set intervals.
 // // Time is measured in miliseconds.

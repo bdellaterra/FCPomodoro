@@ -5,15 +5,14 @@ import { assign, frozen, keys, pick, sealed } from './fn'
 import { degToRadians, msecsToHours, msecsToMinutes,
          msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
 import { sleep, jiffy, delta } from './time'
+import { nullIterator } from './util'
 
 import makePacer from './time'
 // import makeTimer from './timer'
 // import makeArcTimer from './arcTimer'
 
-console.log(delta())
-console.log(delta())
-console.log(delta())
-console.log(delta())
+let n = nullIterator
+console.log(n.next())
 
 // let p = makePacer()
 // console.log(p.getTime())
