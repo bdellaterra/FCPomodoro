@@ -1,18 +1,39 @@
 /* global DEBUG */
 import '../css/styles.css'
 
-import { assign, frozen, keys, pick, sealed } from './fn'
-import { degToRadians, msecsToHours, msecsToMinutes,
-         msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
-import { sleep, jiffy, delta } from './time'
-import { nullIterator } from './util'
-
-import makePacer from './time'
+// import { assign, frozen, keys, pick, sealed } from './fn'
+// import { degToRadians, msecsToHours, msecsToMinutes,
+//         msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
+// import { sleep, jiffy, delta } from './time'
+// import { nullIterator } from './util'
+//
+// import makePacer from './time'
 // import makeTimer from './timer'
 // import makeArcTimer from './arcTimer'
 
-let n = nullIterator
-console.log(n.next())
+const f = () => {}
+const makeState = (spec) => {
+  var state = { ...spec }
+  return (s) => {
+    if (s !== undefined) {
+      Object.assign(state, s)
+    }
+    return state
+  }
+}
+
+let s = makeState()
+s({ a: 1, b: 2 })
+console.log(s({ c: 3 }))
+delete s().b
+console.log(s())
+
+let t = makeState( { ...s(), d: 4 } )
+console.dir(s())
+console.dir(t({ c: 77 }))
+
+// let n = nullIterator
+// console.log(n.next())
 
 // let p = makePacer()
 // console.log(p.getTime())
