@@ -12,7 +12,7 @@ export function sleep(m) {
 // Creates a function that returns the amount of time since it was last called.
 // Returns zero on first call. Returns time since argument, if provided.
 export const makeDeltaTimer = (spec) => {
-  var state = sealed({ lastTime: null })
+  const state = sealed({ lastTime: null })
   return frozen({
     delta: (t) => {
       if (t !== undefined) { state.lastTime = t }
@@ -26,26 +26,29 @@ export const makeDeltaTimer = (spec) => {
 
 // Accumulates time since first call.
 // Accumulates from specified time, if provided.
-export const makeKeepTimer = () => {
-  var delta = makeDeltaTimer(),
-      time = 0
-  return (t) => {
-    if (t !== undefined) { time = 0 }
-    time += delta(t)
-    return time
-  }
+export const makeElapsedTimer = () => {
+  const deltaTimer = makeDeltaTimer(),
+        state = sealed({ elapsedTime: 0 })
+  return frozen({
+    ...deltaTimer,
+    elapsed: (t) => {
+      if (t !== undefined) { state.elapsedTime = 0 }
+      state.elapsedTime += deltaTimer.delta(t)
+      return state.elapsedTime
+    }
+  })
 }
 
 // Counts down from supplied time value.
 // Specifying a value resets the timer.
 export const makeCountdown = () => {
-  var keeptime = makeKeepTimer(),
+  var elapsed = makeElapsedTimer(),
       remaining = 0
   return (r) => {
     if (r !== undefined) {
-      keeptime(now())
+      elapsed(now())
     } else {
-      r = remaining - keeptime()
+      r = remaining - elapsed()
     }
     remaining = Math.max(r, 0)
     return remaining
@@ -57,11 +60,11 @@ export const makeCountdown = () => {
 // at any time but doing so does not reset the timer.
 // A pace of zero allows iteration with zero delay.
 export const makeFeeder = (iter) => {
-  var keeptime = makeKeepTimer(),
+  var elapsed = makeElapsedTimer(),
       lastTime = 0,
       pace = 0
   return (p) => {
-    let time = keeptime(),
+    let time = elapsed(),
         delta = time - lastTime,
         result = null
     if (p !== undefined) { pace = p }

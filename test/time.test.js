@@ -1,7 +1,7 @@
 var test = require(process.env.JS_TEST_LIB).test
 
 import now from 'present'
-import { sleep, makeDeltaTimer, makeKeepTimer,
+import { sleep, makeDeltaTimer, makeElapsedTimer,
          makeCountdown, makeFeeder } from '../src/js/time'
 
 const jiffy = 50,               // Safe delay for testing async timing
@@ -67,31 +67,31 @@ test('Resetting delta() by passing in now() returns zero.', async (t) => {
 })
 
 
-// KeepTimer
+// ElapsedTimer
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-test.only('Initial call to keeptime() returns zero.', (t) => {
-  let keeptime = makeKeepTimer()
-  t.true(keeptime() === 0)
+test.only('Initial call to elapsed() returns zero.', (t) => {
+  let timer = makeElapsedTimer()
+  t.true(timer.elapsed() === 0)
 })
 
-test('keeptime() returns time since initialization.', async (t) => {
-  let keeptime = makeKeepTimer()
-  keeptime()
+test.only('elapsed() returns time since initialization.', async (t) => {
+  let timer = makeElapsedTimer()
+  timer.elapsed()
   await sleep(jiffy)
-  keeptime()
+  timer.elapsed()
   await sleep(jiffy)
-  let elapsed = keeptime()
+  let elapsed = timer.elapsed()
   t.true(pad(elapsed) >= jiffy * 2)
 })
 
-test('keeptime() returns time since argument provided.', async (t) => {
-  let keeptime = makeKeepTimer()
-  keeptime()
+test.only('elapsed() returns time since argument provided.', async (t) => {
+  let timer = makeElapsedTimer()
+  timer.elapsed()
   await sleep(jiffy)
   let click = now()
   await sleep(jiffy)
-  let timeFromClick = pad(keeptime(click))
+  let timeFromClick = pad(timer.elapsed(click))
   t.true(timeFromClick >= jiffy && timeFromClick <= jiffy * 2)
 })
 
