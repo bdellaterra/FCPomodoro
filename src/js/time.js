@@ -11,15 +11,17 @@ export function sleep(m) {
 
 // Creates a function that returns the amount of time since it was last called.
 // Returns zero on first call. Returns time since argument, if provided.
-export const makeDeltaTimer = () => {
-  var lastTime
-  return (t) => {
-    if (t !== undefined) { lastTime = t }
-    let time = now()
-    let delta = lastTime ? time - lastTime : 0
-    lastTime = time
-    return delta
-  }
+export const makeDeltaTimer = (spec) => {
+  var state = sealed({ lastTime: null })
+  return frozen({
+    delta: (t) => {
+      if (t !== undefined) { state.lastTime = t }
+      let time = now()
+      let delta = state.lastTime ? time - state.lastTime : 0
+      state.lastTime = time
+      return delta
+    }
+  })
 }
 
 // Accumulates time since first call.
@@ -74,14 +76,15 @@ export const makeFeeder = (iter) => {
 export const makePacer = (spec) => {
   const state = sealed({
     frameInterval: 0,
-    schedule:      {}
+    schedule:      []
   })
   assign(state, pick(spec, keys(state)))
   return frozen({
     getFrameInterval: () => state.frameInterval,
     setFrameInterval: (v) => state.frameInterval = v,
     dispatch:         () => {
-      schedule.keys().foreach(() => {
+      schedule.foreach((f) => {
+        f.next()
       })
     }
   })

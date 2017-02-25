@@ -36,41 +36,41 @@ test('countTo() generates natural numbers up to specified limit.', (t) => {
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 test('Initial call to delta() returns zero.', (t) => {
-  let delta = makeDeltaTimer()
-  t.true(delta() === 0)
+  let timer = makeDeltaTimer()
+  t.true(timer.delta() === 0)
 })
 
 test('delta() returns time since last call.', async (t) => {
-  let delta = makeDeltaTimer()
-  delta()
+  let timer = makeDeltaTimer()
+  timer.delta()
   await sleep(jiffy)
-  let elapsed = delta()
+  let elapsed = timer.delta()
   t.true(pad(elapsed) / jiffy > 1)
   await sleep(jiffy)
-  t.true(delta() > delta())
+  t.true(timer.delta() > timer.delta())
 })
 
 test('delta() returns time since argument provided.', async (t) => {
-  let delta = makeDeltaTimer()
+  let timer = makeDeltaTimer()
   let startTime = now()
   await sleep(jiffy)
-  delta()
+  timer.delta()
   await sleep(jiffy)
-  t.true(delta() < delta(startTime))
+  t.true(timer.delta() < timer.delta(startTime))
 })
 
 test('Resetting delta() by passing in now() returns zero.', async (t) => {
-  let delta = makeDeltaTimer()
+  let timer = makeDeltaTimer()
   let startTime = now()
   await sleep(jiffy)
-  t.true(delta(now()) < nanoJiffy)
+  t.true(timer.delta(now()) < nanoJiffy)
 })
 
 
 // KeepTimer
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-test('Initial call to keeptime() returns zero.', (t) => {
+test.only('Initial call to keeptime() returns zero.', (t) => {
   let keeptime = makeKeepTimer()
   t.true(keeptime() === 0)
 })
