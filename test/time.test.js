@@ -1,15 +1,17 @@
 var test = require(process.env.JS_TEST_LIB).test
 
 import now from 'present'
-import { sleep, makeDeltaTimer, makeElapsedTimer,
-         makeCountdown, makeFeeder } from '../src/js/time'
+import { sleep, makeTimer } from '../src/js/time'
 
-const jiffy = 50,               // Safe delay for testing async timing
-      microJiffy = jiffy / 10,  // for shift from multiple operations
+const jiffy = 50,               // safe delay for testing async timing
+      microJiffy = jiffy / 10,  // to account for time-shift during operations
       nanoJiffy = jiffy / 100   // for close-to-exact values
 
 // Pad timing results to account for margin of error
-const pad = (t) => Math.ceil(t + nanoJiffy)
+const pad = (t) => Math.ceil(t + microJiffy)
+
+// Return true if two values are equal within margin of error.
+const sameTime = (t1, t2) => pad(t1) > t2 && pad(t2) > t1
 
 // Returns natural numbers up to specified count.
 // Used to test iteration behavior.
@@ -32,126 +34,119 @@ test('countTo() generates natural numbers up to specified limit.', (t) => {
   t.true(iter.next().done)
 })
 
-// DeltaTimer
+// Timer
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+// Initialization
+
+test('Initial call to time() returns zero.', (t) => {
+  let timer = makeTimer()
+  t.true(timer.time() === 0)
+})
+
 test('Initial call to delta() returns zero.', (t) => {
-  let timer = makeDeltaTimer()
+  let timer = makeTimer()
   t.true(timer.delta() === 0)
 })
 
-test('delta() returns time since last call.', async (t) => {
-  let timer = makeDeltaTimer()
-  timer.delta()
-  await sleep(jiffy)
-  let elapsed = timer.delta()
-  t.true(pad(elapsed) / jiffy > 1)
-  await sleep(jiffy)
-  t.true(timer.delta() > timer.delta())
-})
-
-test('delta() returns time since argument provided.', async (t) => {
-  let timer = makeDeltaTimer()
-  let startTime = now()
-  await sleep(jiffy)
-  timer.delta()
-  await sleep(jiffy)
-  t.true(timer.delta() < timer.delta(startTime))
-})
-
-test('Resetting delta() by passing in now() returns zero.', async (t) => {
-  let timer = makeDeltaTimer()
-  let startTime = now()
-  await sleep(jiffy)
-  t.true(timer.delta(now()) < nanoJiffy)
-})
-
-
-// ElapsedTimer
-// :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-test.only('Initial call to elapsed() returns zero.', (t) => {
-  let timer = makeElapsedTimer()
+test('Initial call to elapsed() returns zero.', (t) => {
+  let timer = makeTimer()
   t.true(timer.elapsed() === 0)
 })
 
-test.only('elapsed() returns time since initialization.', async (t) => {
-  let timer = makeElapsedTimer()
-  timer.elapsed()
-  await sleep(jiffy)
-  timer.elapsed()
-  await sleep(jiffy)
-  let elapsed = timer.elapsed()
-  t.true(pad(elapsed) >= jiffy * 2)
+test('time(), delta(), and elapsed() work to spec.', (t) => {
+  let timer = makeTimer({
+    currentTime: 100,
+    startTime:   50,
+    lastTime:    80
+  })
+  t.true(timer.time() === 100)
+  t.true(timer.delta() === 20)
+  t.true(timer.elapsed() === 50)
 })
 
-test.only('elapsed() returns time since argument provided.', async (t) => {
-  let timer = makeElapsedTimer()
-  timer.elapsed()
-  await sleep(jiffy)
-  let click = now()
-  await sleep(jiffy)
-  let timeFromClick = pad(timer.elapsed(click))
-  t.true(timeFromClick >= jiffy && timeFromClick <= jiffy * 2)
+// Resets
+
+test('Time values all sync to now() on reset.', (t) => {
+  let timer = makeTimer()
+  timer.reset()
+  t.true( sameTime( now(), timer.time() ) )
+  t.true(timer.delta() === 0)
+  t.true(timer.elapsed() === 0)
 })
 
-
-// Countdown
-// :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-test('countdown() returns zero if initial call has no argument.', (t) => {
-  let countdown = makeCountdown()
-  t.true(countdown() === 0)
+test('Time values all sync to specified time on reset.', (t) => {
+  let timer = makeTimer()
+  timer.reset(5000)
+  t.true(timer.time() === 5000)
+  t.true(timer.delta() === 0)
+  t.true(timer.elapsed() === 0)
 })
 
-test('countdown() returns argument if provided.', async (t) => {
-  let countdown = makeCountdown()
-  t.true(countdown(500) === 500)
+// Updates
+
+test('Update sets current time to now().', (t) => {
+  let timer = makeTimer()
+  let time = timer.update()
+  t.true( sameTime( now(), timer.time() ) )
+  t.true(timer.delta() === time)
+  t.true(timer.elapsed() === time)
+})
+
+test('Update sets current time to specified value', (t) => {
+  let timer = makeTimer()
+  let time = timer.update(5000)
+  t.true(timer.time() === time)
+  t.true(timer.delta() === time)
+  t.true(timer.elapsed() === time)
+})
+
+// Delta
+
+test('delta() returns time since last call.', async (t) => {
+  let timer = makeTimer()
+  timer.update()
   await sleep(jiffy)
-  t.true(countdown(500) === 500)
+  timer.update()
+  t.true( sameTime( jiffy, timer.delta() ) )
 })
 
-test('countdown() subtracts time passed from time remaining.', async (t) => {
-  let countdown = makeCountdown()
-  countdown(jiffy * 2)
-  await sleep(pad(jiffy))
-  t.true(countdown() <= jiffy)
-})
+// Elapsed
 
-test('countdown() resets time remaining to argument provided.', async (t) => {
-  let countdown = makeCountdown()
-  countdown(jiffy * 5)
+test('elapsed() returns time since initialization.', async (t) => {
+  let timer = makeTimer()
+  timer.reset()
   await sleep(jiffy)
-  countdown(jiffy * 7)
+  timer.update()
+  t.true( sameTime( jiffy, timer.elapsed() ) )
   await sleep(jiffy)
-  let remaining = pad(countdown())
-  t.true(remaining > jiffy * 5 && remaining < jiffy * 7)
+  timer.update()
+  t.true( sameTime( jiffy * 2, timer.elapsed() ) )
 })
-
 
 // Feed
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-test('Initial call to feed() returns null if given positive value.', (t) => {
+test.skip('Initial call to feed() returns null if given positive value.', (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed(1) === null)
 })
 
-test('feed() with zero value performs immediate iteration.', async (t) => {
+test.skip('feed() with zero value performs immediate iteration.', async (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed(0).value === 1)
   await sleep(jiffy)
   t.true(feed(0).value === 2)
 })
 
-test('Intial call to feed() with no arg implies pace of zero.', async (t) => {
+test.skip('Intial call to feed() with no arg implies pace of zero.', async (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed().value === 1)
   await sleep(jiffy)
   t.true(feed().value === 2)
 })
 
-test('feed() can run a counter at specified time interval.', async (t) => {
+test.skip('feed() can run a counter at specified time interval.', async (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed(jiffy) === null)
   await sleep(pad(jiffy))
@@ -164,7 +159,7 @@ test('feed() can run a counter at specified time interval.', async (t) => {
   t.true(feed().done)
 })
 
-test('feed() returns null during wait for next interval.', async (t) => {
+test.skip('feed() returns null during wait for next interval.', async (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed(jiffy) === null)
   t.true(feed() === null)
@@ -175,7 +170,7 @@ test('feed() returns null during wait for next interval.', async (t) => {
   t.true(feed() === null)
 })
 
-test('feed() can change establised pace to provided value.', async (t) => {
+test.skip('feed() can change establised pace to provided value.', async (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed(jiffy) === null)
   t.true(feed() === null)

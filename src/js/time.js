@@ -9,140 +9,47 @@ export function sleep(m) {
   return new Promise((res) => setTimeout(res, m))
 }
 
-// Creates a function that returns the amount of time since it was last called.
-// Returns zero on first call. Returns time since argument, if provided.
-export const makeDeltaTimer = (spec) => {
-  const state = sealed({ lastTime: null })
-  return frozen({
-    delta: (t) => {
-      if (t !== undefined) { state.lastTime = t }
-      let time = now()
-      let delta = state.lastTime ? time - state.lastTime : 0
-      state.lastTime = time
-      return delta
-    }
-  })
-}
+// create a timer object to track periodic and total elapsed time.
+// For efficiency, this implementation requires a manual call
+// to update() before time values are made current.
+export const makeTimer = (spec) => {
 
-// Accumulates time since first call.
-// Accumulates from specified time, if provided.
-export const makeElapsedTimer = () => {
-  const deltaTimer = makeDeltaTimer(),
-        state = sealed({ elapsedTime: 0 })
-  return frozen({
-    ...deltaTimer,
-    elapsed: (t) => {
-      if (t !== undefined) { state.elapsedTime = 0 }
-      state.elapsedTime += deltaTimer.delta(t)
-      return state.elapsedTime
-    }
-  })
-}
-
-// Counts down from supplied time value.
-// Specifying a value resets the timer.
-export const makeCountdown = () => {
-  var elapsed = makeElapsedTimer(),
-      remaining = 0
-  return (r) => {
-    if (r !== undefined) {
-      elapsed(now())
-    } else {
-      r = remaining - elapsed()
-    }
-    remaining = Math.max(r, 0)
-    return remaining
-  }
-}
-
-// Returns a function that feeds iteration results at no
-// faster than the specified pace. The pace can be changed
-// at any time but doing so does not reset the timer.
-// A pace of zero allows iteration with zero delay.
-export const makeFeeder = (iter) => {
-  var elapsed = makeElapsedTimer(),
-      lastTime = 0,
-      pace = 0
-  return (p) => {
-    let time = elapsed(),
-        delta = time - lastTime,
-        result = null
-    if (p !== undefined) { pace = p }
-    if (!pace || delta / pace > 1) {
-      lastTime = time
-      result = iter.next()
-    }
-    return result
-  }
-}
-
-export const makePacer = (spec) => {
+  // Default state
   const state = sealed({
-    frameInterval: 0,
-    schedule:      []
+    startTime:   0,
+    currentTime: 0,
+    lastTime:    0
   })
+
+  // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
-  return frozen({
-    getFrameInterval: () => state.frameInterval,
-    setFrameInterval: (v) => state.frameInterval = v,
-    dispatch:         () => {
-      schedule.foreach((f) => {
-        f.next()
-      })
-    }
-  })
-}
 
-export const makeLooper = (p) => {
-  const pace = (p !== undefined) ? p : makePacer(),
-        loop = () => {
-          window.requestAnimationFrame(loop)
-          pace()
-        }
-  return loop
-}
+  // Return current time. (as of last upate)
+  const time = () => state.currentTime
 
-// // Create a time keeper that dispatches callbacks at set intervals.
-// // Time is measured in miliseconds.
-// export const makePacer2 = (spec) => {
-//
-//   // Default state
-//   const state = sealed({
-//     startTick:      now(),  // time when tracking began
-//     time:           0,      // time elapsed
-//     updateInterval: 1, // delay between notifications
-//     schedule:       {}
-//   })
-//
-//   // Update time every animation frame.
-//   // Dispatch at set intervals. (Default is every frame.)
-//   const run = () => {
-//     window.requestAnimationFrame(run)
-//     state.time = now() - state.startTick
-//     // if (state.time / state.updateInterval > 1) {
-//     //  dispatch()
-//     // }
-//   }
-//
-//   const dispatch = () => {
-//     console.log('Updates at:', state.time)
-//   }
-//
-//   // Adjust default state to spec.
-//   assign(state, pick(spec, keys(state)))
-//
-//   // Start in running state
-//   run()
-//
-//   return frozen({
-//
-//     // As above
-//     run,
-//
-//     getTime: () => state.time,
-//     reset:   () => state.startTick = now()
-//
-//   })
-//
-// }
+  // Return time between updates.
+  const delta = () => state.currentTime - state.lastTime
+
+  // Return total time elapsed. (as of last upate)
+  const elapsed = () => state.currentTime - state.startTime
+
+  // Update the current time. Save previous for calculating delta.
+  const update = (t) => {
+    state.lastTime = state.currentTime
+    state.currentTime = (t !== undefined) ? t : now()
+    return state.currentTime
+  }
+
+  // Re-initialize all time values to present time.
+  const reset = (t) => {
+    state.currentTime = (t !== undefined) ? t : now()
+    state.startTime = state.currentTime
+    state.lastTime = state.currentTime
+    return state.currentTime
+  }
+
+  // Interface
+  return frozen({ update, time, delta, elapsed, reset })
+
+}
 
