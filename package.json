@@ -9,7 +9,7 @@
   "scripts": {
     "mon": "nodemon --watch package.json --watch webpack.config.babel.js --watch conf/webpack --exec npm run dev",
     "dev": "webpack -d && webpack-dev-server --watch-poll",
-    "build": "webpack",
+    "build": "cross-env NODE_ENV=production webpack",
     "lint": "eslint . --cache --ignore-path .gitignore",
     "cover": "cross-env JS_TEST_LIB=ava nyc ava",
     "tap": "cross-env JS_TEST_LIB=ava ava --tap",
