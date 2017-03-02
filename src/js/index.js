@@ -14,29 +14,9 @@ import { sleep, makePacer, makeTimer } from './time'
 // import makeTimer from './timer'
 // import makeArcTimer from './arcTimer'
 
-// Asynchronous generator - a generator that yields promises
-function* wait() {
-  let x = 1
-  while (true) {
-    // console.log('...')
-    yield sleep(1000).then(() => x++)
-  }
-}
-
-const add = (x, y) => x + y
-
 function* countTo(limit) {
   let x = 1
   while (x <= limit) {
-    // console.log(x)
-    yield x++
-  }
-}
-
-function* count4Eva() {
-  let x = 1
-  while (true) {
-    delay(1000)
     yield x++
   }
 }
@@ -53,19 +33,25 @@ function* alphaTo(limit) {
   }
 }
 
-let pacer = makePacer()
+function* stooges() {
+  let names = ['Larry', 'Curly', 'Moe', 'Shemp']
+  for (let n in names) {
+    yield names[n]
+  }
+}
 
-const pmake = (message, timeout = 1) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log(message)
-      resolve(1)
-    }, timeout)
+const iterate = (gs) => {
+  return gs.filter((gen) => {
+    let n = gen.next()
+    if (!n.done) { console.log(n.value) }
+    return !n.done
   })
 }
 
-pacer.addUpdate(pmake('First Promise!', 1))
-pacer.addUpdate(pmake('2nd promizzy', 1000))
-pacer.addUpdate(pmake('#3 p', 3000))
-pacer.run()
+let gs = [countTo(15), alphaTo('m'), stooges()]
+
+let guard = 50
+while (gs.length > 0 && guard-- > 0) {
+  gs = iterate(gs)
+}
 
