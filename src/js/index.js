@@ -54,7 +54,6 @@ let sw = sandwich()
 
 const saySomething = (t, d) => console.log('Something!', t)
 const saySomethingElse = (t, d) => console.log('Aardvark!', t)
-const sandwichTime = (t, d) => sw.next()
 
 let secondsGen = makeDeltaGen({ interval: 1000, callbacks: [saySomething] })
 let doubleSecondsGen = makeDeltaGen({ interval: 2000 })
@@ -64,5 +63,5 @@ let pacer = makePacer()
 pacer.addUpdate(secondsGen)
 pacer.addUpdate(doubleSecondsGen)
 pacer.run()
-sleep(8000).then(() => secondsGen.addCallback(sandwichTime))
+sleep(8000).then(() => secondsGen.addCallback(() => sw.next()))
 
