@@ -7,6 +7,7 @@ export const nullIterator = (function* () {}())
 export const filterNext = (gs, v) => {
   return gs.filter((gen) => {
     let { done } = gen.next(v)
+    DEBUG && !done && console.log(value)
     return !done
   })
 }
