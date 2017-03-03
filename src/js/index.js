@@ -50,13 +50,19 @@ function* sandwich(g) {
   }
 }
 
-const saySomething = () => console.log('Something!')
-const saySomethingElse = () => console.log('Aardvark!')
+const saySomething = (t, d) => console.log('Something!', t)
+const saySomethingElse = (t, d) => console.log('Aardvark!', t)
 
 let secondsGen = makeDeltaGen({ interval: 2, callbacks: [saySomething] })
 console.log('NumCallbacks:', secondsGen.numCallbacks())
 console.log('NumCallbacks:', secondsGen.addCallback(saySomethingElse))
+console.log(secondsGen.next(now()))
+console.log(secondsGen.next(now()))
+console.log(secondsGen.next(now()))
 secondsGen.removeCallback(saySomething)
+console.log(secondsGen.next(now()))
+console.log(secondsGen.next(now()))
+console.log(secondsGen.next(now()))
 
 // console.log(secondsGen.next(now()))
 // console.log(secondsGen.next(now()))

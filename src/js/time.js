@@ -81,7 +81,7 @@ export const makePacer = (spec) => {
   assign(state, pick(spec, keys(state)))
 
   // Iterate each update-generator, removing those that are done.
-  // The current time is passed to generators for calculation purposes.
+  // The current time is passed to the generators for calculation purposes.
   const update = (time) => {
     state.updates = filterNext(state.updates, time)
   }
@@ -96,20 +96,22 @@ export const makePacer = (spec) => {
     state.renders = filterNext(state.renders)
   }
 
-  // Add an render-generator to the render queue
+  // Add a render-generator to the render queue
   const addRender = (p) => {
     state.renders.push(p)
   }
 
   // Run a frame loop that executes once every frameInterval miliseconds.
   // The broswer will call back the loop with a high-precision timestamp.
-  const loop = async (time) => {
+  const loop = (time) => {
     if (state.isRunning) {
       // If frame interval is zero or time delta has met/exceeded interval.
       if (!state.frameInterval
         || state.frameInterval <= time - state.lastTime) {
         // Perform all updates.
         update(time)
+        // Perform all renders.
+        // render()
         // Save this time for next loop.
         state.lastTime = time
       }
@@ -161,5 +163,54 @@ export const makePacer = (spec) => {
     stop
   })
 
+}
+
+
+// Create a generator that triggers callbacks only after a set time interval.
+// The current time must be passed in every iteration. If the delta from
+// the previous time exceeds the defined interval the generator invokes all
+// callbacks with the current time and the delta as args, then yields true.
+function* deltaGen(spec) {
+
+  // Initialize state.
+  const state = sealed({
+    lastTime:  now(),
+    interval:  0,
+    callbacks: []
+  })
+
+  // Adjust state to spec.
+  assign(state, pick(spec, keys(state)))
+
+  // Iteration is a permanent loop.
+  while (true) {
+    let time = yield Boolean(isTriggered),  // Time passed in via next()
+        delta = time - state.lastTime,
+        isTriggered = delta >= state.interval
+    // Trigger callbacks if delta exceeds interval.
+    if (isTriggered) {
+      let len = state.callbacks.length
+      while (len--) {
+        state.callbacks[len](time, delta)
+      }
+      state.lastTime = time
+    }
+  }
+
+}
+
+// Extend generator deltaGen with methods for adding/removing callbacks.
+export const makeDeltaGen = (spec = {}) => {
+  // Create shared reference to callbacks.
+  const state = { callbacks: spec.callbacks || [] }
+  spec.callbacks = state.callbacks
+  // Return generator extended with methods regarding callbacks.
+  return Object.assign(deltaGen(spec), {
+    numCallbacks:   () => state.callbacks.length,
+    addCallback:    (cb) => state.callbacks.push(cb),
+    removeCallback: (cb) => {
+      Array.splice(state.callbacks, state.callbacks.indexOf(cb), 1)
+    }
+  })
 }
 
