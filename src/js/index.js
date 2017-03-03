@@ -1,18 +1,10 @@
 /* global DEBUG */
 import '../css/styles.css'
 
-import now from 'present'
-import * as most from 'most'
-
-import { assign, frozen, keys, pick, sealed } from './fn'
-// import { degToRadians, msecsToHours, msecsToMinutes,
-//         msecsToSeconds, timeToDegrees, timeToRadians } from './conv'
-// import { sleep, jiffy, delta } from './time'
-// import { nullIterator } from './util'
-//
-import { sleep, makePacer, makeDeltaGen } from './time'
-// import makeTimer from './timer'
-// import makeArcTimer from './arcTimer'
+import { makeDeltaGen } from './time/deltaGen'
+import { makePacer } from './time/pacer'
+import { makeTimer } from './time/timer'
+import sleep from './time/sleep'
 
 function* countTo(limit) {
   let x = 1

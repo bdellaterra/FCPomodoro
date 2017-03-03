@@ -1,80 +1,59 @@
-import now from 'present'
-import { assign, frozen, keys, pick, sealed } from './fn'
+import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makePauser from './pauser'
+import now from 'present'
 
-// Create a timer that counts down from initial time remaining.
-// Time is measured in miliseconds.
-const makeTimer = (spec) => {
+// USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
 
-  // Has pausability, defaulting to paused.
-  const pauser = makePauser({ isPaused: true, ...spec })
 
-  // Initial state will be restored upon reset.
-  const initState = {
-    time:     0,    // time remaining
-    lastTick: null  // previous timestamp
-  }
+// Create a timer object to track periodic and total elapsed time.
+// This implementation requires a manual call to update() before time values
+// are made current. This aids efficiency and prevents shift between calls.
+export const makeTimer = (spec) => {
 
-  // Adjust default state to spec.
-  const state = sealed({ ...initState })
+  // Initialize state.
+  const state = sealed({
+    startTime:   0,
+    currentTime: 0,
+    lastTime:    0
+  })
+
+  // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Reduce time remaining by time elapsed since last update.
-  // No effect if timer is paused. Returns current timestamp.
-  const update = () => {
-    const lastTick = state.lastTick || now(),
-          tick = now()
-    if (!pauser.isPaused()) {
-      // Delta is time elapsed since last tick recorded.
-      const delta = tick - lastTick
-      // Reduce time remaining by delta. Stops at zero.
-      state.time = Math.max(state.time - delta, 0)
-    }
-    // Save current tick to calculate next delta
-    state.lastTick = tick
-    return tick
+  // Return current time. (as of last upate)
+  const time = () => state.currentTime
+
+  // Return time between updates.
+  const delta = () => state.currentTime - state.lastTime
+
+  // Return total time elapsed. (as of last upate)
+  const elapsed = () => state.currentTime - state.startTime
+
+  // Update current time. Save previous for calculating delta.
+  // Updates current time to now() if argument is undefined.
+  const update = (t) => {
+    state.lastTime = state.currentTime
+    state.currentTime = (t !== undefined) ? t : now()
+    return state.currentTime
   }
 
-  // Unpause should run update to initialize lastTick.
-  const unpause = () => {
-    update()
-    pauser.unpause()
+  // Syncronize all time values to now().
+  // Optionally synchronize to specified value, if provided.
+  const reset = (t) => {
+    state.currentTime = (t !== undefined) ? t : now()
+    state.startTime = state.currentTime
+    state.lastTime = state.currentTime
+    return state.currentTime
   }
 
-  // Pause should run update for consistency with unpause
-  const pause = () => {
-    update()
-    pauser.pause()
-  }
-
-  // Return interface.
+  // Return Interface.
   return frozen({
-    ...pauser,
-
-    // As above
-    update,
-    unpause,
-    pause,
-
-    // Aliases
-    start: unpause,
-    stop:  pause,
-
-    // Read time remaining.
-    read: () => state.time,
-
-    // Reset timer to initial state.
-    // Optionally set time remaining to argument provided.
-    reset: (t) => {
-      pauser.pause()
-      assign(state, initState)
-      if (t !== undefined) {
-        state.time = t
-      }
-    }
-
+    delta,
+    elapsed,
+    reset,
+    time,
+    update
   })
 
 }
 
-export default makeTimer
