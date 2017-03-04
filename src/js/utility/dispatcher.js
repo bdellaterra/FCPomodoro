@@ -13,7 +13,6 @@ function* dispatcher(spec) {
   // Iteration is a permanent loop.
   while (true) {
     let len = state.callbacks.length
-    console.log('dispatching:', len)
     while (len--) {
       state.callbacks[len]()
     }
