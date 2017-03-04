@@ -1,8 +1,8 @@
+import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { degToRadians } from '../utility/conv'
 import makeArc from './arc'
 import makeTimer from '../time/timer'
 import { SECOND } from '../utility/constants'
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { degToRadians } from '../utility/conv'
 
 
 // Create an arc that updates itself over time.
@@ -30,8 +30,8 @@ export const makeArcTimer = (spec) => {
   const update = (time) => {
     timer.update(time)
     let elapsed = timer.elapsed() / state.timeUnit,
-        degTravel = 360 / state.unitsPerRotation,
-        radTravel = degToRadians(degTravel * elapsed)
+        degTravel = 360 / state.unitsPerRotation * elapsed,
+        radTravel = degToRadians(degTravel)
     arc.setEnd( baseStart + radTravel % (2 * Math.PI) )
     return time
   }
