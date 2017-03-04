@@ -55,16 +55,24 @@ const makeArc = (spec) => {
   // Set width of arc line to specified pixel value.
   const setLineWidth = (v) => state.lineWidth = v
 
+  // Return stroke style.
+  const getStrokeStyle = () => state.strokeStyle
+
+  // Set the stroke style.
+  const setStrokeStyle = (v) => state.strokeStyle = v
+
   // Return Interface.
   return frozen({
     ...displayer,
     getEnd,
     getLineWidth,
+    getStrokeStyle,
     getRadius,
     getStart,
     render,
     setEnd,
     setLineWidth,
+    setStrokeStyle,
     setRadius,
     setStart
   })
