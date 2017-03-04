@@ -1,4 +1,5 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { canvas, context } from '../ui/canvas'
 import { filterNext } from '../utility/iter'
 import now from 'present'
 import sleep from './sleep'
@@ -35,6 +36,7 @@ export const makePacer = (spec) => {
 
   // Iterate each render-generator, removing those that are done.
   const render = () => {
+    context.clearRect(0, 0, canvas.width, canvas.height)
     state.renders = filterNext(state.renders)
   }
 
@@ -53,7 +55,7 @@ export const makePacer = (spec) => {
         // Perform all updates.
         update(time)
         // Perform all renders.
-        // render()
+        render()
         // Save this time for next loop.
         state.lastTime = time
       }
@@ -107,3 +109,5 @@ export const makePacer = (spec) => {
 
 }
 
+
+export default makePacer

@@ -1,59 +1,22 @@
 /* global DEBUG */
 import '../css/styles.css'
 
-import { makeDeltaGen } from './time/deltaGen'
-import { makePacer } from './time/pacer'
-import { makeTimer } from './time/timer'
+import makeArc from './ui/arc'
+import makeArcTimer from './ui/arcTimer'
+import makeDeltaGen from './time/deltaGen'
+import makeDispatcher from './utility/dispatcher'
+import makePacer from './time/pacer'
 import sleep from './time/sleep'
 
-function* countTo(limit) {
-  let x = 1
-  while (x <= limit) {
-    yield x++
-  }
-}
+const pacer = makePacer()
+const secondsGen = makeDeltaGen({ interval: 1000, callbacks: [] })
+const secondsArc = makeArcTimer()
+const renderGen = makeDispatcher()
 
-function* alphaTo(limit) {
-  const alpha = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-                 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-                 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-  let l,
-      i = 0
-  while (l !== limit && i < alpha.length) {
-    l = alpha[i++]
-    yield l
-  }
-}
+secondsGen.addCallback(secondsArc.update)
+renderGen.addCallback(secondsArc.render)
 
-function* stooges() {
-  let names = ['Larry', 'Curly', 'Moe', 'Shemp']
-  for (let n in names) {
-    yield names[n]
-  }
-}
-
-function* sandwich(g) {
-  let layers = ['bread', 'meat', 'cheese', 'pickles', 'condiments'],
-      i = 0
-  while (i < layers.length) {
-    console.log(layers[i])
-    i += 1
-    yield
-  }
-}
-
-let sw = sandwich()
-
-const saySomething = (t, d) => console.log('Something!', t)
-const saySomethingElse = (t, d) => console.log('Aardvark!', t)
-
-let secondsGen = makeDeltaGen({ interval: 1000, callbacks: [saySomething] })
-let doubleSecondsGen = makeDeltaGen({ interval: 2000 })
-doubleSecondsGen.addCallback(saySomethingElse)
-
-let pacer = makePacer()
 pacer.addUpdate(secondsGen)
-pacer.addUpdate(doubleSecondsGen)
+pacer.addRender(renderGen)
 pacer.run()
-sleep(8000).then(() => secondsGen.addCallback(() => sw.next()))
 

@@ -1,5 +1,6 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 
+
 const makePauser = (spec) => {
   const state = sealed({ isPaused: false })
   assign(state, pick(spec, keys(state)))
@@ -10,3 +11,5 @@ const makePauser = (spec) => {
   })
 }
 
+
+export default makePauser

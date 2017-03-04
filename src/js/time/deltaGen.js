@@ -54,3 +54,5 @@ export const makeDeltaGen = (spec = {}) => {
   })
 }
 
+
+export default makeDeltaGen

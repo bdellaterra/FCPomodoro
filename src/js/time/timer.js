@@ -57,3 +57,5 @@ export const makeTimer = (spec) => {
 
 }
 
+
+export default makeTimer
