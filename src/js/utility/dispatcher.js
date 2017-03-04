@@ -29,7 +29,7 @@ export const makeDispatcher = (spec = {}) => {
   spec.callbacks = state.callbacks
   // Return generator extended with methods for managing callbacks.
   return Object.assign(dispatcher(spec), {
-    addCallback:    (cb) => state.callbacks.push(cb),
+    addCallback:    (cb) => state.callbacks.unshift(cb),
     numCallbacks:   () => state.callbacks.length,
     removeCallback: (cb) => {
       Array.splice(state.callbacks, state.callbacks.indexOf(cb), 1)
