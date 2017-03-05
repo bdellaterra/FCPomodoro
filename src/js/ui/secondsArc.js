@@ -1,5 +1,5 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { SECOND } from '../utility/constants.js'
+import { SECOND } from '../utility/constants'
 import makeArcTimer from './arcTimer'
 
 

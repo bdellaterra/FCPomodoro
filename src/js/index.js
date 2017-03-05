@@ -1,30 +1,34 @@
 /* global DEBUG */
 import '../css/styles.css'
 
+import { MILISECOND, MINUTE, SECOND } from './utility/constants'
 import makeArc from './ui/arc'
-import makeSecondsArc from './ui/secondsArc'
 import makeBlinkingCursor from './ui/blinkingCursor'
-import makeDeltaGen from './time/deltaGen'
 import makeDispatcher from './utility/dispatcher'
+import makeRateLimiter from './time/rateLimiter'
 import makePacer from './time/pacer'
+import makeSecondsArc from './ui/secondsArc'
 import sleep from './time/sleep'
 
-const pacer = makePacer()
-const milisecondsGen = makeDeltaGen({ interval: 1, callbacks: [] })
-const secondsGen = makeDeltaGen({ interval: 1000, callbacks: [] })
 const secondsArc = makeSecondsArc()
 const blinkingCursor = makeBlinkingCursor()
+
+const pacer = makePacer()
+const milisecondsGen = makeRateLimiter({ interval: MILISECOND })
+const secondsGen = makeRateLimiter({ interval: SECOND })
+const minutesGen = makeRateLimiter({ interval: MINUTE, callbacks: [() => console.log('MINUTE:')] })
 const renderGen = makeDispatcher()
 
-
 milisecondsGen.addCallback(secondsArc.update)
-secondsGen.addCallback(blinkingCursor.update)
+secondsGen.addCallback(blinkingCursor.blink)
+minutesGen.addCallback(blinkingCursor.update)
 
 renderGen.addCallback(secondsArc.render)
 renderGen.addCallback(blinkingCursor.render)
 
 pacer.addUpdate(milisecondsGen)
 pacer.addUpdate(secondsGen)
+pacer.addUpdate(minutesGen)
 pacer.addRender(renderGen)
 pacer.run()
 

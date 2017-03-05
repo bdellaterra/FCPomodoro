@@ -1,5 +1,5 @@
-import now from 'present'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import now from 'present'
 
 
 // Create a unique entity with it's own ID.

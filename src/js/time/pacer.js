@@ -1,5 +1,5 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { canvas, context } from '../ui/canvas'
+import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { filterNext } from '../utility/iter'
 import now from 'present'
 import sleep from './sleep'
@@ -26,7 +26,7 @@ export const makePacer = (spec) => {
   // Iterate each update-generator, removing those that are done.
   // The current time is passed to the generators for calculation purposes.
   const update = (time) => {
-    state.updates = filterNext(state.updates, time)
+    state.updates = filterNext(state.updates, [time])
   }
 
   // Add an update-generator to the update queue

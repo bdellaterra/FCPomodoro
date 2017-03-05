@@ -1,5 +1,5 @@
-import canvas from './canvas'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import canvas from './canvas'
 import makeEntity from './entity'
 
 // USAGE NOTE: X,Y coordinates are pixel offsets from the top left corner.

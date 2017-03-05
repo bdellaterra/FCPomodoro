@@ -1,6 +1,6 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { context } from './canvas'
-import makeDisplayer from './displayer.js'
+import makeDisplayer from './displayer'
 
 
 // A partial circle

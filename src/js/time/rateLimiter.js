@@ -1,58 +1,66 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { assign, frozen, keys, omit, pick, sealed } from '../utility/fn'
+import makeDispatcher from '../utility/dispatcher'
 import now from 'present'
 
 // USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
 
 
-// Create a generator that triggers callbacks only after a set time interval.
-// The current time must be passed in every iteration. If the delta from
-// the previous time exceeds the defined interval the generator invokes all
-// callbacks with the current time and the delta as args, then yields true.
-// NOT EXPORTED: See makeDeltaGen()
-function* deltaGen(spec) {
+// A dispatcher that triggers callbacks only after
+// a set time interval has elapsed.
+function* rateLimiter(state) {
+  let time = state.lastTime
+  while (true) {
+    let delta = time - state.lastTime,
+        isTriggered = delta >= state.interval
+   // Trigger callbacks if delta exceeds time interval.
+    if (isTriggered) {
+      state.dispatcher.next([time, delta])
+      state.lastTime = time
+    }
+    // Next timestamp must be passed in via next()
+    time = yield Boolean(isTriggered)
+  }
+}
+
+
+// Create a dispatcher that triggers callbacks only after a set time interval.
+// The current time must be passed inside and array every iteration via next().
+// If the delta from the previous time exceeds the defined interval then all
+// callbacks will be called with the current time and delta as args.
+export const makeRateLimiter = (spec = {}) => {
 
   // Initialize state.
   const state = sealed({
-    lastTime:  now(),
-    interval:  0,
-    callbacks: []
+    dispatcher: null,   // placeholder for assign() below
+    lastTime:   now(),
+    interval:   0
   })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Iteration is a permanent loop.
-  while (true) {
-    let time = yield Boolean(isTriggered),  // Time passed in via next()
-        delta = time - state.lastTime,
-        isTriggered = delta >= state.interval
-    // Trigger callbacks if delta exceeds interval.
-    if (isTriggered) {
-      let len = state.callbacks.length
-      while (len--) {
-        state.callbacks[len](time, delta)
-      }
-      state.lastTime = time
-    }
+  // Create a dispatcher if none was provided.
+  if (!state.dispatcher) {
+    state.dispatcher = makeDispatcher({
+      args: [state.lastTime, 0],  // time, delta
+      ...spec
+    })
   }
 
+  // Create generator.
+  const rl = rateLimiter(state)
+
+  // Inherit methods from dispatcher without overriding anything.
+  assign( rl, omit(state.dispatcher, keys(rl)) )
+
+  // Add additional methods.
+  assign( rl, { setInterval: (v) => state.callbacks.unshift(cb) } )
+
+  // Prime and return the generator.
+  rl.next()
+  return frozen(rl)
+
 }
 
 
-// Extend generator deltaGen with methods for adding/removing callbacks.
-export const makeDeltaGen = (spec = {}) => {
-  // Create shared reference to callbacks.
-  const state = { callbacks: spec.callbacks || [] }
-  spec.callbacks = state.callbacks
-  // Return generator extended with methods for managing callbacks.
-  return Object.assign(deltaGen(spec), {
-    addCallback:    (cb) => state.callbacks.unshift(cb),
-    numCallbacks:   () => state.callbacks.length,
-    removeCallback: (cb) => {
-      Array.splice(state.callbacks, state.callbacks.indexOf(cb), 1)
-    }
-  })
-}
-
-
-export default makeDeltaGen
+export default makeRateLimiter

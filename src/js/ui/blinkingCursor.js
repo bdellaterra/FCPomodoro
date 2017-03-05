@@ -1,4 +1,4 @@
-import { MINUTE, SECOND } from '../utility/constants.js'
+import { MINUTE, SECOND } from '../utility/constants'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makeArcTimer from './arcTimer'
 
@@ -14,11 +14,7 @@ export const makeBlinkingCursor = (spec) => {
   })
 
   // Initialize state.
-  const state = sealed({
-    strokeStyle: arcTimer.getStrokeStyle(),
-    lastMinute:  -1,
-    location:    arcTimer.getEnd()
-  })
+  const state = sealed({ strokeStyle: arcTimer.getStrokeStyle() })
 
   // Make cursor visible every other second.
   const blink = (time) => {
@@ -27,33 +23,33 @@ export const makeBlinkingCursor = (spec) => {
     } else {
       arcTimer.setStrokeStyle('transparent')
     }
-  }
-
-  const stagger = (time, loc) => {
-    let currentMinute = Math.floor(time / MINUTE)
-    if ( currentMinute > state.lastMinute ) {
-      state.lastMinute = currentMinute
-      state.location = arcTimer.getEnd()
-    }
-    arcTimer.setStart( state.location - 0.01 )
-    arcTimer.setEnd( state.location + 0.01 )
-  }
-
-  const update = (time) => {
-    arcTimer.update(time)
-    stagger(time)
-    blink(time)
     return time
   }
 
+  // Style arc as a thin cursor at the current minute location.
+  const update = (time) => {
+    console.log('Cursor update:', time)
+    arcTimer.update(time)
+    let end = arcTimer.getEnd()
+    arcTimer.setStart( end - 0.01 )
+    arcTimer.setEnd( end + 0.01 )
+    return time
+  }
+
+  // Set the stroke style.
+  // The change will not display visually until the next call to blink().
   const setStrokeStyle = (v) => {
-    arcTimer.setStrokeStyle(v)
     state.strokeStyle = v
   }
+
+  // Perform initialization.
+  // blink(update(0))
+  update(0)
 
   // Return Interface.
   return frozen({
     ...arcTimer,
+    blink,
     setStrokeStyle,
     update
   })
