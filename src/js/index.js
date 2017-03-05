@@ -16,7 +16,7 @@ const blinkingCursor = makeBlinkingCursor()
 const pacer = makePacer()
 const milisecondsGen = makeRateLimiter({ interval: MILISECOND })
 const secondsGen = makeRateLimiter({ interval: SECOND })
-const minutesGen = makeRateLimiter({ interval: MINUTE, callbacks: [() => console.log('MINUTE:')] })
+const minutesGen = makeRateLimiter({ interval: MINUTE })
 const renderGen = makeDispatcher()
 
 milisecondsGen.addCallback(secondsArc.update)

@@ -5,24 +5,6 @@ import now from 'present'
 // USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
 
 
-// A dispatcher that triggers callbacks only after
-// a set time interval has elapsed.
-function* rateLimiter(state) {
-  let time = state.lastTime
-  while (true) {
-    let delta = time - state.lastTime,
-        isTriggered = delta >= state.interval
-   // Trigger callbacks if delta exceeds time interval.
-    if (isTriggered) {
-      state.dispatcher.next([time, delta])
-      state.lastTime = time
-    }
-    // Next timestamp must be passed in via next()
-    time = yield Boolean(isTriggered)
-  }
-}
-
-
 // Create a dispatcher that triggers callbacks only after a set time interval.
 // The current time must be passed inside and array every iteration via next().
 // If the delta from the previous time exceeds the defined interval then all
@@ -47,8 +29,25 @@ export const makeRateLimiter = (spec = {}) => {
     })
   }
 
-  // Create generator.
-  const rl = rateLimiter(state)
+  // A dispatcher that triggers callbacks only after
+  // a set time interval has elapsed.
+  function* rateLimiter() {
+    let time = state.lastTime
+    while (true) {
+      let delta = time - state.lastTime,
+          isTriggered = delta >= state.interval
+      // Trigger callbacks if delta exceeds time interval.
+      if (isTriggered) {
+        state.dispatcher.next([time, delta])
+        state.lastTime = time
+      }
+      // Next timestamp must be passed in via next()
+      time = yield isTriggered
+    }
+  }
+
+  // Create the generator.
+  const rl = rateLimiter()
 
   // Inherit methods from dispatcher without overriding anything.
   assign( rl, omit(state.dispatcher, keys(rl)) )
