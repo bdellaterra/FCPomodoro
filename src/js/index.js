@@ -16,6 +16,7 @@ const secondsArc = makeSecondsArc()
 const blinkingCursor = makeBlinkingCursor()
 const renderGen = makeDispatcher()
 
+
 milisecondsGen.addCallback(secondsArc.update)
 secondsGen.addCallback(blinkingCursor.update)
 

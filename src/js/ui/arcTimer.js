@@ -1,8 +1,8 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { SECOND } from '../utility/constants'
 import { degToRadians } from '../utility/conv'
+import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makeArc from './arc'
 import makeTimer from '../time/timer'
-import { SECOND } from '../utility/constants'
 
 
 // Create an arc that updates itself over time.
