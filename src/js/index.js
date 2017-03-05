@@ -5,8 +5,8 @@ import { MILISECOND, MINUTE, SECOND } from './utility/constants'
 import makeArc from './ui/arc'
 import makeBlinkingCursor from './ui/blinkingCursor'
 import makeDispatcher from './utility/dispatcher'
-import makeRateLimiter from './time/rateLimiter'
 import makePacer from './time/pacer'
+import makeRateLimiter from './time/rateLimiter'
 import makeSecondsArc from './ui/secondsArc'
 import sleep from './time/sleep'
 
@@ -16,7 +16,7 @@ const blinkingCursor = makeBlinkingCursor()
 const pacer = makePacer()
 const milisecondsGen = makeRateLimiter({ interval: MILISECOND })
 const secondsGen = makeRateLimiter({ interval: SECOND })
-const minutesGen = makeRateLimiter({ interval: MINUTE, callbacks: [() => console.log('MINUTE:')] })
+const minutesGen = makeRateLimiter({ interval: MINUTE })
 const renderGen = makeDispatcher()
 
 milisecondsGen.addCallback(secondsArc.update)
