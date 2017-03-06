@@ -1,4 +1,5 @@
-import { MINUTE, SECOND } from '../utility/constants'
+import { ARC_CYCLE, ARC_ORIGIN, SECOND, SECONDS_PER_HOUR
+       } from '../utility/constants'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makeArcTimer from './arcTimer'
 
@@ -11,7 +12,8 @@ export const makeBlinkingCursor = (spec) => {
     lineWidth:     16,
     strokeStyle:   'rgba(0, 0, 255, 1)',
     timeUnit:      SECOND,
-    unitsPerCycle: -3600,
+    unitsPerCycle: SECONDS_PER_HOUR,
+    isClockwise:   false,
     ...spec
   })
 
@@ -31,9 +33,10 @@ export const makeBlinkingCursor = (spec) => {
   // Style arc as a thin cursor at the current minute location.
   const update = (time) => {
     arcTimer.update(time)
-    let end = arcTimer.getEnd()
-    arcTimer.setStart( end - 0.01 )
-    arcTimer.setEnd( end + 0.01 )
+    let end = arcTimer.getEnd(),
+        cursorWidth = ARC_CYCLE / 360
+    arcTimer.setStart( end )
+    arcTimer.setEnd( end - cursorWidth )
     return time
   }
 
@@ -44,7 +47,7 @@ export const makeBlinkingCursor = (spec) => {
   }
 
   // Perform initialization.
-  blink(update(0))
+  blink(update(ARC_ORIGIN))
 
   // Return Interface.
   return frozen({

@@ -1,7 +1,6 @@
 import { assign, frozen, keys, omit, pick, sealed } from '../utility/fn'
 import makeDispatcher from '../utility/dispatcher'
 import makeTimer from './timer'
-import now from 'present'
 
 // USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
 

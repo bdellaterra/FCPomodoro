@@ -2,7 +2,6 @@ import { canvas, context } from '../ui/canvas'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { filterNext } from '../utility/iter'
 import now from 'present'
-import sleep from './sleep'
 
 // USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
 

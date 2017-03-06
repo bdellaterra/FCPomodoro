@@ -1,5 +1,7 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { context } from './canvas'
+import { ARC_CLOCK_ROTATION, ARC_CYCLE, ARC_ORIGIN
+       } from '../utility/constants'
 import makeDisplayer from './displayer'
 
 
@@ -11,9 +13,11 @@ const makeArc = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    start:       0 * Math.PI,
-    end:         2 * Math.PI,
-    rotation:    -0.5 * Math.PI,
+    start:       ARC_ORIGIN,
+    end:         ARC_CYCLE,
+    rotation:    ARC_CLOCK_ROTATION,
+    isClockwise: true,  // Preffered over "isCounterclockwise"
+    isInverse:   false,
     radius:      100,
     lineWidth:   5,
     strokeStyle: 'blue'
@@ -24,10 +28,16 @@ const makeArc = (spec) => {
 
   // Draw the arc.
   const render = () => {
+    let isCounterclockwise = !state.isClockwise,
+        start = state.start + state.rotation,
+        end = state.end + state.rotation
+    if (state.isInverse) {
+      [start, end] = [end, start]
+    }
     context.beginPath()
     context.lineWidth = state.lineWidth
     context.arc( displayer.getX(), displayer.getY(), state.radius,
-                 state.start + state.rotation, state.end + state.rotation )
+                 start, end, isCounterclockwise )
     context.strokeStyle = state.strokeStyle
     context.stroke()
   }
@@ -50,6 +60,12 @@ const makeArc = (spec) => {
   // Set radius of arc to specified pixel length.
   const setRadius = (v) => state.radius = v
 
+  // Return rotation in radians.
+  const getRotation = () => state.rotation
+
+  // Set rotation to the specified radian value.
+  const setRotation = (v) => state.rotation = v
+
   // Return width of arc line in pixels.
   const getLineWidth = () => state.lineWidth
 
@@ -62,20 +78,38 @@ const makeArc = (spec) => {
   // Set the stroke style.
   const setStrokeStyle = (v) => state.strokeStyle = v
 
+  // Return boolean indicating if the arc runs clockwise.
+  const isClockwise = () => state.isClockwise
+
+  // Set boolean indicating whether the arc runs clockwise.
+  const setClockwise = (v) => state.isClockwise = v
+
+  // Return boolean indicating if the arc is inverted.
+  const isInverse = () => state.isInverse
+
+  // Set boolean indicating whether the arc is inverted.
+  const setInverse = (v) => state.isInverse = v
+
   // Return Interface.
   return frozen({
     ...displayer,
     getEnd,
     getLineWidth,
-    getStrokeStyle,
     getRadius,
+    getRotation,
     getStart,
+    getStrokeStyle,
+    isClockwise,
+    isInverse,
     render,
+    setClockwise,
     setEnd,
+    setInverse,
     setLineWidth,
-    setStrokeStyle,
     setRadius,
-    setStart
+    setRotation,
+    setStart,
+    setStrokeStyle
   })
 
 }

@@ -1,5 +1,4 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import makePauser from './pauser'
 import now from 'present'
 
 // USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
@@ -40,7 +39,7 @@ export const makeTimer = (spec) => {
   // Syncronize all time values to now().
   // Optionally synchronize to specified value, if provided.
   const reset = (time) => {
-    state.currentTime = (time !== undefined) ? t : now()
+    state.currentTime = (time !== undefined) ? time : now()
     state.startTime = state.currentTime
     state.lastTime = state.currentTime
     return state.currentTime

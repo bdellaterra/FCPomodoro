@@ -1,5 +1,4 @@
-import { SECOND } from '../utility/constants'
-import { degToRadians } from '../utility/conv'
+import { ARC_CYCLE, SECOND, SECONDS_PER_MINUTE } from '../utility/constants'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makeArc from './arc'
 import makeTimer from '../time/timer'
@@ -15,7 +14,7 @@ export const makeArcTimer = (spec) => {
   const state = sealed({
     timer:         null,  // placeholder for assign() below
     timeUnit:      SECOND,
-    unitsPerCycle: 60  // Use negative values for counterclockwise
+    unitsPerCycle: SECONDS_PER_MINUTE
   })
 
   // Adjust state to spec.
@@ -26,22 +25,24 @@ export const makeArcTimer = (spec) => {
     state.timer = makeTimer(spec)
   }
 
-  // Save initial start/end positions for reference.
-  const baseStart = arc.getStart()
-  const baseEnd = arc.getEnd()
-
   // Update the end position of the arc based on time elapsed,
   // and proportional to the number of time units per circle.
+  // The timer must be updated seperately, such as in a frame loop.
   const update = (time) => {
-    state.timer.update(time)
-    let elapsed = state.timer.elapsed() / state.timeUnit,
-        degTravel = 360 / state.unitsPerCycle * elapsed,
-        radTravel = degToRadians(degTravel)
-    arc.setEnd( baseStart + radTravel % (2 * Math.PI) )
+    let moments = Math.floor(state.timer.elapsed() / state.timeUnit),
+        step = ARC_CYCLE / state.unitsPerCycle,
+        movements = step * moments,
+        sign = arc.isClockwise() ? 1 : -1,
+        end = sign * movements
+            % (ARC_CYCLE + step / 2)  // Add step to allow full circle.
+    arc.setEnd( end )
     return time
   }
 
-  // Return the time unit.
+  // Return a reference to the timer.
+  const getTimer = () => state.timer
+
+  // Return the time unit indicated by the arc timer.
   const getTimeUnit = () => state.timeUnit
 
   // Return the number of time units per full circular rotation.
@@ -51,6 +52,7 @@ export const makeArcTimer = (spec) => {
   return frozen({
     ...arc,
     ...state.timer,
+    getTimer,
     getTimeUnit,
     getUnitsPerCycle,
     update
