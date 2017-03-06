@@ -3,8 +3,6 @@ import '../css/styles.css'
 
 import { ARC_CLOCK_ROTATION, MILLISECOND, MINUTE, SECOND
        } from './utility/constants'
-import makeArc from './ui/arc'
-import makeArcTimer from './ui/arcTimer.js'
 import makeBlinkingCursor from './ui/blinkingCursor'
 import makeDispatcher from './utility/dispatcher'
 import makeMinutesArc from './ui/minutesArc'
@@ -12,7 +10,6 @@ import makePacer from './time/pacer'
 import makeRateLimiter from './time/rateLimiter'
 import makeSecondsArc from './ui/secondsArc'
 import makeTimer from './time/timer'
-import sleep from './time/sleep'
 
 
 // Create a shared timer to synchronize components.
