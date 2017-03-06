@@ -9,11 +9,11 @@ export const makeMinutesArc = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
-    radius:           200,
-    lineWidth:        18,
-    strokeStyle:      'rgba(0, 120, 250, 0.5)',
-    timeUnit:         SECOND,
-    unitsPerRotation: -3600,
+    radius:        200,
+    lineWidth:     18,
+    strokeStyle:   'rgba(0, 120, 250, 0.5)',
+    timeUnit:      SECOND,
+    unitsPerCycle: -3600,
     ...spec
   })
 

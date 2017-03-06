@@ -13,9 +13,9 @@ export const makeArcTimer = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    timer:            null,  // placeholder for assign() below
-    timeUnit:         SECOND,
-    unitsPerRotation: 60  // Use negative values for counterclockwise
+    timer:         null,  // placeholder for assign() below
+    timeUnit:      SECOND,
+    unitsPerCycle: 60  // Use negative values for counterclockwise
   })
 
   // Adjust state to spec.
@@ -35,7 +35,7 @@ export const makeArcTimer = (spec) => {
   const update = (time) => {
     state.timer.update(time)
     let elapsed = state.timer.elapsed() / state.timeUnit,
-        degTravel = 360 / state.unitsPerRotation * elapsed,
+        degTravel = 360 / state.unitsPerCycle * elapsed,
         radTravel = degToRadians(degTravel)
     arc.setEnd( baseStart + radTravel % (2 * Math.PI) )
     return time
@@ -45,14 +45,14 @@ export const makeArcTimer = (spec) => {
   const getTimeUnit = () => state.timeUnit
 
   // Return the number of time units per full circular rotation.
-  const getUnitsPerRotation = () => state.unitsPerRotation
+  const getUnitsPerCycle = () => state.unitsPerCycle
 
   // Return Interface.
   return frozen({
     ...arc,
     ...state.timer,
     getTimeUnit,
-    getUnitsPerRotation,
+    getUnitsPerCycle,
     update
   })
 

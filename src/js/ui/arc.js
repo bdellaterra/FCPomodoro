@@ -11,8 +11,9 @@ const makeArc = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    start:       -0.5 * Math.PI,
-    end:         1.5 * Math.PI,
+    start:       0 * Math.PI,
+    end:         2 * Math.PI,
+    rotation:    -0.5 * Math.PI,
     radius:      100,
     lineWidth:   5,
     strokeStyle: 'blue'
@@ -25,8 +26,8 @@ const makeArc = (spec) => {
   const render = () => {
     context.beginPath()
     context.lineWidth = state.lineWidth
-    context.arc( displayer.getX(), displayer.getY(),
-                 state.radius, state.start, state.end )
+    context.arc( displayer.getX(), displayer.getY(), state.radius,
+                 state.start + state.rotation, state.end + state.rotation )
     context.strokeStyle = state.strokeStyle
     context.stroke()
   }
