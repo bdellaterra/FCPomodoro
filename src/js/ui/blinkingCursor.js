@@ -28,7 +28,6 @@ export const makeBlinkingCursor = (spec) => {
 
   // Style arc as a thin cursor at the current minute location.
   const update = (time) => {
-    console.log('Cursor update:', time)
     arcTimer.update(time)
     let end = arcTimer.getEnd()
     arcTimer.setStart( end - 0.01 )

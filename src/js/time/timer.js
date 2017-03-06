@@ -29,18 +29,18 @@ export const makeTimer = (spec) => {
   // Return total time elapsed. (as of last upate)
   const elapsed = () => state.currentTime - state.startTime
 
-  // Update current time. Save previous for calculating delta.
+  // Update current time. Save previous time for calculating delta.
   // Updates current time to now() if argument is undefined.
-  const update = (t) => {
+  const update = (time) => {
     state.lastTime = state.currentTime
-    state.currentTime = (t !== undefined) ? t : now()
+    state.currentTime = (time !== undefined) ? time : now()
     return state.currentTime
   }
 
   // Syncronize all time values to now().
   // Optionally synchronize to specified value, if provided.
-  const reset = (t) => {
-    state.currentTime = (t !== undefined) ? t : now()
+  const reset = (time) => {
+    state.currentTime = (time !== undefined) ? t : now()
     state.startTime = state.currentTime
     state.lastTime = state.currentTime
     return state.currentTime

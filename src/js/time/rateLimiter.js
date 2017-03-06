@@ -1,5 +1,6 @@
 import { assign, frozen, keys, omit, pick, sealed } from '../utility/fn'
 import makeDispatcher from '../utility/dispatcher'
+import makeTimer from './timer'
 import now from 'present'
 
 // USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
@@ -13,13 +14,18 @@ export const makeRateLimiter = (spec = {}) => {
 
   // Initialize state.
   const state = sealed({
+    timer:      null,   // placeholder for assign() below
     dispatcher: null,   // placeholder for assign() below
-    lastTime:   now(),
     interval:   0
   })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
+
+  // Create a timer if none was provided.
+  if (!state.timer) {
+    state.timer = makeTimer(spec)
+  }
 
   // Create a dispatcher if none was provided.
   if (!state.dispatcher) {
@@ -29,20 +35,21 @@ export const makeRateLimiter = (spec = {}) => {
     })
   }
 
-  // A dispatcher that triggers callbacks only after
-  // a set time interval has elapsed.
+  // A dispatcher that triggers callbacks only after a set time interval
+  // has elapsed. The timer itself is updated elsewhere, such as in frame loop.
   function* rateLimiter() {
-    let time = state.lastTime
+    let lastTime = state.timer.time()
     while (true) {
-      let delta = time - state.lastTime,
+      let time = state.timer.time(),
+          delta = time - lastTime,
           isTriggered = delta >= state.interval
       // Trigger callbacks if delta exceeds time interval.
       if (isTriggered) {
         state.dispatcher.next([time, delta])
-        state.lastTime = time
+        lastTime = time
       }
       // Next timestamp must be passed in via next()
-      time = yield isTriggered
+      state.timer.update(yield isTriggered)
     }
   }
 

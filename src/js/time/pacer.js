@@ -35,12 +35,13 @@ export const makePacer = (spec) => {
   }
 
   // Iterate each render-generator, removing those that are done.
-  const render = () => {
+  // The current time is passed for aliasing/interpolation purposes.
+  const render = (time) => {
     context.clearRect(0, 0, canvas.width, canvas.height)
-    state.renders = filterNext(state.renders)
+    state.renders = filterNext(state.renders, [time])
   }
 
-  // Add a render-generator to the render queue
+  // Add a render-generator to the render queue.
   const addRender = (p) => {
     state.renders.push(p)
   }
@@ -55,7 +56,7 @@ export const makePacer = (spec) => {
         // Perform all updates.
         update(time)
         // Perform all renders.
-        render()
+        render(time)
         // Save this time for next loop.
         state.lastTime = time
       }

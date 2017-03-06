@@ -9,17 +9,22 @@ import makeTimer from '../time/timer'
 export const makeArcTimer = (spec) => {
 
   // Extends:
-  const arc = makeArc(spec),
-        timer = makeTimer(spec)
+  const arc = makeArc(spec)
 
   // Initialize state.
   const state = sealed({
+    timer:            null,  // placeholder for assign() below
     timeUnit:         SECOND,
     unitsPerRotation: 60  // Use negative values for counterclockwise
   })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
+
+  // Create a timer if none was provided.
+  if (!state.timer) {
+    state.timer = makeTimer(spec)
+  }
 
   // Save initial start/end positions for reference.
   const baseStart = arc.getStart()
@@ -28,8 +33,8 @@ export const makeArcTimer = (spec) => {
   // Update the end position of the arc based on time elapsed,
   // and proportional to the number of time units per circle.
   const update = (time) => {
-    timer.update(time)
-    let elapsed = timer.elapsed() / state.timeUnit,
+    state.timer.update(time)
+    let elapsed = state.timer.elapsed() / state.timeUnit,
         degTravel = 360 / state.unitsPerRotation * elapsed,
         radTravel = degToRadians(degTravel)
     arc.setEnd( baseStart + radTravel % (2 * Math.PI) )
@@ -45,7 +50,7 @@ export const makeArcTimer = (spec) => {
   // Return Interface.
   return frozen({
     ...arc,
-    ...timer,
+    ...state.timer,
     getTimeUnit,
     getUnitsPerRotation,
     update
