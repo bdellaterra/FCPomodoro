@@ -4,7 +4,7 @@ import { filterNext } from '../utility/iter'
 import now from 'present'
 import sleep from './sleep'
 
-// USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
+// USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
 
 
 // Create a pacer to run a frame loop.
@@ -46,7 +46,7 @@ export const makePacer = (spec) => {
     state.renders.push(p)
   }
 
-  // Run a frame loop that executes once every frameInterval miliseconds.
+  // Run a frame loop that executes once every frameInterval milliseconds.
   // The broswer will call back the loop with a high-precision timestamp.
   const loop = (time) => {
     if (state.isRunning) {

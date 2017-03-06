@@ -1,10 +1,12 @@
 /* global DEBUG */
 import '../css/styles.css'
 
-import { MILISECOND, MINUTE, SECOND } from './utility/constants'
+import { MILLISECOND, MINUTE, SECOND } from './utility/constants'
 import makeArc from './ui/arc'
+import makeArcTimer from './ui/arcTimer.js'
 import makeBlinkingCursor from './ui/blinkingCursor'
 import makeDispatcher from './utility/dispatcher'
+import makeMinutesArc from './ui/minutesArc'
 import makePacer from './time/pacer'
 import makeRateLimiter from './time/rateLimiter'
 import makeSecondsArc from './ui/secondsArc'
@@ -14,42 +16,47 @@ import sleep from './time/sleep'
 // Create a shared timer to synchronize components.
 const timer = makeTimer()
 
-// Create a pacer to drive updaates/renders via a frame loop.
+// Create a pacer to drive updates/renders via a frame loop.
 const pacer = makePacer()
 
 // Create generators to dispatch updates at various time intervals.
-const milisecondsGen = makeRateLimiter({ timer, interval: MILISECOND })
+const millisecondsGen = makeRateLimiter({ timer, interval: MILLISECOND })
 const secondsGen = makeRateLimiter({ timer, interval: SECOND })
 const minutesGen = makeRateLimiter({ timer, interval: MINUTE })
 
 // Create a generator to dispatch rendering.
 const renderGen = makeDispatcher()
 
+// Create dispay elements for user interface.
 const secondsArc = makeSecondsArc({ timer })
+const minutesArc = makeMinutesArc({ timer })
 const blinkingCursor = makeBlinkingCursor({ timer })
 
-// The shared timer is updated frequently for accurate timing.
-milisecondsGen.addCallback(timer.update)
+// Timer updates at millisecond-interval for accuracy.
+millisecondsGen.addCallback(timer.update)
 
-// The seconds display is updated frequently for a smooth continuous motion.
-milisecondsGen.addCallback(secondsArc.update)
+// Seconds display updates with smooth continuous motion.
+millisecondsGen.addCallback(secondsArc.update)
 
-// The cursor display blinks at second-intervals,
-// but progresses only once per minute.
+// The cursor moves slowly and blinks at second-intervals.
 secondsGen.addCallback(blinkingCursor.blink)
-minutesGen.addCallback(blinkingCursor.update)
+secondsGen.addCallback(blinkingCursor.update)
 
-// Add render functions for ui components in proper order so they
-// layer one on top of the other.
+// The minutes display moves slowly updating once per second.
+secondsGen.addCallback(minutesArc.update)
+
+// Add render functions for ui components in order of layering.
+renderGen.addCallback(minutesArc.render)
 renderGen.addCallback(secondsArc.render)
 renderGen.addCallback(blinkingCursor.render)
 
-// Add all generators to the pacer so it can drive iteration.
-pacer.addUpdate(milisecondsGen)
+// Add generators to the pacer so it can drive iteration.
+pacer.addUpdate(millisecondsGen)
 pacer.addUpdate(secondsGen)
 pacer.addUpdate(minutesGen)
 pacer.addRender(renderGen)
 
 // Run the pacer to begin animation.
 pacer.run()
+timer.reset()
 

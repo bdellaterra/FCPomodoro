@@ -1,5 +1,5 @@
 
-// USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
+// USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
 
 
 // Returns a promise that resolves after specified timeout.

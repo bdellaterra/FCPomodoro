@@ -2,7 +2,7 @@ import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makePauser from './pauser'
 import now from 'present'
 
-// USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
+// USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
 
 
 // Create a timer object to track periodic and total elapsed time.

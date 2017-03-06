@@ -4,12 +4,14 @@ import makeArcTimer from './arcTimer'
 
 
 export const makeBlinkingCursor = (spec) => {
+
+  // Extends:
   const arcTimer = makeArcTimer({
     radius:           200,
     lineWidth:        16,
     strokeStyle:      'rgba(0, 0, 255, 1)',
-    timeUnit:         MINUTE,
-    unitsPerRotation: 60,
+    timeUnit:         SECOND,
+    unitsPerRotation: -3600,
     ...spec
   })
 
@@ -42,8 +44,7 @@ export const makeBlinkingCursor = (spec) => {
   }
 
   // Perform initialization.
-  // blink(update(0))
-  update(0)
+  blink(update(0))
 
   // Return Interface.
   return frozen({

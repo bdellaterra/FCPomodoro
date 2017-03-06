@@ -3,7 +3,7 @@ import makeDispatcher from '../utility/dispatcher'
 import makeTimer from './timer'
 import now from 'present'
 
-// USAGE NOTE: All time values are in miliseconds, unless noted otherwise.
+// USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
 
 
 // Create a dispatcher that triggers callbacks only after a set time interval.
@@ -38,9 +38,9 @@ export const makeRateLimiter = (spec = {}) => {
   // A dispatcher that triggers callbacks only after a set time interval
   // has elapsed. The timer itself is updated elsewhere, such as in frame loop.
   function* rateLimiter() {
-    let lastTime = state.timer.time()
+    let lastTime = state.timer.elapsed()
     while (true) {
-      let time = state.timer.time(),
+      let time = state.timer.elapsed(),
           delta = time - lastTime,
           isTriggered = delta >= state.interval
       // Trigger callbacks if delta exceeds time interval.
