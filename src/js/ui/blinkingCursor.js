@@ -10,7 +10,7 @@ export const makeBlinkingCursor = (spec) => {
   const arcTimer = makeArcTimer({
     radius:        200,
     lineWidth:     16,
-    strokeStyle:   'rgba(0, 0, 255, 1)',
+    strokeStyle:   'rgba(0, 55, 170, 1)',
     timeUnit:      SECOND,
     unitsPerCycle: SECONDS_PER_HOUR,
     isCountdown:   true,
@@ -18,14 +18,17 @@ export const makeBlinkingCursor = (spec) => {
   })
 
   // Initialize state.
-  const state = sealed({ strokeStyle: arcTimer.getStrokeStyle() })
+  const state = sealed({
+    strokeStyle:  arcTimer.getStrokeStyle(),
+    strokeStyle2: 'rgba(245, 245, 245, 1)'
+  })
 
   // Make cursor visible every other second.
   const blink = (time) => {
     if ( (time / SECOND) % 2 >= 1 ) {
       arcTimer.setStrokeStyle(state.strokeStyle)
     } else {
-      arcTimer.setStrokeStyle('transparent')
+      arcTimer.setStrokeStyle(state.strokeStyle2)
     }
     return time
   }
@@ -46,6 +49,12 @@ export const makeBlinkingCursor = (spec) => {
     state.strokeStyle = v
   }
 
+  // Return the 2nd stroke style.
+  const getStrokeStyle2 = () => state.strokeStyle2
+
+  // Set the 2nd stroke style for alternate seconds.
+  const setStrokeStyle2 = (v) => state.strokeStyle2 = v
+
   // Perform initialization.
   blink(update(ARC_ORIGIN))
 
@@ -53,7 +62,9 @@ export const makeBlinkingCursor = (spec) => {
   return frozen({
     ...arcTimer,
     blink,
+    getStrokeStyle2,
     setStrokeStyle,
+    setStrokeStyle2,
     update
   })
 

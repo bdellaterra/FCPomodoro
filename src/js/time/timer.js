@@ -30,7 +30,7 @@ export const makeTimer = (spec) => {
   const elapsed = () => state.currentTime - state.startTime
 
   // Return total time elapsed. (as of last upate)
-  const remaining = () => state.endTime - state.currentTime
+  const remaining = () => Math.max(0, state.endTime - state.currentTime)
 
   // Update current time. Save previous time for calculating delta.
   // Updates current time to now() if argument is undefined.

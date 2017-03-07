@@ -1,5 +1,5 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { HOUR } from '../utility/constants'
+import { HOUR, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
 import { context } from '../ui/canvas'
 import makeArcTimer from './arcTimer'
 
@@ -10,25 +10,27 @@ export const makeHoursArc = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
-  // radius:        200,
-  // lineWidth:     18,
-  // strokeStyle:   'rgba(0, 120, 250, 0.5)',
-  // timeUnit:      SECOND,
-  // unitsPerCycle: SECONDS_PER_HOUR,
-  // isInverse:     true,
-  // isClockwise:   false,
+  radius:        200,
+  lineWidth:     18,
+  strokeStyle:   'rgba(25, 22, 19, 1)',
+  timeUnit:      SECOND,
+  unitsPerCycle: SECONDS_PER_HOUR,
+  isCountdown:   true,
   ...spec
   })
 
   // Initialize state.
-  const state = sealed({ opacity: 0.25 })
+  const state = sealed({
+    opacity:     0,
+    opacityStep: 0.1
+  })
 
   // During update the shape of the default full-circle arc remains unchanged.
   // An opacity value is set and the timer is updated.
   const update = (time) => {
     let timer = arcTimer.getTimer(),
         hoursRemaining = timer.remaining() / HOUR
-    state.opacity = hoursRemaining / 5
+    state.opacity = Math.floor(hoursRemaining) * state.opacityStep
   }
 
   // The circle is rendered with a transparency based on how few hours remain.
@@ -41,7 +43,7 @@ export const makeHoursArc = (spec) => {
   }
 
   // Perform initialization.
-  // update()
+  update(arcTimer.getTimer().time())
 
   // Return Interface.
   return frozen({

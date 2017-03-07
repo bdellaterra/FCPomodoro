@@ -15,8 +15,7 @@ export const makeDispatcher = (spec = {}) => {
 
   // A generator that triggers a list of callbacks on every iteration.
   // Arguments for the callbacks can be passed in an array via next().
-  // For the first iteration, an array can be provided via spec.args
-  // at the time of creation.
+  // For the first iteration, an array can be provided via spec.args.
   function* dispatcher() {
     while (true) {
       let len = state.callbacks.length

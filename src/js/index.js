@@ -55,7 +55,7 @@ secondsGen.addCallback(() => {
 const renderGen = makeDispatcher()
 
 // Add render functions for ui components in order of layering.
-// renderGen.addCallback(hoursArc.render)
+renderGen.addCallback(hoursArc.render)
 renderGen.addCallback(minutesArc.render)
 renderGen.addCallback(secondsArc.render)
 renderGen.addCallback(blinkingCursor.render)
@@ -72,7 +72,7 @@ pacer.addRender(renderGen)
 
 // Initialize the timer.
 timer.reset()
-timer.end(HOUR + MINUTE)
+timer.end(9 * HOUR + MINUTE)
 
 // Run the pacer to begin animation.
 pacer.run()
