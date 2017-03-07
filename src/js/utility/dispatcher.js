@@ -2,8 +2,6 @@ import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 
 
 // Create dispatcher with methods for adding/removing callbacks.
-// A spec.args array can be used to pass args to the callbacks
-// on the first iteration of the generator.
 export const makeDispatcher = (spec = {}) => {
 
   // Initialize state.
@@ -15,7 +13,10 @@ export const makeDispatcher = (spec = {}) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Create the generator.
+  // A generator that triggers a list of callbacks on every iteration.
+  // Arguments for the callbacks can be passed in an array via next().
+  // For the first iteration, an array can be provided via spec.args
+  // at the time of creation.
   function* dispatcher() {
     while (true) {
       let len = state.callbacks.length

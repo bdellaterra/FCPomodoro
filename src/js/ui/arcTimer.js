@@ -14,7 +14,8 @@ export const makeArcTimer = (spec) => {
   const state = sealed({
     timer:         null,  // placeholder for assign() below
     timeUnit:      SECOND,
-    unitsPerCycle: SECONDS_PER_MINUTE
+    unitsPerCycle: SECONDS_PER_MINUTE,
+    isCountdown:   false
   })
 
   // Adjust state to spec.
@@ -27,15 +28,18 @@ export const makeArcTimer = (spec) => {
 
   // Update the end position of the arc based on time elapsed,
   // and proportional to the number of time units per circle.
-  // The timer must be updated seperately, such as in a frame loop.
+  // The current time must be polled seperately, likely in a frame loop.
   const update = (time) => {
-    let moments = Math.floor(state.timer.elapsed() / state.timeUnit),
-        step = ARC_CYCLE / state.unitsPerCycle,
-        movements = step * moments,
-        sign = arc.isClockwise() ? 1 : -1,
-        end = sign * movements
-            % (ARC_CYCLE + step / 2)  // Add step to allow full circle.
-    arc.setEnd( end )
+    const progress = (state.isCountdown)
+            ? state.timer.remaining()
+            : state.timer.elapsed(),
+          moments = progress / state.timeUnit,
+          step = ARC_CYCLE / state.unitsPerCycle,
+          movements = step * moments,
+          sign = arc.isCounterclockwise() ? -1 : 1,
+          end = sign * movements % ARC_CYCLE
+    // Set arc endpoint, favoring full vs. empty circle after a complete cycle.
+    arc.setEnd( (Math.abs(end) > step) ? end : 0 )
     return time
   }
 

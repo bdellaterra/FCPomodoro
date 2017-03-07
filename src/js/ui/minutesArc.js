@@ -11,8 +11,7 @@ export const makeMinutesArc = (spec) => makeArcTimer({
   strokeStyle:   'rgba(0, 120, 250, 0.5)',
   timeUnit:      SECOND,
   unitsPerCycle: SECONDS_PER_HOUR,
-  isInverse:     true,
-  isClockwise:   false,
+  isCountdown:   true,
   ...spec
 })
 

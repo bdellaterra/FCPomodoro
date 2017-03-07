@@ -13,7 +13,8 @@ export const makeTimer = (spec) => {
   const state = sealed({
     startTime:   0,
     currentTime: 0,
-    lastTime:    0
+    lastTime:    0,
+    endTime:     0
   })
 
   // Adjust state to spec.
@@ -27,6 +28,9 @@ export const makeTimer = (spec) => {
 
   // Return total time elapsed. (as of last upate)
   const elapsed = () => state.currentTime - state.startTime
+
+  // Return total time elapsed. (as of last upate)
+  const remaining = () => state.endTime - state.currentTime
 
   // Update current time. Save previous time for calculating delta.
   // Updates current time to now() if argument is undefined.
@@ -42,13 +46,25 @@ export const makeTimer = (spec) => {
     state.currentTime = (time !== undefined) ? time : now()
     state.startTime = state.currentTime
     state.lastTime = state.currentTime
+    state.endTime = state.currentTime
     return state.currentTime
+  }
+
+  // Return the end time. Optionally set end time to
+  // current time plus provided value.
+  const end = (waitTime) => {
+    if (waitTime) {
+      state.endTime = state.currentTime + waitTime
+    }
+    return state.endTime
   }
 
   // Return Interface.
   return frozen({
     delta,
     elapsed,
+    end,
+    remaining,
     reset,
     time,
     update

@@ -13,7 +13,7 @@ export const makeBlinkingCursor = (spec) => {
     strokeStyle:   'rgba(0, 0, 255, 1)',
     timeUnit:      SECOND,
     unitsPerCycle: SECONDS_PER_HOUR,
-    isClockwise:   false,
+    isCountdown:   true,
     ...spec
   })
 
@@ -34,9 +34,9 @@ export const makeBlinkingCursor = (spec) => {
   const update = (time) => {
     arcTimer.update(time)
     let end = arcTimer.getEnd(),
+        sign = arcTimer.isCounterclockwise() ? -1 : 1,
         cursorWidth = ARC_CYCLE / 360
-    arcTimer.setStart( end )
-    arcTimer.setEnd( end - cursorWidth )
+    arcTimer.setStart(end - sign * cursorWidth)
     return time
   }
 

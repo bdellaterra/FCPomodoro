@@ -13,14 +13,14 @@ const makeArc = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    start:       ARC_ORIGIN,
-    end:         ARC_CYCLE,
-    rotation:    ARC_CLOCK_ROTATION,
-    isClockwise: true,  // Preffered over "isCounterclockwise"
-    isInverse:   false,
-    radius:      100,
-    lineWidth:   5,
-    strokeStyle: 'blue'
+    start:              ARC_ORIGIN,
+    end:                ARC_CYCLE,
+    rotation:           ARC_CLOCK_ROTATION,
+    isCounterclockwise: false,
+    isInverse:          false,
+    radius:             100,
+    lineWidth:          5,
+    strokeStyle:        'blue'
   })
 
   // Adjust state to spec.
@@ -28,8 +28,7 @@ const makeArc = (spec) => {
 
   // Draw the arc.
   const render = () => {
-    let isCounterclockwise = !state.isClockwise,
-        start = state.start + state.rotation,
+    let start = state.start + state.rotation,
         end = state.end + state.rotation
     if (state.isInverse) {
       [start, end] = [end, start]
@@ -37,7 +36,7 @@ const makeArc = (spec) => {
     context.beginPath()
     context.lineWidth = state.lineWidth
     context.arc( displayer.getX(), displayer.getY(), state.radius,
-                 start, end, isCounterclockwise )
+                 start, end, state.isCounterclockwise )
     context.strokeStyle = state.strokeStyle
     context.stroke()
   }
@@ -78,11 +77,11 @@ const makeArc = (spec) => {
   // Set the stroke style.
   const setStrokeStyle = (v) => state.strokeStyle = v
 
-  // Return boolean indicating if the arc runs clockwise.
-  const isClockwise = () => state.isClockwise
+  // Return boolean indicating if the arc runs counterclockwise.
+  const isCounterclockwise = () => state.isCounterclockwise
 
-  // Set boolean indicating whether the arc runs clockwise.
-  const setClockwise = (v) => state.isClockwise = v
+  // Set boolean indicating whether the arc runs counterclockwise.
+  const setCounterclockwise = (v) => state.isCounterclockwise = v
 
   // Return boolean indicating if the arc is inverted.
   const isInverse = () => state.isInverse
@@ -99,10 +98,10 @@ const makeArc = (spec) => {
     getRotation,
     getStart,
     getStrokeStyle,
-    isClockwise,
+    isCounterclockwise,
     isInverse,
     render,
-    setClockwise,
+    setCounterclockwise,
     setEnd,
     setInverse,
     setLineWidth,
