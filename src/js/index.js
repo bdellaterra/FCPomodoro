@@ -13,6 +13,7 @@ import makeSecondsArc from './ui/secondsArc'
 import makeTimer from './time/timer'
 import now from 'present'
 import sleep from './time/sleep'
+import { displayDigitalTime } from './ui/input'
 
 
 // Create a shared timer to synchronize components.
@@ -50,6 +51,9 @@ secondsGen.addCallback(hoursArc.update)
 secondsGen.addCallback(() => {
   secondsArc.setRotation(ARC_CLOCK_ROTATION + minutesArc.getEnd())
 })
+
+// Update the digital timer display once per second.
+secondsGen.addCallback(() => displayDigitalTime(timer.remaining()))
 
 // Create a generator to dispatch rendering of various ui components.
 const renderGen = makeDispatcher()

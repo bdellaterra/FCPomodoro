@@ -19,9 +19,9 @@ body,
 }
 
 #pomodoro {
-  outline: 1px solid #778899 ;
   text-align:center;
   font:16px sans-serif; 
+  color: #222222;
 }
 
 .heading {
@@ -45,6 +45,14 @@ body,
 
 #content {
   z-index: 10;
+}
+
+a {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  z-index:25;
 }
 
 textarea,
@@ -84,10 +92,11 @@ input[type=number] {
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  top: 100px;
+  top: 102px;
 }
 
 #readout {
+  position: static;
   height: 100px;
 }
 
@@ -101,10 +110,14 @@ input[type=number] {
   font-size: 38px;
 }
 
+.digitalTime {
+  line-height: 50px;
+}
+
 .instruction {
   position:static;
   font-size: 12px;
-  color: #112233;
+  color: #222222;
   margin-top: 5px;
 }
 
@@ -119,7 +132,7 @@ input[type=number] {
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  bottom: 120px;
+  bottom: 128px;
 }
 
 canvas {
