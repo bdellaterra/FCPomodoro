@@ -10,7 +10,7 @@ export const makeBlinkingCursor = (spec) => {
   const arcTimer = makeArcTimer({
     radius:        200,
     lineWidth:     16,
-    strokeStyle:   'rgba(0, 55, 170, 1)',
+    strokeStyle:   'rgba(0, 20, 250, 1)',
     timeUnit:      SECOND,
     unitsPerCycle: SECONDS_PER_HOUR,
     isCountdown:   true,

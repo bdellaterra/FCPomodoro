@@ -72,10 +72,8 @@ pacer.addRender(renderGen)
 
 // Initialize the timer.
 timer.reset()
-timer.end(9 * HOUR + MINUTE)
+timer.end(HOUR + MINUTE)
 
 // Run the pacer to begin animation.
-pacer.run()
-
-// sleep(10000).then(() => pacer.stop())
+sleep(SECOND).then(pacer.run)
 

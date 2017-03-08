@@ -12,7 +12,7 @@ export const makeHoursArc = (spec) => {
   const arcTimer = makeArcTimer({
   radius:        200,
   lineWidth:     18,
-  strokeStyle:   'rgba(25, 22, 19, 1)',
+  strokeStyle:   'rgba(15, 12, 5, 1)',
   timeUnit:      SECOND,
   unitsPerCycle: SECONDS_PER_HOUR,
   isCountdown:   true,
@@ -22,7 +22,7 @@ export const makeHoursArc = (spec) => {
   // Initialize state.
   const state = sealed({
     opacity:     0,
-    opacityStep: 0.1
+    opacityStep: 0.09
   })
 
   // During update the shape of the default full-circle arc remains unchanged.

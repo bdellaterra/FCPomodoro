@@ -8,7 +8,7 @@ import makeArcTimer from './arcTimer'
 export const makeMinutesArc = (spec) => makeArcTimer({
   radius:        200,
   lineWidth:     18,
-  strokeStyle:   'rgba(70, 170, 235, 1)',
+  strokeStyle:   'rgba(35, 170, 250, 1)',
   timeUnit:      SECOND,
   unitsPerCycle: SECONDS_PER_HOUR,
   isCountdown:   true,

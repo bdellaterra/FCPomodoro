@@ -1,5 +1,134 @@
 
-body {
-  background: #b4b4b4;
+html {
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+html,
+body,
+#pomodoro {
+  background: #aabbcc;
+  border-radius: 0;
+  box-sizing: border-box;
+  margin:0;
+  padding: 0;
+}
+
+#pomodoro * {
+  box-sizing: inherit;
+}
+
+#pomodoro {
+  outline: 1px solid #778899 ;
+  text-align:center;
+  font:16px sans-serif; 
+}
+
+.heading {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.main {
+  position: static;
+  width: 500px;
+  height: 500px;
+}
+
+.main,
+.container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#content {
+  z-index: 10;
+}
+
+textarea,
+input,
+select {
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  font-size: 14px;
+  border: 1px solid #cccccc;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+  border-color: #999999;
+}
+
+input[type=number] {
+  -webkit-appearance: none;
+  width: 50px;
+}
+
+#session {
+  position: relative;
+  height: 200px;
+}
+
+#session .container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 100px;
+}
+
+#readout {
+  height: 100px;
+}
+
+#readout .container {
+  position:static;
+  margin-top: 25px;
+  width: 300px;
+  height: 50px;
+  background-color: #112233;
+  color: #eeeeee;
+  font-size: 38px;
+}
+
+.instruction {
+  position:static;
+  font-size: 12px;
+  color: #112233;
+  margin-top: 5px;
+}
+
+#break {
+  position:relative;
+  height: 200px;
+}
+
+#break .container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  bottom: 120px;
+}
+
+canvas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 0px;
+  z-index: 5;
 }
 
