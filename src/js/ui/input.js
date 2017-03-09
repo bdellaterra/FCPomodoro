@@ -92,3 +92,18 @@ export const readBreakInput = () => {
   return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
 }
 
+export const addSessionInputListener = (event, callback) => {
+  const [h, m, s] = ['sessionHours', 'sessionMinutes', 'sessionSeconds']
+    .map( (e) => El[e].addEventListener(event, callback) )
+}
+
+export const addBreakInputListener = (event, callback) => {
+  const [h, m, s] = ['breakHours', 'breakMinutes', 'breakSeconds']
+    .map( (e) => El[e].addEventListener(event, callback) )
+}
+
+export const addReadoutListener = (event, callback) => {
+  const [dt] = ['digitalTime']
+    .map( (e) => El[e].addEventListener(event, callback) )
+}
+

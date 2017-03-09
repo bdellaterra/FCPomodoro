@@ -1,4 +1,7 @@
-import { ARC_CLOCK_ROTATION, ARC_CYCLE, ARC_ORIGIN } from '../utility/constants'
+import { ARC_CLOCK_ROTATION, ARC_CYCLE, ARC_ORIGIN
+       } from '../utility/constants'
+import { DEFAULT_ARC_LINE_WIDTH, DEFAULT_ARC_RADIUS, DEFAULT_ARC_STROKE_STYLE
+       } from '../utility/conf'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { context } from './canvas'
 import makeDisplayer from './displayer'
@@ -17,9 +20,9 @@ const makeArc = (spec) => {
     rotation:           ARC_CLOCK_ROTATION,
     isCounterclockwise: false,
     isInverse:          false,
-    radius:             100,
-    lineWidth:          5,
-    strokeStyle:        'blue'
+    radius:             DEFAULT_ARC_RADIUS,
+    lineWidth:          DEFAULT_ARC_LINE_WIDTH,
+    strokeStyle:        DEFAULT_ARC_STROKE_STYLE
   })
 
   // Adjust state to spec.

@@ -1,5 +1,7 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { HOUR, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
+import { HOURS_LINE_WIDTH, HOURS_RADIUS, HOURS_STROKE_STYLE
+       } from '../utility/conf'
 import { context } from '../ui/canvas'
 import makeArcTimer from './arcTimer'
 
@@ -10,9 +12,9 @@ export const makeHoursArc = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
-  radius:        200,
-  lineWidth:     18,
-  strokeStyle:   'rgb(15, 12, 5)',
+  radius:        HOURS_RADIUS,
+  lineWidth:     HOURS_LINE_WIDTH,
+  strokeStyle:   HOURS_STROKE_STYLE,
   timeUnit:      SECOND,
   unitsPerCycle: SECONDS_PER_HOUR,
   isCountdown:   true,

@@ -1,5 +1,8 @@
 import { ARC_CYCLE, ARC_ORIGIN, DEGREES_PER_CYCLE, SECOND, SECONDS_PER_HOUR
        } from '../utility/constants'
+import { CURSOR_LINE_WIDTH, CURSOR_RADIUS,
+         CURSOR_STROKE_STYLE_1, CURSOR_STROKE_STYLE_2
+       } from '../utility/conf'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makeArcTimer from './arcTimer'
 
@@ -9,9 +12,9 @@ export const makeBlinkingCursor = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
-    radius:        200,
-    lineWidth:     16,
-    strokeStyle:   'rgb(0, 20, 250)',
+    radius:        CURSOR_RADIUS,
+    lineWidth:     CURSOR_LINE_WIDTH,
+    strokeStyle:   CURSOR_STROKE_STYLE_1,
     timeUnit:      SECOND,
     unitsPerCycle: SECONDS_PER_HOUR,
     isCountdown:   true,
@@ -21,7 +24,7 @@ export const makeBlinkingCursor = (spec) => {
   // Initialize state.
   const state = sealed({
     strokeStyle:  arcTimer.getStrokeStyle(),
-    strokeStyle2: 'rgb(245, 245, 245)'
+    strokeStyle2: CURSOR_STROKE_STYLE_2
   })
 
   // Adjust state to spec.
