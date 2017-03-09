@@ -76,23 +76,12 @@ pacer.addRender(renderGen)
 
 // Initialize the timer.
 timer.reset()
-timer.end(4 * HOUR + 20 * SECOND)
+timer.end(Number(HOUR) + 5 * SECOND)
 
 // Run the pacer to begin animation.
 sleep(SECOND).then(pacer.run)
 
-let t = 2000000000
-secondsGen.addCallback( () => {
-  let i = 0,
-      x = 0
-  while (i++ < t) {
-    x += 1
-  }
-  t *= 0.9
-  if (t < 1000000) {
-    t *= 1000
-  }
-  console.log('X:', x, 'T:', t)
-})
-secondsGen.addCallback( () => console.log(pacer.getAverageFrameRate()) )
+sleep(MINUTE).then( () => console.log('AFTER 1 MIN:', timer.remaining() / MINUTE ) )
+
+// secondsGen.addCallback( () => console.log(pacer.getAverageFrameRate()) )
 
