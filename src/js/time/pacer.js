@@ -27,6 +27,7 @@ export const makePacer = (spec) => {
   // The current time is passed to the generators for calculation purposes.
   const update = (time) => {
     state.updates = filterNext(state.updates, [time])
+    return time
   }
 
   // Add an update-generator to the update queue
@@ -39,6 +40,7 @@ export const makePacer = (spec) => {
   const render = (time) => {
     context.clearRect(0, 0, canvas.width, canvas.height)
     state.renders = filterNext(state.renders, [time])
+    return time
   }
 
   // Add a render-generator to the render queue.
