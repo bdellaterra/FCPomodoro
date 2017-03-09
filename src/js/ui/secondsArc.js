@@ -1,6 +1,5 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { MILLISECOND, MILLISECONDS_PER_SECOND, SECOND, SECONDS_PER_MINUTE
-       } from '../utility/constants'
+import { MILLISECOND, MILLISECONDS_PER_MINUTE } from '../utility/constants'
 import makeArcTimer from './arcTimer'
 
 
@@ -11,7 +10,7 @@ export const makeSecondsArc = (spec) => makeArcTimer({
   lineWidth:     2,
   strokeStyle:   'rgba(0, 0, 0, 1)',
   timeUnit:      MILLISECOND,
-  unitsPerCycle: SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND,
+  unitsPerCycle: MILLISECONDS_PER_MINUTE,
   isCountdown:   true,
   isInverse:     true,
   ...spec
