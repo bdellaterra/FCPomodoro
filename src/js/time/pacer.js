@@ -13,6 +13,7 @@ export const makePacer = (spec) => {
   const state = sealed({
     lastTime:       0,
     frameInterval:  0,
+    frameAvgInt:    16.5,  // estimate
     frameRequestID: null,
     isRunning:      false,
     updates:        [],
@@ -49,26 +50,35 @@ export const makePacer = (spec) => {
   // The broswer will call back the loop with a high-precision timestamp.
   const loop = (time) => {
     if (state.isRunning) {
+      const delta = time - state.lastTime
       // If frame interval is zero or time delta has met/exceeded interval.
       if (!state.frameInterval
-        || state.frameInterval <= time - state.lastTime) {
+        || state.frameInterval <= delta) {
         // Perform all updates.
         update(time)
         // Perform all renders.
         render(time)
         // Save this time for next loop.
         state.lastTime = time
+        // Keep a moving average of the frame rate
+        state.frameAvgInt = 0.9 * state.frameAvgInt + 0.1 * delta
       }
       // Request callback from browser for another animation frame.
       state.frameRequestID = window.requestAnimationFrame(loop)
     }
   }
 
-  // Get time of last completed loop
+  // Return time of last completed loop
   const getLastTime = () => state.lastTime
 
-  // Get current frame interval.
+  // Return current frame interval.
   const getFrameInterval = () => state.frameInterval
+
+  // Return average frame interval.
+  const getAverageFrameInterval = () => state.frameAvgInt
+
+  // Return average frame rate per second.
+  const getAverageFrameRate = () => 1000 / state.frameAvgInt
 
   // Adjust how often the loop iterates by setting the frame interval.
   const setFrameInterval = (f = 0) => {
@@ -99,6 +109,8 @@ export const makePacer = (spec) => {
   return frozen({
     addRender,
     addUpdate,
+    getAverageFrameInterval,
+    getAverageFrameRate,
     getFrameInterval,
     getLastTime,
     isRunning,

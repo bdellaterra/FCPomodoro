@@ -12,6 +12,7 @@ import makePacer from './time/pacer'
 import makeRateLimiter from './time/rateLimiter'
 import makeSecondsArc from './ui/secondsArc'
 import makeTimer from './time/timer'
+import now from 'present'
 import sleep from './time/sleep'
 
 
@@ -44,7 +45,7 @@ secondsGen.addCallback(blinkingCursor.blink)
 secondsGen.addCallback(blinkingCursor.style)
 
 // The hours display as semi-transparent full circles for each hour remaining.
-secondsGen.addCallback(hoursArc.style)
+hoursGen.addCallback(hoursArc.style)
 
 // Continuously rotate the seconds arc so it tracks with the minutes arc.
 secondsGen.addCallback(() => {
@@ -52,7 +53,7 @@ secondsGen.addCallback(() => {
 })
 
 // Update the digital timer display once per second.
-secondsGen.addCallback( () => displayDigitalTime(timer.remaining()) )
+millisecondsGen.addCallback( () => displayDigitalTime(timer.remaining()) )
 
 // Create a generator to dispatch rendering of various ui components.
 const renderGen = makeDispatcher()
@@ -79,4 +80,19 @@ timer.end(4 * HOUR + 20 * SECOND)
 
 // Run the pacer to begin animation.
 sleep(SECOND).then(pacer.run)
+
+let t = 2000000000
+secondsGen.addCallback( () => {
+  let i = 0,
+      x = 0
+  while (i++ < t) {
+    x += 1
+  }
+  t *= 0.9
+  if (t < 1000000) {
+    t *= 1000
+  }
+  console.log('X:', x, 'T:', t)
+})
+secondsGen.addCallback( () => console.log(pacer.getAverageFrameRate()) )
 
