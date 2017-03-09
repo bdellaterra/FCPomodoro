@@ -3,16 +3,16 @@ import { HOUR, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
 import { context } from '../ui/canvas'
 import makeArcTimer from './arcTimer'
 
-// Create a full-circle minutes arc to indicate an additional hour remains.
-// The semi-transparent nature of these arcs makes it possible to visually
-// infer if multiple hours remain.
+
+// Create a full-circle minutes arc to indicate additional hours remaining.
+// The arc fades over time as fewer hours remain.
 export const makeHoursArc = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
   radius:        200,
   lineWidth:     18,
-  strokeStyle:   'rgba(15, 12, 5, 1)',
+  strokeStyle:   'rgb(15, 12, 5)',
   timeUnit:      SECOND,
   unitsPerCycle: SECONDS_PER_HOUR,
   isCountdown:   true,
@@ -25,24 +25,25 @@ export const makeHoursArc = (spec) => {
     opacityStep: 0.09
   })
 
-  // During update the shape of the default full-circle arc remains unchanged.
-  // An opacity value is set and the timer is updated.
-  const shade = () => {
-    let timer = arcTimer.getTimer(),
-        hoursRemaining = timer.remaining() / HOUR
+  // Adjust state to spec.
+  assign(state, pick(spec, keys(state)))
+
+  // Style as an opacity change. The arc remains a full-circle.
+  const style = () => {
+    const hoursRemaining = arcTimer.remaining() / HOUR
     state.opacity = Math.floor(hoursRemaining) * state.opacityStep
   }
 
-  // Update the timer, the pivot the arc to the proper position.
-  const update = (time) => {
-    arcTimer.getTimer().update(time)
-    shade()
+  // Update the timer and adjust opacity based on hours remaining.
+  const update = (t) => {
+    const time = arcTimer.sync(t)
+    style()
     return time
   }
 
-  // The circle is rendered with a transparency based on how few hours remain.
+  // Render the circle, adjusting opacity via the context alpha setting.
   const render = (time) => {
-    let saveGlobalAlpha = context.globalAlpha
+    const saveGlobalAlpha = context.globalAlpha
     context.globalAlpha = state.opacity
     arcTimer.render(time)
     context.globalAlpha = saveGlobalAlpha
@@ -50,13 +51,13 @@ export const makeHoursArc = (spec) => {
   }
 
   // Perform initialization.
-  update(arcTimer.getTimer().time())
+  update(arcTimer.time())
 
   // Return Interface.
   return frozen({
     ...arcTimer,
     render,
-    shade,
+    style,
     update
   })
 

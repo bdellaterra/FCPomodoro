@@ -29,18 +29,18 @@ export const makeTimer = (spec) => {
   // Return total time elapsed. (as of last upate)
   const elapsed = () => state.currentTime - state.startTime
 
-  // Return total time elapsed. (as of last upate)
+  // Return total time remaining. (as of last upate)
   const remaining = () => Math.max(0, state.endTime - state.currentTime)
 
   // Update current time. Save previous time for calculating delta.
-  // Updates current time to now() if argument is undefined.
-  const update = (time) => {
+  // Update current time to now() if argument is undefined.
+  const sync = (time) => {
     state.lastTime = state.currentTime
     state.currentTime = (time !== undefined) ? time : now()
     return state.currentTime
   }
 
-  // Syncronize all time values to now().
+  // Synchronize all time values to now().
   // Optionally synchronize to specified value, if provided.
   const reset = (time) => {
     state.currentTime = (time !== undefined) ? time : now()
@@ -66,8 +66,10 @@ export const makeTimer = (spec) => {
     end,
     remaining,
     reset,
+    sync,
     time,
-    update
+    // aliases
+    update: sync
   })
 
 }

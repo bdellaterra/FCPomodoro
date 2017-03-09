@@ -28,7 +28,7 @@ export const makeArcTimer = (spec) => {
 
   // Set the end position of the arc based on time elapsed/remaining,
   // and proportional to the number of time units per circle.
-  const pivot = () => {
+  const style = () => {
     const progress = (state.isCountdown)
             ? state.timer.remaining()
             : state.timer.elapsed(),
@@ -41,10 +41,10 @@ export const makeArcTimer = (spec) => {
     arc.setEnd( (Math.abs(end) > step) ? end : 0 )
   }
 
-  // Update the timer, the pivot the arc to the proper position.
-  const update = (time) => {
-    state.timer.update(time)
-    pivot()
+  // Update the timer and the positioning of the arc.
+  const update = (t) => {
+    const time = state.timer.update(t)
+    style()
     return time
   }
 
@@ -57,6 +57,13 @@ export const makeArcTimer = (spec) => {
   // Return the number of time units per full circular rotation.
   const getUnitsPerCycle = () => state.unitsPerCycle
 
+  // Return true if arc displays time diminishing toward zero.
+  const isCountdown = () => state.isCountdown
+
+  // Set boolean indicating if arc tracks diminishing time.
+  // If true the timer's end value should be considered as well.
+  const setCountdown = (v) => state.isCountdown = Boolean(v)
+
   // Return Interface.
   return frozen({
     ...arc,
@@ -64,7 +71,9 @@ export const makeArcTimer = (spec) => {
     getTimer,
     getTimeUnit,
     getUnitsPerCycle,
-    pivot,
+    isCountdown,
+    setCountdown,
+    style,
     update
   })
 

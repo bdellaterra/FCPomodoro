@@ -1,11 +1,10 @@
+import { ARC_CLOCK_ROTATION, ARC_CYCLE, ARC_ORIGIN } from '../utility/constants'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { context } from './canvas'
-import { ARC_CLOCK_ROTATION, ARC_CYCLE, ARC_ORIGIN
-       } from '../utility/constants'
 import makeDisplayer from './displayer'
 
 
-// A partial circle
+// Create a partial circle.
 const makeArc = (spec) => {
 
   // Extends:
@@ -81,13 +80,13 @@ const makeArc = (spec) => {
   const isCounterclockwise = () => state.isCounterclockwise
 
   // Set boolean indicating whether the arc runs counterclockwise.
-  const setCounterclockwise = (v) => state.isCounterclockwise = v
+  const setCounterclockwise = (v) => state.isCounterclockwise = Boolean(v)
 
   // Return boolean indicating if the arc is inverted.
   const isInverse = () => state.isInverse
 
   // Set boolean indicating whether the arc is inverted.
-  const setInverse = (v) => state.isInverse = v
+  const setInverse = (v) => state.isInverse = Boolean(v)
 
   // Return Interface.
   return frozen({

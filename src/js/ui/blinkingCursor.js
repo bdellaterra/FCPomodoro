@@ -1,16 +1,17 @@
-import { ARC_CYCLE, ARC_ORIGIN, SECOND, SECONDS_PER_HOUR
+import { ARC_CYCLE, ARC_ORIGIN, DEGREES_PER_CYCLE, SECOND, SECONDS_PER_HOUR
        } from '../utility/constants'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import makeArcTimer from './arcTimer'
 
 
+// Create a cursor that traverses an arc-like path and blinks periodically.
 export const makeBlinkingCursor = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
     radius:        200,
     lineWidth:     16,
-    strokeStyle:   'rgba(0, 20, 250, 1)',
+    strokeStyle:   'rgb(0, 20, 250)',
     timeUnit:      SECOND,
     unitsPerCycle: SECONDS_PER_HOUR,
     isCountdown:   true,
@@ -20,28 +21,39 @@ export const makeBlinkingCursor = (spec) => {
   // Initialize state.
   const state = sealed({
     strokeStyle:  arcTimer.getStrokeStyle(),
-    strokeStyle2: 'rgba(245, 245, 245, 1)'
+    strokeStyle2: 'rgb(245, 245, 245)'
   })
 
+  // Adjust state to spec.
+  assign(state, pick(spec, keys(state)))
+
   // Make cursor visible every other second.
-  // Blinking stops if time is zero.
-  const blink = (time) => {
-    console.log(time)
-    if ( (time / SECOND) % 2 >= 1 ) {
+  // Blinking stops if countdown timer reaches zero.
+  const blink = () => {
+    const progress = (arcTimer.isCountdown())
+            ? arcTimer.remaining()
+            : arcTimer.elapsed()
+    if (progress && (progress / SECOND) % 2 >= 1 ) {
       arcTimer.setStrokeStyle(state.strokeStyle)
     } else {
       arcTimer.setStrokeStyle(state.strokeStyle2)
     }
-    return time
   }
 
   // Style arc as a thin cursor at the current minute location.
-  const update = (time) => {
-    arcTimer.update(time)
-    let end = arcTimer.getEnd(),
-        sign = arcTimer.isCounterclockwise() ? -1 : 1,
-        cursorWidth = ARC_CYCLE / 360
+  const style = () => {
+    arcTimer.style()
+    const end = arcTimer.getEnd(),
+          sign = arcTimer.isCounterclockwise() ? -1 : 1,
+          cursorWidth = ARC_CYCLE / DEGREES_PER_CYCLE
     arcTimer.setStart(end - sign * cursorWidth)
+  }
+
+  // Update the timer and the position/style of the cursor.
+  const update = (t) => {
+    const time = arcTimer.update(t)
+    style()
+    blink()
     return time
   }
 
@@ -67,6 +79,7 @@ export const makeBlinkingCursor = (spec) => {
     getStrokeStyle2,
     setStrokeStyle,
     setStrokeStyle2,
+    style,
     update
   })
 

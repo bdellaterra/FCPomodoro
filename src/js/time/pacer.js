@@ -22,7 +22,7 @@ export const makePacer = (spec) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Iterate each update-generator, removing those that are done.
+  // Iterate each update generator, removing those that are done.
   // The current time is passed to the generators for calculation purposes.
   const update = (time) => {
     state.updates = filterNext(state.updates, [time])
@@ -33,7 +33,7 @@ export const makePacer = (spec) => {
     state.updates.push(p)
   }
 
-  // Iterate each render-generator, removing those that are done.
+  // Iterate each render generator, removing those that are done.
   // The current time is passed for aliasing/interpolation purposes.
   const render = (time) => {
     context.clearRect(0, 0, canvas.width, canvas.height)
