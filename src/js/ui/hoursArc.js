@@ -27,10 +27,17 @@ export const makeHoursArc = (spec) => {
 
   // During update the shape of the default full-circle arc remains unchanged.
   // An opacity value is set and the timer is updated.
-  const update = (time) => {
+  const shade = () => {
     let timer = arcTimer.getTimer(),
         hoursRemaining = timer.remaining() / HOUR
     state.opacity = Math.floor(hoursRemaining) * state.opacityStep
+  }
+
+  // Update the timer, the pivot the arc to the proper position.
+  const update = (time) => {
+    arcTimer.getTimer().update(time)
+    shade()
+    return time
   }
 
   // The circle is rendered with a transparency based on how few hours remain.
@@ -49,6 +56,7 @@ export const makeHoursArc = (spec) => {
   return frozen({
     ...arcTimer,
     render,
+    shade,
     update
   })
 

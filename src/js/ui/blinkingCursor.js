@@ -24,7 +24,9 @@ export const makeBlinkingCursor = (spec) => {
   })
 
   // Make cursor visible every other second.
+  // Blinking stops if time is zero.
   const blink = (time) => {
+    console.log(time)
     if ( (time / SECOND) % 2 >= 1 ) {
       arcTimer.setStrokeStyle(state.strokeStyle)
     } else {

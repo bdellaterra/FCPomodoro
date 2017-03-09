@@ -24,7 +24,6 @@ const formatTime = (t) => {
         seconds = Math.floor(msecsToSeconds(t) % SECONDS_PER_MINUTE),
         minutes = Math.floor(msecsToMinutes(t) % MINUTES_PER_HOUR),
         hours = Math.floor(msecsToHours(t))
-  console.log(hours, minutes, seconds)
   return [hours, zeroPad(minutes), zeroPad(seconds)].join(':')
 }
 
