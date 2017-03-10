@@ -44,7 +44,6 @@ watch.milliseconds.addCallback(display.seconds.style)
 watch.seconds.addCallback(display.minutes.style)
 
 // The cursor moves with the minutes arc and blinks at second-intervals.
-watch.seconds.addCallback(display.cursor.blink)
 watch.seconds.addCallback(display.cursor.style)
 
 // The hours display as semi-transparent full circles for each hour remaining.
@@ -83,10 +82,4 @@ timer.end(2 * HOUR + 20 * SECOND)
 
 // Run the pacer to begin animation.
 sleep(SECOND).then(pacer.run)
-
-sleep(MINUTE).then( () => console.log('AFTER 1 MIN:', timer.remaining() / MINUTE ) )
-
-populateSessionInput(timer.remaining())
-
-// secondsGen.addCallback( () => console.log(pacer.getAverageFrameRate()) )
 
