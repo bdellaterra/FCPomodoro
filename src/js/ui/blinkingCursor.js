@@ -50,40 +50,29 @@ export const makeBlinkingCursor = (spec) => {
           sign = arcTimer.isCounterclockwise() ? -1 : 1,
           cursorWidth = ARC_CYCLE / DEGREES_PER_CYCLE
     arcTimer.setStart(end - sign * cursorWidth)
-  }
-
-  // Update the timer and the position/style of the cursor.
-  const update = (t) => {
-    const time = arcTimer.update(t)
-    style()
     blink()
-    return time
   }
 
-  // Set the stroke style.
-  // The change will not display visually until the next call to blink().
-  const setStrokeStyle = (v) => {
-    state.strokeStyle = v
-  }
+  // Set the stroke style. (May not show visually until next blink)
+  const setStrokeStyle = (v) => state.strokeStyle = v
 
   // Return the 2nd stroke style.
   const getStrokeStyle2 = () => state.strokeStyle2
 
   // Set the 2nd stroke style for alternate seconds.
+  // (May not show visually until next blink)
   const setStrokeStyle2 = (v) => state.strokeStyle2 = v
 
   // Perform initialization.
-  blink(update(ARC_ORIGIN))
+  style()
 
   // Return Interface.
   return frozen({
     ...arcTimer,
-    blink,
     getStrokeStyle2,
     setStrokeStyle,
     setStrokeStyle2,
-    style,
-    update
+    style
   })
 
 }

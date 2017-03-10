@@ -12,13 +12,13 @@ export const makeHoursArc = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
-  radius:        HOURS_RADIUS,
-  lineWidth:     HOURS_LINE_WIDTH,
-  strokeStyle:   HOURS_STROKE_STYLE,
-  timeUnit:      SECOND,
-  unitsPerCycle: SECONDS_PER_HOUR,
-  isCountdown:   true,
-  ...spec
+    radius:        HOURS_RADIUS,
+    lineWidth:     HOURS_LINE_WIDTH,
+    strokeStyle:   HOURS_STROKE_STYLE,
+    timeUnit:      SECOND,
+    unitsPerCycle: SECONDS_PER_HOUR,
+    isCountdown:   true,
+    ...spec
   })
 
   // Initialize state.
@@ -37,11 +37,11 @@ export const makeHoursArc = (spec) => {
   }
 
   // Update the timer and adjust opacity based on hours remaining.
-  const update = (t) => {
-    const time = arcTimer.sync(t)
-    style()
-    return time
-  }
+  // const update = (t) => {
+  //   const time = arcTimer.sync(t)
+  //   style()
+  //   return time
+  // }
 
   // Render the circle, adjusting opacity via the context alpha setting.
   const render = (time) => {
@@ -53,14 +53,14 @@ export const makeHoursArc = (spec) => {
   }
 
   // Perform initialization.
-  update(arcTimer.time())
+  style()
 
   // Return Interface.
   return frozen({
     ...arcTimer,
     render,
-    style,
-    update
+    style
+    // update
   })
 
 }

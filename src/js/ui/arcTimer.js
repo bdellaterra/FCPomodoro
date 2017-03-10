@@ -41,13 +41,6 @@ export const makeArcTimer = (spec) => {
     arc.setEnd( (Math.abs(end) > step) ? end : 0 )
   }
 
-  // Update the timer and the positioning of the arc.
-  const update = (t) => {
-    const time = state.timer.update(t)
-    style()
-    return time
-  }
-
   // Return a reference to the timer.
   const getTimer = () => state.timer
 
@@ -70,7 +63,7 @@ export const makeArcTimer = (spec) => {
   const isCountdown = () => state.isCountdown
 
   // Set boolean indicating if arc tracks diminishing time.
-  // If true the timer's end value should be considered as well.
+  // If changed this affects the arc's start and end position.
   const setCountdown = (v) => state.isCountdown = Boolean(v)
 
   // Return Interface.
@@ -85,8 +78,7 @@ export const makeArcTimer = (spec) => {
     setTimer,
     setTimeUnit,
     setUnitsPerCycle,
-    style,
-    update
+    style
   })
 
 }
