@@ -12,14 +12,13 @@ const makeDisplayer = (spec) => {
   // Extends:
   const entity = makeEntity(spec)
 
-  // Initial state will be restored upon reset.
-  const initState = {
+  // Initialize state.
+  const state = {
     x: canvas.width / 2,
     y: canvas.height / 2
   }
 
   // Adjust state to spec.
-  const state = sealed({ ...initState })
   assign(state, pick(spec, keys(state)))
 
   // Return the x coordinate
