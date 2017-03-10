@@ -51,11 +51,20 @@ export const makeArcTimer = (spec) => {
   // Return a reference to the timer.
   const getTimer = () => state.timer
 
+  // Set the arc to track a different timer.
+  const setTimer = (v) => state.timer = v
+
   // Return the time unit indicated by the arc timer.
   const getTimeUnit = () => state.timeUnit
 
+  // Set the time unit denominated by the arc timer.
+  const setTimeUnit = (v) => state.timeUnit = v
+
   // Return the number of time units per full circular rotation.
   const getUnitsPerCycle = () => state.unitsPerCycle
+
+  // Set the number of time units per full circular rotation.
+  const setUnitsPerCycle = (v) => state.unitsPerCycle = v
 
   // Return true if arc displays time diminishing toward zero.
   const isCountdown = () => state.isCountdown
@@ -73,6 +82,9 @@ export const makeArcTimer = (spec) => {
     getUnitsPerCycle,
     isCountdown,
     setCountdown,
+    setTimer,
+    setTimeUnit,
+    setUnitsPerCycle,
     style,
     update
   })
