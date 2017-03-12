@@ -36,13 +36,6 @@ export const makeHoursArc = (spec) => {
     state.opacity = Math.floor(hoursRemaining) * state.opacityStep
   }
 
-  // Update the timer and adjust opacity based on hours remaining.
-  // const update = (t) => {
-  //   const time = arcTimer.sync(t)
-  //   style()
-  //   return time
-  // }
-
   // Render the circle, adjusting opacity via the context alpha setting.
   const render = (time) => {
     const saveGlobalAlpha = context.globalAlpha
@@ -60,7 +53,6 @@ export const makeHoursArc = (spec) => {
     ...arcTimer,
     render,
     style
-    // update
   })
 
 }
