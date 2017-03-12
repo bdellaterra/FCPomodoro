@@ -29,11 +29,20 @@ export const makeTimer = (spec) => {
   // Return total time elapsed. (as of last upate)
   const elapsed = () => state.currentTime - state.startTime
 
+  // Return the end time. Optionally set end time to
+  // current time plus provided value.
+  const end = (waitTime) => {
+    if (waitTime) {
+      state.endTime = state.currentTime + waitTime
+    }
+    return state.endTime
+  }
+
   // Return total time remaining. (as of last upate)
   const remaining = () => Math.max(0, state.endTime - state.currentTime)
 
-  // Update current time. Save previous time for calculating delta.
-  // Update current time to now() if argument is undefined.
+  // Update current time to value provided. Save previous time for
+  // calculating deltas. Update current time to now() if argument is undefined.
   const sync = (time) => {
     state.lastTime = state.currentTime
     state.currentTime = (time !== undefined) ? time : now()
@@ -48,15 +57,6 @@ export const makeTimer = (spec) => {
     state.lastTime = state.currentTime
     state.endTime = state.currentTime
     return state.currentTime
-  }
-
-  // Return the end time. Optionally set end time to
-  // current time plus provided value.
-  const end = (waitTime) => {
-    if (waitTime) {
-      state.endTime = state.currentTime + waitTime
-    }
-    return state.endTime
   }
 
   // Return Interface.

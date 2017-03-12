@@ -14,6 +14,7 @@ import makeSecondsArc from './ui/secondsArc'
 import makeTimer from './time/timer'
 import now from 'present'
 import sleep from './time/sleep'
+import view from './app/view'
 
 // Create a shared timer to synchronize components.
 const timer = makeTimer()
@@ -55,7 +56,7 @@ watch.seconds.addCallback(() => {
 })
 
 // Update the digital timer display once per second.
-watch.milliseconds.addCallback( () => displayDigitalTime(timer.remaining()) )
+// watch.milliseconds.addCallback( () => displayDigitalTime(timer.remaining()) )
 
 // Create a generator to dispatch rendering of various ui components.
 watch.renders = makeDispatcher()
@@ -78,8 +79,10 @@ pacer.addRender(watch.renders)
 
 // Initialize the timer.
 timer.reset()
-timer.end(2 * HOUR + 20 * SECOND)
+timer.end(45 * MINUTE)
 
 // Run the pacer to begin animation.
 sleep(SECOND).then(pacer.run)
+
+view()
 

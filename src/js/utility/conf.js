@@ -2,8 +2,8 @@ import { MILLISECONDS_PER_MINUTE } from './constants'
 
 // Time settings
 
-export const DEF_SESSION_TIME = 45 * MILLISECONDS_PER_MINUTE
-export const DEF_BREAK_TIME = 15 * MILLISECONDS_PER_MINUTE
+export const DEFAULT_SESSION_TIME = 45 * MILLISECONDS_PER_MINUTE
+export const DEFAULT_BREAK_TIME = 15 * MILLISECONDS_PER_MINUTE
 
 // Styles
 
