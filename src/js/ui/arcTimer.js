@@ -69,7 +69,6 @@ export const makeArcTimer = (spec) => {
   // Return Interface.
   return frozen({
     ...arc,
-    ...state.timer,
     getTimer,
     getTimeUnit,
     getUnitsPerCycle,
