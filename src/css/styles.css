@@ -69,10 +69,16 @@ select {
   padding-right: 5px;
 }
 
-#session textarea,
-#session input,
-#session select {
+#pomodoro.inSession #session textarea,
+#pomodoro.inSession #session input,
+#pomodoro.inSession #session select {
   border-color: #003399;
+}
+
+#pomodoro.onBreak #break textarea,
+#pomodoro.onBreak #break input,
+#pomodoro.onBreak #break select {
+  border-color: #009900;
 }
 
 /* #pomodoro added for specificity. */
@@ -134,6 +140,7 @@ input[type=number] {
   position:static;
   font-size: 12px;
   color: #222222;
+  text-transform: uppercase;
   margin-top: 5px;
 }
 

@@ -28,10 +28,12 @@ export const makeArcTimer = (spec) => {
 
   // Set the end position of the arc based on time elapsed/remaining,
   // and proportional to the number of time units per circle.
-  const style = () => {
-    const progress = (state.isCountdown)
+  // Optionally position arc based on a supplied time value.
+  const style = (t) => {
+    const time = (state.isCountdown)
             ? state.timer.remaining()
             : state.timer.elapsed(),
+          progress = (t !== undefined) ? t : time,
           moments = progress / state.timeUnit,
           step = ARC_CYCLE / state.unitsPerCycle,
           movements = step * moments,

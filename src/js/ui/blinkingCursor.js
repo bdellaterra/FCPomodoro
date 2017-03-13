@@ -32,10 +32,11 @@ export const makeBlinkingCursor = (spec) => {
 
   // Make cursor visible every other second.
   // Blinking stops if countdown timer reaches zero.
-  const blink = () => {
-    const progress = (arcTimer.isCountdown())
+  const blink = (t) => {
+    const time = (state.isCountdown)
             ? arcTimer.remaining()
-            : arcTimer.elapsed()
+            : arcTimer.elapsed(),
+          progress = (t !== undefined) ? t : time
     if (progress && (progress / SECOND) % 2 >= 1 ) {
       arcTimer.setStrokeStyle(state.strokeStyle)
     } else {
@@ -44,13 +45,13 @@ export const makeBlinkingCursor = (spec) => {
   }
 
   // Style arc as a thin cursor at the current minute location.
-  const style = () => {
-    arcTimer.style()
+  const style = (t) => {
+    arcTimer.style(t)
     const end = arcTimer.getEnd(),
           sign = arcTimer.isCounterclockwise() ? -1 : 1,
           cursorWidth = ARC_CYCLE / DEGREES_PER_CYCLE
     arcTimer.setStart(end - sign * cursorWidth)
-    blink()
+    blink(t)
   }
 
   // Set the stroke style. (May not show visually until next blink)

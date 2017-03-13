@@ -31,8 +31,9 @@ export const makeHoursArc = (spec) => {
   assign(state, pick(spec, keys(state)))
 
   // Style as an opacity change. The arc remains a full-circle.
-  const style = () => {
-    const hoursRemaining = arcTimer.remaining() / HOUR
+  const style = (t) => {
+    const time = (t !== undefined) ? t : arcTimer.remaining(),
+          hoursRemaining = time / HOUR
     state.opacity = Math.floor(hoursRemaining) * state.opacityStep
   }
 
