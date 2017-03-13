@@ -14,6 +14,19 @@ export const makeDispatcher = (spec = {}) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
+  // Add a callback.
+  const addCallback = (cb) => {
+    state.callbacks.unshift(cb)
+  }
+
+  // Remove a callback from the list.
+  const removeCallback = (cb) => {
+    Array.splice(state.callbacks, state.callbacks.indexOf(cb), 1)
+  }
+
+  // Return the number of callbacks.
+  const numCallbacks = () => state.callbacks.length
+
   // A generator that triggers a list of callbacks on every iteration.
   // Arguments for the callbacks can be passed in an array via next().
   // For the first iteration, an array can be provided via spec.args.
@@ -21,12 +34,16 @@ export const makeDispatcher = (spec = {}) => {
     while (true) {
       let len = state.callbacks.length
       while (len > 0) {
-        let cb = state.callbacks[--len],  // zero-indexed array
+        let cb = state.callbacks[--len],  // decrement, zero-indexed array
             args = (state.args && state.args.length) ? state.args : []
         if (typeof cb === 'function') {
+          // Call functions.
           cb(...args)
         } else if ( isIterable(cb) ) {
-          cb.next(...args)
+          // Call next() for iterators, removing them if iteration is done.
+          if ( cb.next(...args).done ) {
+            removeCallback(cb)
+          }
         }
       }
       state.args = yield
@@ -38,11 +55,9 @@ export const makeDispatcher = (spec = {}) => {
 
   // Add additional methods.
   Object.assign(d, {
-    addCallback:    (cb) => state.callbacks.unshift(cb),
-    numCallbacks:   () => state.callbacks.length,
-    removeCallback: (cb) => {
-      Array.splice(state.callbacks, state.callbacks.indexOf(cb), 1)
-    }
+    addCallback,
+    numCallbacks,
+    removeCallback
   })
 
   // Prime and return the generator.
