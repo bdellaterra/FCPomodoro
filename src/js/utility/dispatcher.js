@@ -1,4 +1,5 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { isIterable } from './iter'
 
 
 // Create dispatcher with methods for adding/removing callbacks.
@@ -19,10 +20,16 @@ export const makeDispatcher = (spec = {}) => {
   function* dispatcher() {
     while (true) {
       let len = state.callbacks.length
-      while (len > 1) {
-        state.callbacks[--len].apply(null, state.args)  // zero-indexed array
+      while (len > 0) {
+        let cb = state.callbacks[--len],  // zero-indexed array
+            args = (state.args && state.args.length) ? state.args : []
+        if (typeof cb === 'function') {
+          cb(...args)
+        } else if ( isIterable(cb) ) {
+          cb.next(...args)
+        }
       }
-      state.args = yield state.callbacks.length
+      state.args = yield
     }
   }
 
