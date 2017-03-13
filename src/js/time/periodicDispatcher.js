@@ -4,7 +4,7 @@ import makeTimer from './timer'
 
 
 // Create a dispatcher that keeps a schedule of time intervals and
-// associated callbacks. On each call to sync() the callbacks for the
+// associated callbacks. On each call to next() the callbacks for the
 // intervals that have elapsed will be triggered.
 export const makePeriodicDispatcher = (spec) => {
 
@@ -23,7 +23,7 @@ export const makePeriodicDispatcher = (spec) => {
   }
 
   // Add a callback to the dispatcher for the specified time interval.
-  const addCallback = (cb, interval) => {
+  const addCallback = (cb, interval = 0) => {
     if (state.schedule[interval] === undefined) {
       state.schedule[interval] = {
         dispatcher: makeDispatcher(),
@@ -34,7 +34,7 @@ export const makePeriodicDispatcher = (spec) => {
   }
 
   // Remove a callback from the dispatcher for the specified time interval.
-  const removeCallback = (cb, interval) => {
+  const removeCallback = (cb, interval = 0) => {
     if (state.schedule[interval] !== undefined
         && state.schedule[interval].dispatcher !== undefined) {
       const dispatcher = state.schedule[interval].dispatcher
@@ -63,31 +63,41 @@ export const makePeriodicDispatcher = (spec) => {
     return num
   }
 
-  // Sync timer to current time. Trigger any callbacks that have waited
+  // Create a dispatcher that triggers any callbacks that have waited
   // their specified interval or longer.
-  const sync = (t) => {
-    state.timer.sync(t)
-    const elapsed = state.timer.elapsed()
-    console.dir(keys(state.schedule))
-    keys(state.schedule).map((interval) => {
-      const dispatcher = state.schedule[interval].dispatcher,
-            last = state.schedule[interval].last,
-            delta = elapsed - last
-      if (delta > interval) {
-        console.log('Dispatch for', interval, 'after', elapsed)
-        dispatcher.next()
-        state.schedule[interval].last = elapsed
-      }
-    })
+  function* periodicDispatcher() {
+    while (true) {
+      const elapsed = state.timer.elapsed()
+      keys(state.schedule).map((interval) => {
+        const dispatcher = state.schedule[interval].dispatcher,
+              last = state.schedule[interval].last,
+              delta = elapsed - last
+        if (delta >= interval) {
+          DEBUG && console.log('Dispatch for', interval, 'after', elapsed)
+          dispatcher.next()
+          state.schedule[interval].last = elapsed
+        }
+      })
+      // Next timestamp must be passed in via next().
+      state.timer.sync(yield)
+    }
   }
 
-  // Return Interface.
-  return frozen({
+  // Create the generator.
+  const pd = periodicDispatcher()
+
+  // Add additional methods.
+  assign( pd, {
     addCallback,
     numCallbacks,
-    removeCallback,
-    sync
+    removeCallback
   })
+
+  // Prime and return the generator.
+  pd.next()
+
+  // Return Interface.
+  return frozen(pd)
 
 }
 
