@@ -19,10 +19,10 @@ export const makeDispatcher = (spec = {}) => {
   function* dispatcher() {
     while (true) {
       let len = state.callbacks.length
-      while (len--) {
-        state.callbacks[len].apply(null, state.args)
+      while (len > 1) {
+        state.callbacks[--len].apply(null, state.args)  // zero-indexed array
       }
-      state.args = yield len
+      state.args = yield state.callbacks.length
     }
   }
 
