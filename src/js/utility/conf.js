@@ -28,3 +28,8 @@ export const SECONDS_RADIUS = DEFAULT_ARC_RADIUS - 8
 export const SECONDS_LINE_WIDTH = 2
 export const SECONDS_STROKE_STYLE = 'rgb(0, 0, 0)'
 
+export const BREAK_RADIUS = MINUTES_RADIUS
+export const BREAK_LINE_WIDTH = MINUTES_LINE_WIDTH
+export const BREAK_STROKE_STYLE = 'rgb(15, 190, 125)'
+export const BREAK_STROKE_STYLE_2 = 'rgb(10, 20, 50)'
+

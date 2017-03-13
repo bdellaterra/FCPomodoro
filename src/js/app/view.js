@@ -6,6 +6,7 @@ import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 export const view = (s) => {
 
   const state = {
+    pomodoro:       ['inSession'],
     sessionHours:   0,
     sessionMinutes: 45,
     sessionSeconds: 0,
@@ -15,6 +16,9 @@ export const view = (s) => {
     digitalTime:    '0:45:00',
     message:        'Click to Run Timer'
   }
+
+  // Root element which will receive a list of classes to adjust presentation.
+  const app = { pomodoro: ['started'] }
 
   // Declare input fields with default values.
   const inputs = {
@@ -26,19 +30,22 @@ export const view = (s) => {
     breakSeconds:   0
   }
 
-  // Declare ouput nodes with default content.
+  // Declare ouput elements with default content.
   const outputs = {
     digitalTime: '0:00:00',
     message:     'Click to Set Timer'
   }
 
-  // Pull DOM elements into an object.
+  // Pull DOM targets into an object.
   const El = {}
-  keys({ ...inputs, ...outputs })
+  keys({ ...app, ...inputs, ...outputs })
     .map( (e) => El[e] = document.getElementById(e) )
 
   // Render current state to the DOM.
   const render = () => {
+    keys(app).map( (e) => {
+      El[e].className = state[e]
+    })
     keys(inputs).map( (e) => El[e].value = state[e] )
     keys(outputs).map( (e) => El[e].innerHTML = state[e] )
   }

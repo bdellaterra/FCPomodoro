@@ -8,7 +8,8 @@ import makeTimer from '../time/timer'
 
 const model = (() => {
 
-  const timer = makeTimer()
+  const timer = makeTimer(),
+        pacer = makePacer()
 
   let intent = {}
 
@@ -17,7 +18,6 @@ const model = (() => {
     sessionTime: DEFAULT_SESSION_TIME,
     breakTime:   DEFAULT_BREAK_TIME,
     onBreak:     false,
-    isRunning:   false,
     hasInput:    false
   }
 
@@ -63,19 +63,6 @@ const model = (() => {
 
   const present = (newState = {}) => {
     intent = newState
-    if (toSession()) {
-      state.onBreak = false
-    }
-    if (toBreak()) {
-      state.onBreak = true
-    }
-    if (toStart()) {
-      state.timer.stop()
-    }
-    if (toStop()) {
-      state.timer.stop()
-    }
-    state = { ...state, render() }
     intent = {}
   }
 

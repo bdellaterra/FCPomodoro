@@ -34,8 +34,8 @@ export const makeBlinkingCursor = (spec) => {
   // Blinking stops if countdown timer reaches zero.
   const blink = () => {
     const progress = (arcTimer.isCountdown())
-            ? arcTimer.getTimer().remaining()
-            : arcTimer.getTimer().elapsed()
+            ? arcTimer.remaining()
+            : arcTimer.elapsed()
     if (progress && (progress / SECOND) % 2 >= 1 ) {
       arcTimer.setStrokeStyle(state.strokeStyle)
     } else {

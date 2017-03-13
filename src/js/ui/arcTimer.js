@@ -1,5 +1,5 @@
 import { ARC_CYCLE, SECOND, SECONDS_PER_MINUTE } from '../utility/constants'
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
 import makeArc from './arc'
 import makeTimer from '../time/timer'
 
@@ -69,6 +69,7 @@ export const makeArcTimer = (spec) => {
   // Return Interface.
   return frozen({
     ...arc,
+    ...relay(state, 'timer'),
     getTimer,
     getTimeUnit,
     getUnitsPerCycle,
