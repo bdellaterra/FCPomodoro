@@ -1,7 +1,8 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { HOUR, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
+import { HOUR, MINUTE, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
 import { HOURS_LINE_WIDTH, HOURS_RADIUS, HOURS_STROKE_STYLE
        } from '../utility/conf'
+import { once } from '../utility/iter'
 import { context } from '../ui/canvas'
 import makeArcTimer from './arcTimer'
 
@@ -15,8 +16,8 @@ export const makeHoursArc = (spec) => {
     radius:        HOURS_RADIUS,
     lineWidth:     HOURS_LINE_WIDTH,
     strokeStyle:   HOURS_STROKE_STYLE,
-    timeUnit:      SECOND,
-    unitsPerCycle: SECONDS_PER_HOUR,
+    timeUnit:      HOUR,
+    unitsPerCycle: 1,
     isCountdown:   true,
     ...spec
   })
@@ -46,12 +47,28 @@ export const makeHoursArc = (spec) => {
     return time
   }
 
+  // Setup animation callbacks.
+  const animate = () => {
+    arcTimer.addUpdate(once(style), 0)  // Initial display
+    arcTimer.addUpdate(style, arcTimer.getTimeUnit(), arcTimer.updateOffset)
+    arcTimer.addRender(render)
+  }
+
+  // Teardown animation callbacks.
+  const deanimate = () => {
+    arcTimer.removeUpdate(style, arcTimer.getTimeUnit())
+    arcTimer.removeRender(render)
+  }
+
   // Perform initialization.
   style()
+  animate()
 
   // Return Interface.
   return frozen({
     ...arcTimer,
+    animate,
+    deanimate,
     render,
     style
   })

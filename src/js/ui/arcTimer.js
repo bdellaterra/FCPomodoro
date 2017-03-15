@@ -1,5 +1,6 @@
 import { ARC_CYCLE, SECOND, SECONDS_PER_MINUTE } from '../utility/constants'
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
+import { once } from '../utility/iter'
 import makeAnimator from '../time/animator'
 import makeArc from './arc'
 
@@ -68,10 +69,33 @@ export const makeArcTimer = (spec) => {
   // If changed this affects the arc's start and end position.
   const setCountdown = (v) => state.isCountdown = Boolean(v)
 
+  const updateOffset = () => {
+    let offset = 0
+    if (state.isCountdown) {
+      offset = state.timeUnit - state.animator.ending() % state.timeUnit
+    }
+    return offset
+  }
+
+  // Setup animation callbacks.
+  const animate = () => {
+    state.animator.addUpdate(once(style), 0)  // Initial display
+    state.animator.addUpdate(style, state.timeUnit, updateOffset)
+    state.animator.addRender(arc.render)
+  }
+
+  // Teardown animation callbacks.
+  const deanimate = () => {
+    state.animator.removeUpdate(style, state.timeUnit)
+    state.animator.removeRender(arc.render)
+  }
+
   // Return Interface.
   return frozen({
     ...arc,
     ...relay(state.animator),
+    animate,
+    deanimate,
     getAnimator,
     getTimeUnit,
     getUnitsPerCycle,
@@ -80,7 +104,8 @@ export const makeArcTimer = (spec) => {
     setAnimator,
     setTimeUnit,
     setUnitsPerCycle,
-    style
+    style,
+    updateOffset
   })
 
 }

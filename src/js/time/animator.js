@@ -34,12 +34,16 @@ export const makeAnimator = (spec) => {
   }
 
   // Add an update callback with optional time interval between updates.
-  const addUpdate = (cb, interval) => state.updater.addCallback(cb, interval)
+  const addUpdate = state.updater.addCallback
 
   // Remove an update callback, specifying the same interval it was added under.
   const removeUpdate = (cb, interval) => {
     return state.updater.removeCallback(cb, interval)
   }
+
+  // Return the number of update callbacks under a given time interval.
+  // If no argument is provided, return the total number of update callbacks.
+  const numUpdates = state.updater.numCallbacks
 
   // Trigger renders.
   const render = () => {
@@ -52,6 +56,9 @@ export const makeAnimator = (spec) => {
 
   // Remove a render callback.
   const removeRender = state.renderer.removeCallback
+
+  // Return the number of render callbacks.
+  const numRenders = state.renderer.numCallbacks
 
   // Run a frame loop that executes once every frameInterval milliseconds.
   // The browser will call back the loop with a high-precision timestamp.
@@ -122,6 +129,8 @@ export const makeAnimator = (spec) => {
     getFrameInterval,
     getLastTime,
     isRunning,
+    numRenders,
+    numUpdates,
     removeRender,
     removeUpdate,
     run,

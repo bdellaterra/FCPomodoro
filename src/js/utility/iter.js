@@ -2,6 +2,11 @@
 // Minimal null-form of an iterator.
 export const nullIterator = (function* () {}())
 
+// Iterator that returns after executing provided callback a single time.
+export function* once(cb, ...args) {
+  yield cb(...args)
+}
+
 // Minimal null-form of an iterator.
 export const isIterable = (x) => x && typeof x[Symbol.iterator] === 'function'
 

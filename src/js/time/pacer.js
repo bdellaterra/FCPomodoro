@@ -1,4 +1,5 @@
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
+import { MINUTE, SECOND } from '../utility/constants'
 import makeDispatcher from '../utility/dispatcher.js'
 import makeTimer from './timer'
 
@@ -24,11 +25,16 @@ export const makePacer = (spec) => {
 
   // Add a callback to the dispatcher for the specified time interval.
   // The default interval of zero means the callback triggers every iteration.
-  // Returns the interval.
-  const addCallback = (cb, interval = 0) => {
+  // An optional timing offset callback can be provided. Returns the interval.
+  const addCallback = (cb, interval = 0, offset = () => 0) => {
     if (state.schedule[interval] === undefined) {
       // Each interval has a dispatcher and the last reading of timer.elapsed().
-      state.schedule[interval] = { dispatcher: makeDispatcher(), last: 0 }
+      state.schedule[interval] = {
+        dispatcher: makeDispatcher(),
+        last:       0,
+        offset
+      }
+      console.log(interval, state.schedule[interval])
     }
     state.schedule[interval].dispatcher.addCallback(cb)
     return interval
@@ -98,7 +104,12 @@ export const makePacer = (spec) => {
       keys(state.schedule).map((interval) => {
         const dispatcher = state.schedule[interval].dispatcher,
               last = state.schedule[interval].last,
-              delta = elapsed - last
+              offset = state.schedule[interval].offset(),
+              delta = elapsed - last + offset
+        if (Number(interval) === MINUTE) {
+          console.clear()
+          console.log(delta)
+        }
         if (delta >= interval) {
           dispatcher.next()
           state.schedule[interval].last = elapsed
