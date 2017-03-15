@@ -2,15 +2,15 @@ import { frozen } from '../utility/fn'
 import { MILLISECOND, SECOND } from '../utility/constants'
 import { formatTime, msecsToHours, msecsToMinutes, msecsToSeconds
        } from '../utility/conv'
-import { action, getTimer, getUpdater, mode, model, view } from './index'
+import { action, getTimer, getUpdater, model, stateControl, view } from './index'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
-// "State" can be an ambiguous term, sometimes referring to "control state"
-// and sometimes to "internal state" or data. The term "mode" has been chosen
-// here for the state-control layer between the view and the model.
-const makeMode = () => {
+// The term "state" can be ambiguous. ("control state" vs. "internal state")
+// The layer between the view and model is typically called "state" in the
+// SAM methodology, but here it is called "state control" to disambiguate.
+const makeStateControl = () => {
 
   // Get access to shared resources
   const timer = getTimer(),
@@ -48,7 +48,7 @@ const makeMode = () => {
   // Send a representation of the model to the view for rendering,
   // then invoke possible next actions that result from current control state.
   const render = () => {
-    DEBUG && console.log('MODE RENDER:')
+    DEBUG && console.log('STATE RENDER:')
 
     if ( model.hasInput() && !model.isRunning() ) {
       if ( model.inSession() ) {
@@ -78,7 +78,7 @@ const makeMode = () => {
 
   // Trigger actions that automatically follow certain control states.
   const nextAction = () => {
-    DEBUG && console.log('CHECK FOR NEXT ACTION:', model.isRunning())
+    DEBUG && console.log('CHECK FOR NEXT ACTION:')
     if ( model.isRunning() && model.atTimeout() ) {
       DEBUG && console.log('TIMEOUT!')
       if ( model.inSession() ) {
@@ -97,5 +97,6 @@ const makeMode = () => {
 
 }
 
-Object.assign(mode, makeMode())
+// Populate provided stateControl object.
+Object.assign(stateControl, makeStateControl())
 

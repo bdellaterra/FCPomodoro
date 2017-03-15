@@ -1,6 +1,6 @@
 import { frozen, pick } from '../utility/fn'
 import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
-import { action, getPacer, getTimer, mode, model, view } from './index'
+import { action, getPacer, getTimer, model, stateControl, view } from './index'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
@@ -78,7 +78,7 @@ export const makeModel = () => {
   // Update state with the accepted new state.
   const accept = (newState = {}) => {
     state = { ...state, ...newState }
-    mode.render()
+    stateControl.render()
   }
 
   // Present new state to the model for acceptance.

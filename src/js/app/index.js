@@ -36,7 +36,7 @@ export const action = frozen({
 })
 
 export const view = {}
-export const mode = {}
+export const stateControl = {}
 export const model = {}
 
 export const getPacer = () => pacer
@@ -45,7 +45,7 @@ export const getTimer = () => timer
 export const getUpdater = () => updater
 
 require('./view')
-require('./mode')
+require('./stateControl')
 require('./model')
 
 // Timer polls for the current time as frequently as possible for best accuracy.

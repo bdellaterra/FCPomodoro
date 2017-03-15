@@ -1,6 +1,6 @@
 import { frozen, keys, sealed } from '../utility/fn'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
-import { getAnimator, mode, view } from './index'
+import { getAnimator, stateControl, view } from './index'
 import makeBreakAnalog from '../ui/breakAnalog'
 import makeSessionAnalog from '../ui/sessionAnalog'
 
@@ -19,10 +19,10 @@ const makeView = () => {
   }
 
   // Declare root element which will receive classes to adjust presentation.
-  const app = sealed({ pomodoro: ['started'] })
+  const app = frozen({ pomodoro: ['started'] })
 
   // Declare input fields with their default values.
-  const inputs = sealed({
+  const inputs = frozen({
     sessionHours:   0,
     sessionMinutes: 0,
     sessionSeconds: 0,
@@ -32,7 +32,7 @@ const makeView = () => {
   })
 
   // Declare output elements with their default content.
-  const outputs = sealed({
+  const outputs = frozen({
     digitalTime: '0:00:00',
     message:     'Click to Run Timer'
   })
@@ -66,7 +66,7 @@ const makeView = () => {
   }
 
   const showDigitalTime = () => {
-    El.digitalTime.innerHTML = mode.readout()
+    El.digitalTime.innerHTML = stateControl.readout()
   }
 
   // Show the analog display for proposed session time while the user
