@@ -126,6 +126,6 @@ const makeView = () => {
 
 }
 
-// Populate provided view object.
+// Populate the imported view object.
 Object.assign( view, makeView() )
 

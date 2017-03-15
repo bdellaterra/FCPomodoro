@@ -1,6 +1,6 @@
 import { frozen, pick } from '../utility/fn'
 import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
-import { action, getPacer, getTimer, model, stateControl, view } from './index'
+import { action, getAnimator, model, stateControl, view } from './index'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
@@ -9,8 +9,7 @@ export const makeModel = () => {
 
   // Initialize state
   let state = {
-    timer:       getTimer(),
-    pacer:       getPacer(),
+    animator:    getAnimator(),
     sessionTime: DEFAULT_SESSION_TIME,
     breakTime:   DEFAULT_BREAK_TIME,
     isRunning:   false,
@@ -31,7 +30,7 @@ export const makeModel = () => {
   const isRunning = () => state.isRunning
 
   // Return true if timer has run down to zero.
-  const atTimeout = () => isRunning() && state.timer.remaining() <= 0
+  const atTimeout = () => isRunning() && state.animator.remaining() <= 0
 
   // Return true if display/input focus is on break time.
   const onBreak = () => state.onBreak
@@ -87,7 +86,6 @@ export const makeModel = () => {
     DEBUG && console.log('PRESENT:', newState)
 
     if ( intent === action.monitor ) {
-      DEBUG && console.log('MONITOR:')
       accept(intent)
     }
 
@@ -103,13 +101,13 @@ export const makeModel = () => {
       if (state.hasInput) {
         accept( { ...validate(view.readInput()), hasInput: false } )
       }
-      // state.timer.reset()
-      // state.timer.ending(inSession() ? state.sessionTime : state.breakTime)
+      state.animator.reset()
+      state.animator.ending(inSession() ? state.sessionTime : state.breakTime)
       accept(intent)
     }
 
     if (intent === action.stop) {
-      // state.timer.reset()
+      state.animator.reset()
       accept(intent)
     }
 
@@ -143,5 +141,6 @@ export const makeModel = () => {
 
 }
 
+// Populate the imported model object.
 Object.assign(model, makeModel())
 

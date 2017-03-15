@@ -1,30 +1,13 @@
 import { clearCanvas } from '../ui/canvas'
 import { frozen } from '../utility/fn'
-import { SECOND } from '../utility/constants.js'
-import makeDispatcher from '../utility/dispatcher'
-import makePacer from '../time/pacer'
-import makePeriodicDispatcher from '../time/periodicDispatcher'
-import makeTimer from '../time/timer'
+import { SECOND } from '../utility/constants'
+import makeAnimator from '../time/animator'
 import sleep from '../time/sleep'
-import makeSessionAnalog from '../ui/sessionAnalog'
 
-// Create a pacer to trigger callbacks.
-const pacer = makePacer()
+// Create an animator to be shared across components.
+const animator = makeAnimator()
 
-// Create a shared timer to coordinate display components.
-const timer = makeTimer()
-
-// Create a periodic dispatcher to schedule cyclically timed events.
-const updater = makePeriodicDispatcher({ timer })
-
-// Create a dispatcher for rendering various ui components.
-const renderer = makeDispatcher()
-
-// Add dispatchers to the pacer so it can trigger iteration.
-pacer.addUpdate(updater)
-pacer.addRender(renderer)
-
-// Export access to shared functions/resources.
+// Export actions that can be presented to the model.
 export const action = frozen({
   monitor: { },
   session: { onBreak: false },
@@ -35,31 +18,19 @@ export const action = frozen({
   cancel:  { hasInput: false }
 })
 
+// Export empty view/stateControl/model to avoid cyclical dependencies.
 export const view = {}
 export const stateControl = {}
 export const model = {}
 
-export const getPacer = () => pacer
-export const getRenderer = () => renderer
-export const getTimer = () => timer
-export const getUpdater = () => updater
+// Export access to the shared animator.
+export const getAnimator = () => animator
 
+// Populate the view/state/model objects co-dependently.
 require('./view')
 require('./stateControl')
 require('./model')
 
-// Timer polls for the current time as frequently as possible for best accuracy.
-// updater.addCallback(() => timer.sync())
-
-// Clear the canvas before each render cycle.
-// renderer.addCallback(clearCanvas)
-
-// Monitor state each second while session/break is running.
-updater.addCallback(() => {
-  DEBUG && console.log('...')
-  // model.present(action.monitor), SECOND
-}, SECOND)
-
-// Start the app loop.
-// pacer.run()
+// Monitor for state changes.
+animator.addUpdate( () => model.present(action.monitor), SECOND )
 
