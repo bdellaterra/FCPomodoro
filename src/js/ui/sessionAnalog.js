@@ -22,7 +22,7 @@ export const makeSessionAnalog = (spec = {}) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Create a periodic dispatcher if none provided.
+  // Create an animator if none provided.
   if (!state.animator) {
     state.animator = makeAnimator(spec)
   }
