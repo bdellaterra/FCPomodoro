@@ -43,7 +43,7 @@ export const makeRateLimiter = (spec = {}) => {
         lastElapsed = elapsed
       }
       // Next timestamp must be passed in via next()
-      state.timer.update(yield isTriggered)
+      state.timer.sync(yield isTriggered)
     }
   }
 

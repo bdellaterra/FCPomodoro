@@ -1,37 +1,34 @@
 /* global DEBUG */
 import '../css/styles.css'
 
+// import { ARC_CLOCK_ROTATION, HOUR, MILLISECOND, MINUTE, SECOND
+//        } from './utility/constants'
+// import { displayDigitalTime, populateSessionInput } from './ui/input'
+// import makeBreakAnalog from './ui/breakAnalog'
+// import makeSessionAnalog from './ui/sessionAnalog'
+// import makeBlinkingCursor from './ui/blinkingCursor'
+// import makeDispatcher from './utility/dispatcher'
+// import makeHoursArc from './ui/hoursArc.js'
+import makeMinutesArc from './ui/minutesArc'
+// import makePacer from './time/pacer'
+// import makeRateLimiter from './time/rateLimiter'
+import makeSecondsArc from './ui/secondsArc'
+import makeTimer from './time/timer'
+import now from 'present'
 import sleep from './time/sleep'
+// import action from './app/action'
 import makePeriodicDispatcher from './time/periodicDispatcher'
+// import { action, mode, model, view } from './app'
 
-const pd = makePeriodicDispatcher(),
-      onMs = () => console.log('ms'),
-      onS = () => console.log('s'),
-      on5S = () => console.log('5s')
-
-function* Count2() {
-  console.log('one')
-  yield 'one'
-  console.log('two')
-  yield 'two'
+const update = (analog, time) => {
+  analog.sync(time)
+  analog.style(time)
+  analog.render()
 }
 
-let c2 = Count2()
+const seconds = makeSecondsArc()
 
-pd.addCallback(onMs, 1)
-pd.addCallback(c2, 100)
-pd.addCallback(onS, 1000)
-pd.addCallback(on5S, 5000)
-console.log('Num Callbacks:', pd.numCallbacks())
-pd.next()
-pd.removeCallback(onMs, 1)
-pd.addCallback(onMs, 1)
-sleep(5000).then(() => {
-  pd.next()
-  console.log('Num Callbacks:', pd.numCallbacks())
-})
-sleep(10000).then(() => {
-  pd.next()
-  console.log('Num Callbacks:', pd.numCallbacks())
-})
+seconds.reset()
+seconds.end(50 * 1000)
+update(seconds)
 

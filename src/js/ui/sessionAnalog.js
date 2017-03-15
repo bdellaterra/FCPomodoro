@@ -1,12 +1,12 @@
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
-import { ARC_CLOCK_ROTATION, MILLISECONDS_PER_SECOND, MINUTES_PER_HOUR,
-         SECONDS_PER_MINUTE
+import { ARC_CLOCK_ROTATION, HOUR, MILLISECOND, MILLISECONDS_PER_SECOND,
+         MINUTE, MINUTES_PER_HOUR, SECOND, SECONDS_PER_MINUTE
        } from '../utility/constants'
 import makeBlinkingCursor from './blinkingCursor'
 import makeHoursArc from './hoursArc'
+import makePeriodicDispatcher from '../time/periodicDispatcher'
 import makeMinutesArc from './minutesArc'
 import makeSecondsArc from './secondsArc'
-import makeTimer from '../time/timer'
 
 
 // Create analog display for session time.
@@ -14,19 +14,19 @@ export const makeSessionAnalog = (spec = {}) => {
 
   // Initialize state.
   const state = sealed({
-    timer:   null,
-    cursor:  null,
-    hours:   null,
-    minutes: null,
-    seconds: null
+    periodicDispatcher: null,
+    cursor:             null,
+    hours:              null,
+    minutes:            null,
+    seconds:            null
   })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Create a timer.
-  if (!state.timer) {
-    state.timer = makeTimer()
+  // Create a periodic dispatcher if none provided.
+  if (!state.periodicDispatcher) {
+    state.periodicDispatcher = makePeriodicDispatcher(spec)
   }
 
   // Create a cursor.
@@ -49,13 +49,21 @@ export const makeSessionAnalog = (spec = {}) => {
     state.seconds = makeSecondsArc({ timer: state.timer })
   }
 
-  // Style components.
-  const style = (time) => {
+  // Style individual components.
+  const styleCursor = state.cursor.style
+  const styleHours = state.hours.style
+  const styleMinutes = state.minutes.style
+  const styleSeconds = (time) => {
+    state.seconds.style(time)
     state.seconds.setRotation(ARC_CLOCK_ROTATION + state.minutes.getEnd())
-    state.seconds.style()
-    state.hours.style()
-    state.minutes.style()
-    state.cursor.style()
+  }
+
+  // Style all components
+  const style = (time) => {
+    styleCursor(time)
+    styleHours(time)
+    styleMinutes(time)
+    styleSeconds(time)
   }
 
   // Render components in order of layering.
@@ -66,24 +74,43 @@ export const makeSessionAnalog = (spec = {}) => {
     state.cursor.render()
   }
 
-  // Return a reference to the timer.
-  const getTimer = () => state.timer
+  // Return a reference to the periodicDispatcher.
+  const getPeriodicDispatcher = () => state.periodicDispatcher
 
-  // Set session to track a different timer.
-  const setTimer = (v) => {
-    state.timer = v
-    state.hours.setTimer(v)
-    state.minutes.setTimer(v)
-    state.seconds.setTimer(v)
-    state.cursor.setTimer(v)
+  // Set session to use a different periodicDispatcher.
+  const setPeriodicDispatcher = (v) => {
+    const t = v.getTimer()
+    state.periodicDispatcher = v
+    state.hours.setTimer(t)
+    state.minutes.setTimer(t)
+    state.seconds.setTimer(t)
+    state.cursor.setTimer(t)
+  }
+
+  // Schedule hours/minutes/seconds updates to the periodic dispatcher.
+  const animate = () => {
+    state.periodicDispatcher.addCallback(styleSeconds, MILLISECOND)
+    state.periodicDispatcher.addCallback(styleCursor, SECOND)
+    state.periodicDispatcher.addCallback(styleMinutes, SECOND)
+    state.periodicDispatcher.addCallback(styleHours, HOUR)
+  }
+
+  // Unschedule hours/minutes/seconds updates.
+  const deanimate = () => {
+    state.periodicDispatcher.removeCallback(styleSeconds, MILLISECOND)
+    state.periodicDispatcher.removeCallback(styleCursor, SECOND)
+    state.periodicDispatcher.removeCallback(styleMinutes, SECOND)
+    state.periodicDispatcher.removeCallback(styleHours, HOUR)
   }
 
   // Return Interface.
   return frozen({
-    ...relay(state, 'timer'),
-    getTimer,
+    ...relay(state, 'periodicDispatcher'),  // support dispatcher interface
+    animate,
+    deanimate,
+    getPeriodicDispatcher,
     render,
-    setTimer,
+    setPeriodicDispatcher,
     style
   })
 

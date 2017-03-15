@@ -29,6 +29,9 @@ export const makeTimer = (spec) => {
   // Return total time elapsed. (as of last upate)
   const elapsed = () => state.currentTime - state.startTime
 
+  // Return the start time.
+  const start = () => state.startTime
+
   // Return the end time. Optionally set end time to
   // current time plus provided value.
   const end = (waitTime) => {
@@ -66,10 +69,9 @@ export const makeTimer = (spec) => {
     end,
     remaining,
     reset,
+    start,
     sync,
-    time,
-    // aliases
-    update: sync
+    time
   })
 
 }

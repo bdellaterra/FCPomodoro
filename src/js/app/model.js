@@ -1,19 +1,16 @@
 import { frozen, pick } from '../utility/fn'
 import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
-// import { readInput, render } from './state'
-import action from './action'
-import makePacer from '../time/pacer'
-import makeTimer from '../time/timer'
+import { action, getPacer, getTimer, mode, model, view } from './index'
 
-// USAGE NOTE: This module is part of a Sate-Action-Model (SAM) pattern.
+// USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
-const model = (() => {
+export const makeModel = () => {
 
   // Initialize state
   let state = {
-    timer:       makeTimer(),
-    pacer:       makePacer(),
+    timer:       getTimer(),
+    pacer:       getPacer(),
     sessionTime: DEFAULT_SESSION_TIME,
     breakTime:   DEFAULT_BREAK_TIME,
     isRunning:   false,
@@ -23,23 +20,6 @@ const model = (() => {
 
   // Intended state will be presented to the model via actions.
   let intent = {}
-
-  // Return limited timer interface.
-  const getTimer = () => pick(state.timer, [
-    'delta',
-    'elapsed',
-    'end',
-    'remaining',
-    'time'
-  ])
-
-  // Return limited pacer interface.
-  const getPacer = () => pick(state.pacer, [
-    'addRender',
-    'addUpdate',
-    'removeRender',
-    'removeUpdate'
-  ])
 
   // Return session time setting from last input.
   const getSessionTime = () => state.sessionTime
@@ -75,34 +55,41 @@ const model = (() => {
     return isRunning() && (intent.isRunning !== undefined) && !intent.isRunning
   }
 
-  // Return true if break/session input has changed.
+  // Return true if input has changed.
   const hasInput = () => intent.hasInput && !state.hasInput
 
-  // Return true if input was cancelled.
+  // Return true if input has been cancelled.
   const hasCancelled = () => {
     return state.hasInput && (intent.hasInput !== undefined) && !intent.hasInput
   }
 
   // Validate form input from the view.
   const validate = (input = {}) => {
+    let valid = {}
     if (typeof input === 'object') {
-      return {
+      valid = {
         sessionTime: Math.max(0, Number(input.sessionTime)) || 0,
         breakTime:   Math.max(0, Number(input.breakTime)) || 0
       }
-    } else {
-      return {}
     }
+    return valid
   }
 
-
+  // Update state with the accepted new state.
   const accept = (newState = {}) => {
     state = { ...state, ...newState }
+    mode.render()
   }
 
-
-  const present = (newState = {}) => {
+  // Present new state to the model for acceptance.
+  const present = (newState = action.monitor) => {
     intent = newState
+    DEBUG && console.log('PRESENT:', newState)
+
+    if ( intent === action.monitor ) {
+      DEBUG && console.log('MONITOR:')
+      accept(intent)
+    }
 
     if (intent === action.session) {
       accept(intent)
@@ -114,16 +101,15 @@ const model = (() => {
 
     if (intent === action.start) {
       if (state.hasInput) {
-        accept( { ...validate(mode.readInput()), hasInput: false } )
+        accept( { ...validate(view.readInput()), hasInput: false } )
       }
-      state.timer.reset()
-      state.timer.end(inSession() ? state.sessionTime : state.breakTime)
-      state.pacer.run()
+      // state.timer.reset()
+      // state.timer.end(inSession() ? state.sessionTime : state.breakTime)
       accept(intent)
     }
 
     if (intent === action.stop) {
-      state.pacer.stop()
+      // state.timer.reset()
       accept(intent)
     }
 
@@ -135,7 +121,6 @@ const model = (() => {
       accept(intent)
     }
 
-    // render()
     intent = {}
   }
 
@@ -143,9 +128,7 @@ const model = (() => {
   return frozen({
     atTimeout,
     getBreakTime,
-    getPacer,
     getSessionTime,
-    getTimer,
     hasCancelled,
     hasInput,
     inSession,
@@ -158,7 +141,7 @@ const model = (() => {
     toStop
   })
 
-})()
+}
 
+Object.assign(model, makeModel())
 
-export default model

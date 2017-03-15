@@ -1,6 +1,7 @@
-import { canvas, context } from '../ui/canvas'
+import { SECOND } from '../utility/constants'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { filterNext } from '../utility/iter'
+import { clearCanvas } from '../ui/canvas'
 import now from 'present'
 
 // USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
@@ -13,7 +14,7 @@ export const makePacer = (spec) => {
   const state = sealed({
     lastTime:       0,
     frameInterval:  0,
-    frameAvgInt:    16.5,  // estimate
+    frameAvgInt:    16.5,  // Start with estimate.
     frameRequestID: null,
     isRunning:      false,
     updates:        [],
@@ -38,7 +39,7 @@ export const makePacer = (spec) => {
   // Iterate each render generator, removing those that are done.
   // The current time is passed for aliasing/interpolation purposes.
   const render = (time) => {
-    context.clearRect(0, 0, canvas.width, canvas.height)
+    clearCanvas()
     state.renders = filterNext(state.renders, [time])
     return time
   }
@@ -49,20 +50,19 @@ export const makePacer = (spec) => {
   }
 
   // Run a frame loop that executes once every frameInterval milliseconds.
-  // The broswer will call back the loop with a high-precision timestamp.
+  // The browser will call back the loop with a high-precision timestamp.
   const loop = (time) => {
     if (state.isRunning) {
       const delta = time - state.lastTime
       // If frame interval is zero or time delta has met/exceeded interval.
-      if (!state.frameInterval
-        || state.frameInterval <= delta) {
+      if (!state.frameInterval || state.frameInterval <= delta) {
         // Perform all updates.
         update(time)
         // Perform all renders.
         render(time)
-        // Save this time for next loop.
+        // Save this time for the next loop.
         state.lastTime = time
-        // Keep a moving average of the frame rate
+        // Keep a moving average of the frame interval.
         state.frameAvgInt = 0.9 * state.frameAvgInt + 0.1 * delta
       }
       // Request callback from browser for another animation frame.
@@ -80,11 +80,11 @@ export const makePacer = (spec) => {
   const getAverageFrameInterval = () => state.frameAvgInt
 
   // Return average frame rate per second.
-  const getAverageFrameRate = () => 1000 / state.frameAvgInt
+  const getAverageFrameRate = () => SECOND / state.frameAvgInt
 
   // Adjust how often the loop iterates by setting the frame interval.
   const setFrameInterval = (f = 0) => {
-    state.frameInterval = Math.max(f, 0)
+    state.frameInterval = Math.max(Number(f), 0) || 0
   }
 
   // Return true if the frame loop is currently running.

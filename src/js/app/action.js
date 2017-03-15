@@ -2,7 +2,7 @@ import { frozen } from '../utility/fn'
 // import { mapValues } from '../utility/fn'
 // import model from './model'
 
-// USAGE NOTE: This module is part of a Sate-Action-Model (SAM) pattern.
+// USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
 export const action = frozen({
