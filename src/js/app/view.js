@@ -1,7 +1,6 @@
 import { frozen, keys, sealed } from '../utility/fn'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
-import { SECOND } from '../utility/constants'
-import { getRenderer, getTimer, getUpdater, mode, view } from './index'
+import { getAnimator, mode, view } from './index'
 import makeBreakAnalog from '../ui/breakAnalog'
 import makeSessionAnalog from '../ui/sessionAnalog'
 
@@ -10,15 +9,13 @@ import makeSessionAnalog from '../ui/sessionAnalog'
 
 const makeView = () => {
 
-  // Get access to shared resources.
-  const renderer = getRenderer()
-  const timer = getTimer()
-  const updater = getUpdater()
+  // Get access to shared animator.
+  const animator = getAnimator()
 
   // Create analog display elements for the user interface.
   const display = {
-    session: makeSessionAnalog({ periodicDispatcher: updater }),
-    break:   makeBreakAnalog({ timer })
+    sessionAnalog: makeSessionAnalog({ animator }),
+    breakAnalog:   makeBreakAnalog({ animator })
   }
 
   // Declare root element which will receive classes to adjust presentation.
@@ -76,46 +73,38 @@ const makeView = () => {
   // is inputting values but has yet to click-start.
   const proposeSessionDisplay = () => {
     // Remove any time-triggered display.
-    updater.removeCallback(display.session.style)
-    renderer.removeCallback(display.session.render)
-    updater.removeCallback(display.break.style)
-    renderer.removeCallback(display.break.render)
+    display.sessionAnalog.deanimate()
+    display.breakAnalog.deanimate()
     // Render based on session input fields.
-    display.session.style( readSessionTime() )
-    display.session.render()
+    display.sessionAnalog.style( readSessionTime() )
+    display.sessionAnalog.render()
   }
 
   // Show the analog display for proposed break time while the user
   // is inputting values but has yet to click-start.
   const proposeBreakDisplay = () => {
     // Remove any time-triggered display.
-    updater.removeCallback(display.session.style)
-    renderer.removeCallback(display.session.render)
-    updater.removeCallback(display.break.style)
-    renderer.removeCallback(display.break.render)
-    // Render based on break input fields.
-    display.break.style( readBreakTime() )
-    display.break.render()
+    display.sessionAnalog.deanimate()
+    display.breakAnalog.deanimate()
+    // Render based on session input fields.
+    display.breakAnalog.style( readSessionTime() )
+    display.breakAnalog.render()
   }
 
   // Show the analog display for session time.
   const showSessionDisplay = () => {
-    // Clear any break display.
-    updater.removeCallback(display.break.style)
-    renderer.removeCallback(display.break.render)
-    // Add session display.
-    updater.addCallback(display.session.style)
-    renderer.addCallback(display.session.render)
+    // Disable break animation.
+    display.breakAnalog.deanimate()
+    // Enable session animation.
+    display.sessionAnalog.animate()
   }
 
   // Show the analog display for break time.
   const showBreakDisplay = () => {
-    // Clear any session display.
-    updater.removeCallback(display.session.style)
-    renderer.removeCallback(display.session.render)
-    // Add break display.
-    updater.addCallback(display.break.style)
-    renderer.addCallback(display.break.render)
+    // Disable session animation.
+    display.sessionAnalog.deanimate()
+    // Enable break animation.
+    display.breakAnalog.animate()
   }
 
   // Render current state to the DOM.
@@ -137,5 +126,6 @@ const makeView = () => {
 
 }
 
+// Populate provided view object.
 Object.assign( view, makeView() )
 
