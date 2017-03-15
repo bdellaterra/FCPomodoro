@@ -34,7 +34,6 @@ export const makePacer = (spec) => {
         last:       0,
         offset
       }
-      console.log(interval, state.schedule[interval])
     }
     state.schedule[interval].dispatcher.addCallback(cb)
     return interval
@@ -106,10 +105,6 @@ export const makePacer = (spec) => {
               last = state.schedule[interval].last,
               offset = state.schedule[interval].offset(),
               delta = elapsed - last + offset
-        if (Number(interval) === MINUTE) {
-          console.clear()
-          console.log(delta)
-        }
         if (delta >= interval) {
           dispatcher.next()
           state.schedule[interval].last = elapsed
