@@ -104,7 +104,7 @@ export const makeModel = () => {
         accept( { ...validate(view.readInput()), hasInput: false } )
       }
       // state.timer.reset()
-      // state.timer.end(inSession() ? state.sessionTime : state.breakTime)
+      // state.timer.ending(inSession() ? state.sessionTime : state.breakTime)
       accept(intent)
     }
 

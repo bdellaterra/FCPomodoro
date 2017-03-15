@@ -2,13 +2,18 @@
 import '../css/styles.css'
 
 import { SECOND } from './utility/constants'
-import animator from './time/animator'
+import makeAnimator from './time/animator'
 import makeBlinkingCursor from './ui/blinkingCursor'
 import makeSecondsArc from './ui/secondsArc'
 import sleep from './time/sleep'
 
-const blinkingCursor = makeBlinkingCursor({ end: 50 * SECOND })
-blinkingCursor.run()
+const animator = makeAnimator({ endTime: 60000 }),
+      // blinkingCursor = makeBlinkingCursor({ animator }),
+      secondsArc = makeSecondsArc({ animator })
 
-sleep(5 * SECOND).then(() => blinkingCursor.deanimate())
+// animator.reset()
+// animator.end(50 * SECOND)
+animator.run()
+
+sleep(5 * SECOND).then(() => console.log('REMAINING:', secondsArc.remaining()))
 

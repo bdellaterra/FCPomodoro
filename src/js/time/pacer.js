@@ -28,10 +28,7 @@ export const makePacer = (spec) => {
   const addCallback = (cb, interval = 0) => {
     if (state.schedule[interval] === undefined) {
       // Each interval has a dispatcher and the last reading of timer.elapsed().
-      state.schedule[interval] = {
-        dispatcher: makeDispatcher({ args: 0 }),
-        last:       0
-      }
+      state.schedule[interval] = { dispatcher: makeDispatcher(), last: 0 }
     }
     state.schedule[interval].dispatcher.addCallback(cb)
     return interval
@@ -103,7 +100,7 @@ export const makePacer = (spec) => {
               last = state.schedule[interval].last,
               delta = elapsed - last
         if (delta >= interval) {
-          dispatcher.next(delta)
+          dispatcher.next()
           state.schedule[interval].last = elapsed
         }
       })

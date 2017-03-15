@@ -20,8 +20,8 @@ export const makeAnimator = (spec) => {
     frameAvgInt:    16.5,  // Start with estimate.
     frameRequestID: null,
     isRunning:      false,
-    updater:        makePacer(),
-    renderer:       makeDispatcher()
+    updater:        makePacer(spec),
+    renderer:       makeDispatcher(spec)
   })
 
   // Adjust state to spec.

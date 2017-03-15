@@ -5,73 +5,97 @@ import now from 'present'
 
 
 // Create a timer object to track periodic and total elapsed time.
-// This implementation requires a manual call to update() before time values
+// This implementation requires a manual call to sync() before time values
 // are made current. This aids efficiency and prevents shift between calls.
 export const makeTimer = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    startTime:   0,
-    currentTime: 0,
-    lastTime:    0,
-    endTime:     0
+    beginning: 0,
+    now:       0,
+    last:      0,
+    ending:    0
   })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Return current time. (as of last upate)
-  const time = () => state.currentTime
-
-  // Return time between updates.
-  const delta = () => state.currentTime - state.lastTime
-
-  // Return total time elapsed. (as of last upate)
-  const elapsed = () => state.currentTime - state.startTime
-
-  // Return the start time.
-  const start = () => state.startTime
-
-  // Return the end time. Optionally set end time to
-  // current time plus provided value.
-  const end = (waitTime) => {
-    if (waitTime) {
-      state.endTime = state.currentTime + waitTime
+  // Return current time. (as of last upate) Optionally set time to a value.
+  // NOTE: Generally sync() is preffered for updates, since it handles deltas.
+  const now = (time) => {
+    if (time !== undefined) {
+      state.now = time
     }
-    return state.endTime
+    return state.now
   }
 
-  // Return total time remaining. (as of last upate)
-  const remaining = () => Math.max(0, state.endTime - state.currentTime)
+  // Return time between updates.
+  const delta = () => state.now - state.last
+
+  // Return time elapsed since start time. (as of last upate)
+  // Optionally return time elapsed since a provided time value.
+  const since = (time) => {
+    return state.now - (time !== undefined ? time : state.beginning)
+  }
+
+  // Alias for since()
+  const elapsed = since
+
+  // Return the start time. Optionally set begin time to provided value.
+  const beginning = (time) => {
+    if (time !== undefined) {
+      state.beginning = time
+    }
+    return state.beginning
+  }
+
+  // Return the ending time. Optionally set ending time to provided value.
+  const ending = (time) => {
+    if (time !== undefined) {
+      state.ending = time
+    }
+    return state.ending
+  }
+
+  // Return time remaining until end time. (as of last upate)
+  // Optionally return time remaining until a provided time value.
+  const until = (time) => {
+    return Math.max(0, (time !== undefined ? time : state.ending ) - state.now)
+  }
+
+  // Alias for until()
+  const remaining = until
 
   // Update current time to value provided. Save previous time for
   // calculating deltas. Update current time to now() if argument is undefined.
   const sync = (time) => {
-    state.lastTime = state.currentTime
-    state.currentTime = (time !== undefined) ? time : now()
-    return state.currentTime
+    state.last = state.now
+    state.now = (time !== undefined) ? time : now()
+    return state.now
   }
 
   // Synchronize all time values to now().
-  // Optionally synchronize to specified value, if provided.
+  // Optionally synchronize to a provided time value.
   const reset = (time) => {
-    state.currentTime = (time !== undefined) ? time : now()
-    state.startTime = state.currentTime
-    state.lastTime = state.currentTime
-    state.endTime = state.currentTime
-    return state.currentTime
+    state.now = (time !== undefined) ? time : now()
+    state.beginning = state.now
+    state.last = state.now
+    state.ending = state.now
+    return state.now
   }
 
   // Return Interface.
   return frozen({
     delta,
     elapsed,
-    end,
+    ending,
+    now,
     remaining,
     reset,
-    start,
+    since,
+    beginning,
     sync,
-    time
+    until
   })
 
 }
