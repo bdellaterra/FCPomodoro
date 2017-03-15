@@ -64,12 +64,27 @@ export const makeBlinkingCursor = (spec) => {
   // (May not show visually until next blink)
   const setStrokeStyle2 = (v) => state.strokeStyle2 = v
 
+  // Setup animation callbacks.
+  const animate = () => {
+    arcTimer.addUpdate(style, SECOND)
+    arcTimer.addRender(arcTimer.render)
+  }
+
+  // Teardown animation callbacks.
+  const deanimate = () => {
+    arcTimer.removeUpdate(style, SECOND)
+    arcTimer.removeRender(arcTimer.render)
+  }
+
   // Perform initialization.
   style()
+  animate()
 
   // Return Interface.
   return frozen({
     ...arcTimer,
+    animate,
+    deanimate,
     getStrokeStyle2,
     setStrokeStyle,
     setStrokeStyle2,

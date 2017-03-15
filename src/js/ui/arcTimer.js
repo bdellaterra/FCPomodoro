@@ -1,7 +1,7 @@
 import { ARC_CYCLE, SECOND, SECONDS_PER_MINUTE } from '../utility/constants'
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
+import makeAnimator from '../time/animator'
 import makeArc from './arc'
-import makeTimer from '../time/timer'
 
 
 // Create an arc that updates itself over time.
@@ -12,7 +12,7 @@ export const makeArcTimer = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    timer:         null,  // placeholder for assign() below
+    animator:      null,  // placeholder for assign() below
     timeUnit:      SECOND,
     unitsPerCycle: SECONDS_PER_MINUTE,
     isCountdown:   false
@@ -22,8 +22,8 @@ export const makeArcTimer = (spec) => {
   assign(state, pick(spec, keys(state)))
 
   // Create a timer if none was provided.
-  if (!state.timer) {
-    state.timer = makeTimer(spec)
+  if (!state.animator) {
+    state.animator = makeAnimator(spec)
   }
 
   // Set the end position of the arc based on time elapsed/remaining,
@@ -31,8 +31,8 @@ export const makeArcTimer = (spec) => {
   // Optionally position arc based on a supplied time value.
   const style = (t) => {
     const time = (state.isCountdown)
-            ? state.timer.remaining()
-            : state.timer.elapsed(),
+            ? state.animator.remaining()
+            : state.animator.elapsed(),
           progress = (t !== undefined) ? t : time,
           moments = progress / state.timeUnit,
           step = ARC_CYCLE / state.unitsPerCycle,
@@ -44,10 +44,10 @@ export const makeArcTimer = (spec) => {
   }
 
   // Return a reference to the timer.
-  const getTimer = () => state.timer
+  const getAnimator = () => state.animator
 
   // Set the arc to track a different timer.
-  const setTimer = (v) => state.timer = v
+  const setAnimator = (v) => state.animator = v
 
   // Return the time unit indicated by the arc timer.
   const getTimeUnit = () => state.timeUnit
@@ -71,13 +71,13 @@ export const makeArcTimer = (spec) => {
   // Return Interface.
   return frozen({
     ...arc,
-    ...relay(state, 'timer'),
-    getTimer,
+    ...relay(state.animator),
+    getAnimator,
     getTimeUnit,
     getUnitsPerCycle,
     isCountdown,
     setCountdown,
-    setTimer,
+    setAnimator,
     setTimeUnit,
     setUnitsPerCycle,
     style

@@ -1,125 +1,138 @@
-import { SECOND } from '../utility/constants'
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { filterNext } from '../utility/iter'
-import { clearCanvas } from '../ui/canvas'
-import now from 'present'
-
-// USAGE NOTE: All time values are in milliseconds, unless noted otherwise.
+import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
+import makeDispatcher from '../utility/dispatcher.js'
+import makeTimer from './timer'
 
 
-// Create a pacer to run a frame loop.
+// Create a pacer that keeps a schedule of time intervals and
+// associated callbacks. On each call to next() the callbacks for the
+// intervals that have elapsed will be triggered.
 export const makePacer = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    lastTime:       0,
-    frameInterval:  0,
-    frameAvgInt:    16.5,  // Start with estimate.
-    frameRequestID: null,
-    isRunning:      false,
-    updates:        [],
-    renders:        []
+    timer:    null,  // placeholder for assign() below
+    schedule: {}
   })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Iterate each update generator, removing those that are done.
-  // The current time is passed to the generators for calculation purposes.
-  const update = (time) => {
-    state.updates = filterNext(state.updates, [time])
-    return time
+  // Create a timer if none was provided.
+  if (!state.timer) {
+    state.timer = makeTimer(spec)
   }
 
-  // Add an update-generator to the update queue
-  const addUpdate = (p) => {
-    state.updates.push(p)
-  }
-
-  // Iterate each render generator, removing those that are done.
-  // The current time is passed for aliasing/interpolation purposes.
-  const render = (time) => {
-    clearCanvas()
-    state.renders = filterNext(state.renders, [time])
-    return time
-  }
-
-  // Add a render-generator to the render queue.
-  const addRender = (p) => {
-    state.renders.push(p)
-  }
-
-  // Run a frame loop that executes once every frameInterval milliseconds.
-  // The browser will call back the loop with a high-precision timestamp.
-  const loop = (time) => {
-    if (state.isRunning) {
-      const delta = time - state.lastTime
-      // If frame interval is zero or time delta has met/exceeded interval.
-      if (!state.frameInterval || state.frameInterval <= delta) {
-        // Perform all updates.
-        update(time)
-        // Perform all renders.
-        render(time)
-        // Save this time for the next loop.
-        state.lastTime = time
-        // Keep a moving average of the frame interval.
-        state.frameAvgInt = 0.9 * state.frameAvgInt + 0.1 * delta
+  // Add a callback to the dispatcher for the specified time interval.
+  // The default interval of zero means the callback triggers every iteration.
+  // Returns the interval.
+  const addCallback = (cb, interval = 0) => {
+    if (state.schedule[interval] === undefined) {
+      // Each interval has a dispatcher and the last reading of timer.elapsed().
+      state.schedule[interval] = {
+        dispatcher: makeDispatcher({ args: 0 }),
+        last:       0
       }
-      // Request callback from browser for another animation frame.
-      state.frameRequestID = window.requestAnimationFrame(loop)
+    }
+    state.schedule[interval].dispatcher.addCallback(cb)
+    return interval
+  }
+
+  // Remove a callback from the dispatcher for the specified time interval.
+  // Returns the interval.
+  const removeCallback = (cb, interval = 0) => {
+    if (state.schedule[interval] && state.schedule[interval].dispatcher) {
+      const dispatcher = state.schedule[interval].dispatcher
+      dispatcher.removeCallback(cb)
+      // Remove the entry for the interval itself if zero callbacks remain.
+      if (dispatcher.numCallbacks() <= 0) {
+        delete state.schedule[interval]
+      }
+    }
+    return interval
+  }
+
+  // Return the total number of callbacks for all intervals combined.
+  const totalCallbacks = () => keys(state.schedule).reduce((num, interval) => {
+    return num += state.schedule[interval].dispatcher.numCallbacks()
+  }, 0)
+
+  // Return the number of callbacks being dispatched at the specified interval,
+  // or the total for all intervals if no argument provided.
+  const numCallbacks = (interval) => {
+    let num = 0
+    if (interval !== undefined) {
+      if (state.schedule[interval] !== undefined) {
+        num = state.schedule[interval].dispatcher.numCallbacks()
+      }
+    } else {
+      num = totalCallbacks()
+    }
+    return num
+  }
+
+  // Reset the time for all callbacks
+  const resetCallbacks = () => keys(state.schedule).map((interval) => {
+    state.schedule[interval].last = 0
+  })
+
+  // Reset the timer
+  const resetTimer = () => state.timer.reset()
+
+  // Reset the timer and zero-out the last time reading for all callbacks.
+  const reset = () => {
+    resetTimer()
+    resetCallbacks()
+  }
+
+  // Return the timer.
+  const getTimer = () => state.timer
+
+  // Set the pacer to track a new timer.
+  const setTimer = (v) => {
+    state.timer = v
+    resetCallbacks()
+  }
+
+  // Create a pacer to trigger callbacks that have waited
+  // for a specified timer interval or longer.
+  function* pacer() {
+    while (true) {
+      const elapsed = state.timer.elapsed()
+      keys(state.schedule).map((interval) => {
+        const dispatcher = state.schedule[interval].dispatcher,
+              last = state.schedule[interval].last,
+              delta = elapsed - last
+        if (delta >= interval) {
+          dispatcher.next(delta)
+          state.schedule[interval].last = elapsed
+        }
+      })
+      // Next timestamp is passed in via next().
+      state.timer.sync(yield)
     }
   }
 
-  // Return time of last completed loop
-  const getLastTime = () => state.lastTime
+  // Create the generator.
+  const p = pacer()
 
-  // Return current frame interval.
-  const getFrameInterval = () => state.frameInterval
+  // Add additional methods.
+  assign( p, {
+    ...relay(state.timer),  // provide timer interface
+    addCallback,
+    getTimer,
+    numCallbacks,
+    removeCallback,
+    reset,
+    resetCallbacks,
+    resetTimer,
+    setTimer
+  })
 
-  // Return average frame interval.
-  const getAverageFrameInterval = () => state.frameAvgInt
-
-  // Return average frame rate per second.
-  const getAverageFrameRate = () => SECOND / state.frameAvgInt
-
-  // Adjust how often the loop iterates by setting the frame interval.
-  const setFrameInterval = (f = 0) => {
-    state.frameInterval = Math.max(Number(f), 0) || 0
-  }
-
-  // Return true if the frame loop is currently running.
-  const isRunning = () => state.isRunning
-
-  // Start loop. Update frameInterval if value provided.
-  const run = (f) => {
-    state.lastTime = now()
-    setFrameInterval(f)
-    state.isRunning = true
-    loop(now())
-  }
-
-  // Stop the loop.
-  const stop = () => {
-    if (state.frameRequestID) {
-      window.cancelAnimationFrame(state.frameRequestID)
-    }
-    state.frameRequestID = null
-    state.isRunning = false
-  }
+  // Prime and return the generator.
+  p.next()
 
   // Return Interface.
-  return frozen({
-    addRender,
-    addUpdate,
-    getAverageFrameInterval,
-    getAverageFrameRate,
-    getFrameInterval,
-    getLastTime,
-    isRunning,
-    run,
-    setFrameInterval,
-    stop
-  })
+  return frozen(p)
 
 }
 
