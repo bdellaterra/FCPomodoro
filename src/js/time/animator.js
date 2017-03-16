@@ -47,7 +47,6 @@ export const makeAnimator = (spec) => {
 
   // Trigger renders.
   const render = () => {
-    clearCanvas()
     state.renderer.next()
   }
 

@@ -46,19 +46,19 @@ const makeStateControl = () => {
   // Show a session analog that visually represents the user input.
   const previewSession = () => {
     const { sessionTime, breakTime } = readInput()
-    sessionAnalog.deanimate()
     clearCanvas()
     sessionAnalog.style( sessionTime )
     sessionAnalog.render()
+    console.log('PREVIEW SESSION:', sessionTime)
   }
 
   // Show a break analog that visually represents the user input.
   const previewBreak = () => {
     const { sessionTime, breakTime } = readInput()
-    breakAnalog.deanimate()
     clearCanvas()
     breakAnalog.style( breakTime )
     breakAnalog.render()
+    console.log('PREVIEW BREAK:', breakTime)
   }
 
   // Start a session for the given length of time.
@@ -150,6 +150,7 @@ const makeStateControl = () => {
     }
     const { sessionTime, breakTime } = input
     if ( model.startingAnimation() ) {
+      animator.addRender(clearCanvas)
       // Start the next session/break.
       if ( model.inSession() ) {
         startSession(sessionTime)
@@ -159,14 +160,15 @@ const makeStateControl = () => {
       // Update digital readout frequently while animating.
       animator.addUpdate(view.showDigitalTime, SECOND / 5)
     } else if ( model.inInputMode() ) {
-      // Don't update readout from model while user is inputting new data.
+      animator.removeRender(clearCanvas)
+      // Don't animate while user is inputting new data.
+      sessionAnalog.deanimate()
+      breakAnalog.deanimate()
       animator.removeUpdate(view.showDigitalTime, SECOND / 5)
       // Display a preview of the input values being entered by the user.
       if ( model.inSession() ) {
-        DEBUG && console.log('SESSION PREVIEW:', view.readSessionTime())
         previewSession()
       } else {
-        DEBUG && console.log('BREAK PREVIEW:', view.readSessionTime())
         previewBreak()
       }
     }

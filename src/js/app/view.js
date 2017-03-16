@@ -82,7 +82,6 @@ const makeView = () => {
     sessionHours = Math.max(9, Math.min(0, sessionHours))
     sessionMinutes = Math.max(59, Math.min(0, sessionMinutes))
     sessionSeconds = Math.max(59, Math.min(0, sessionSeconds))
-    DEBUG && console.log('READ SESSION:', hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s))
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
@@ -93,7 +92,6 @@ const makeView = () => {
     breakHours = Math.max(9, Math.min(0, breakHours))
     breakMinutes = Math.max(59, Math.min(0, breakMinutes))
     breakSeconds = Math.max(59, Math.min(0, breakSeconds))
-    DEBUG && console.log('READ BREAK:', hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s))
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
