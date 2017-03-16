@@ -16,6 +16,7 @@ export const action = frozen({
   endBreak:     { inSession: false, hasInput: false, isRunning: false }
 })
 
+// Map a combination of states to their corresponding action name.
 export const actionName = (v) => {
   let name = ''
   keys(action).map((n) => {

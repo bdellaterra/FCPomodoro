@@ -13,21 +13,21 @@ export const makeModel = () => {
   const animator = getAnimator()
 
   // Initialize state
-  let intent = action.inputSession,  // inSession, hasInput, !isRunning
-      state = intent,
+  let state = action.inputSession,  // inSession, hasInput, !isRunning
+      intent = null,
       sessionTime = DEFAULT_SESSION_TIME,
       breakTime = DEFAULT_BREAK_TIME
 
   // Validate time values before accepting.
   const validateTime = (time) => Math.max(0, Number(time)) || 0
 
-  // Return session time setting from last input.
+  // Return time value from last session input.
   const getSessionTime = () => sessionTime
 
   // Set session time to the provided value.
   const setSessionTime = (t) => sessionTime = validateTime(t)
 
-  // Return break time setting from last input.
+  // Return time value from last break input.
   const getBreakTime = () => breakTime
 
   // Set break time to the provided value.
@@ -35,11 +35,11 @@ export const makeModel = () => {
 
   // Update state if intent is for any of the accepted valid states.
   const accept = (validStates) => {
-    const accepted = validStates.reduce((bool, valid) => {
-      return (bool || intent === valid)
+    const accepted = validStates.reduce((isValid, validState) => {
+      return (isValid || intent === validState)
     }, false)
-    DEBUG && console.log(actionName(state), '->', actionName(intent),
-      (accepted ? '(accepted)' : '(rejected)'))
+    DEBUG && console.log( (accepted ? 'ACCEPT:' : 'REJECT:'),
+                           actionName(intent), '<-', actionName(state) )
     if (accepted) {
       state = intent
     }
@@ -86,14 +86,27 @@ export const makeModel = () => {
   // Return a copy of the state object.
   const getState = () => state
 
+  // Return true if the app is in input-mode.
+  const inInputMode = () => state.hasInput && !state.isRunning
+
+  // Return true if transitioning from input-mode to animation-mode.
+  // If true, input must be submitted and animation must be initialized.
+  const startingAnimation = () => state.hasInput && state.isRunning
+
+  // Return true if the app is focused on session time vs. break time.
+  const inSession = () => state.inSession
+
   // Return interface.
   return frozen({
     getBreakTime,
     getSessionTime,
     getState,
+    inInputMode,
+    inSession,
     present,
     setBreakTime,
-    setSessionTime
+    setSessionTime,
+    startingAnimation
   })
 
 }

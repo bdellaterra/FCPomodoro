@@ -4,6 +4,7 @@ import { MILLISECOND, SECOND } from '../utility/constants'
 import { formatTime } from '../utility/conv'
 import { action, getAnimator, model, stateControl, view } from './index'
 import { actionName } from './action'
+import { clearCanvas } from '../ui/canvas'
 import makeBreakAnalog from '../ui/breakAnalog'
 import makeSessionAnalog from '../ui/sessionAnalog'
 
@@ -24,28 +25,30 @@ const makeStateControl = () => {
 
   // Handle changes to the input fields.
   const inputChange = () => {
-    const inSession = model.getState(),
+    const inSession = model.inSession(),
           inputAction = inSession ? action.inputSession : action.inputBreak
     model.present(inputAction)
   }
 
   // Toggle input mode when the user clicks the digital display.
   const inputToggle = () => {
-    const { inSession, hasInput, isRunning } = model.getState(),
+    const inSession = model.inSession(),
           inputAction = inSession ? action.inputSession : action.inputBreak,
           startAction = inSession ? action.startSession : action.startBreak,
-          toggleAction = hasInput ? startAction : inputAction
+          toggleAction = model.inInputMode() ? startAction : inputAction
     model.present( toggleAction )
   }
 
   // Show a session analog that visually represents the user input.
   const previewSession = () => {
     sessionAnalog.style( view.readSessionTime() )
+    sessionAnalog.render()
   }
 
   // Show a break analog that visually represents the user input.
   const previewBreak = () => {
     breakAnalog.style( view.readBreakTime() )
+    breakAnalog.render()
   }
 
   // Start a session for the given length of time.
@@ -56,6 +59,8 @@ const makeStateControl = () => {
       model.present(action.endSession)
     }), duration)
     animator.run()  // Does nothing if already running
+    previewSession()
+    sessionAnalog.animate()
   }
 
   // Start a break for the given length of time.
@@ -66,92 +71,40 @@ const makeStateControl = () => {
       model.present(action.endBreak)
     }), duration)
     animator.run()  // Does nothing if already running
+    previewBreak()
+    breakAnalog.animate()
   }
 
-  // Return consolidated input values.
-  const readInput = () => {
-    return {
-      breakTime:   view.readBreakTime(),
-      sessionTime: view.readSessionTime()
-    }
-  }
-
-  // Submit user input to the model.
-  const submitInput = () => {
-    const { breakTime, sessionTime } = readInput()
-    model.setBreakTime(breakTime)
+  // Submit provided session/break input to the model.
+  const submitInput = ({ sessionTime, breakTime }) => {
     model.setSessionTime(sessionTime)
+    model.setBreakTime(breakTime)
+  }
+
+  // Read and submit session/break input. Return the data as an object.
+  const readInput = () => {
+    const sessionTime = view.readSessionTime(),
+          breakTime = view.readBreakTime(),
+          input = { sessionTime, breakTime }
+    submitInput(input)
+    return { sessionTime, breakTime }
   }
 
   // Adjust presentation with style classes for various control states.
-  const presentation = (inSession) => inSession ? ['inSession'] : ['onBreak']
-
-  // Return true if input-mode is active.
-  const isInputMode = () => {
-    const state = model.getState()
-    return (state === action.inputSession || state === action.inputBreak)
-  }
+  const presentation = () => model.inSession() ? ['inSession'] : ['onBreak']
 
   // Return a formatted value for the digital time display.
   const readout = () => {
-    return isInputMode() ? 'START' : formatTime(animator.remaining())
+    return model.inInputMode() ? 'START' : formatTime(animator.remaining())
   }
 
   // Message user with instructions.
-  const notification = (isInputMode) => {
-    return isInputMode ? 'Click to Run Timer' : 'Click to Set Timer'
+  const notification = () => {
+    return model.inInputMode() ? 'Click to Run Timer' : 'Click to Set Timer'
   }
 
   // Create a model that is easily consumed by the view.
-  // The representation is derived from the provided plan:
-  // session - true if focus should be on session time vs. break time.
-  // input - true if display should reflect input values vs. animation.
-  // submit - true if input values should be submitted to the model.
-  // animate - true if a new animation is beginning.
-  const representation = (plan) => {
-    // Submit input values to the model.
-    if (plan.submit) {
-      submitInput()
-    }
-    // Get time values from the model.
-    let sessionTime = model.getSessionTime(),
-        breakTime = model.getBreakTime()
-    // Disable animation for the session/break analog that's not in focus.
-    // Either animate the analog that is in focus, or if in input-mode,
-    // show a rendering that serves to preview the user's input values.
-    if (plan.session) {
-      breakAnalog.deanimate()
-      if (plan.input) {
-        previewSession()
-      } else {
-        if (plan.animate) {
-          startSession(sessionTime)  // Startup new animations.
-        }
-        sessionAnalog.animate()
-      }
-    } else {
-      // focus is on break
-      sessionAnalog.deanimate()
-      if (plan.input) {
-        previewBreak()
-      } else {
-        if (plan.animate) {
-          startBreak(breakTime)  // Startup new animations.
-        }
-        breakAnalog.animate()
-      }
-    }
-    // Create lexically scoped callback for animating digital readout.
-    if (plan.input) {
-      // Don't update from model while user is inputting new data.
-      const input = readInput()
-      breakTime = input.breakTime
-      sessionTime = input.sessionTime
-      animator.removeUpdate(view.showDigitalTime, SECOND / 5)
-    } else {
-      // Update digital readout frequently while animating.
-      animator.addUpdate(view.showDigitalTime, SECOND / 5)
-    }
+  const representation = ({ sessionTime, breakTime }) => {
     // Format time values for display.
     const [sessionHours, sessionMinutes, sessionSeconds]
             = formatTime(sessionTime).split(':'),
@@ -165,48 +118,45 @@ const makeStateControl = () => {
       breakHours,
       breakMinutes,
       breakSeconds,
-      pomodoro:    presentation(plan.session),
-      digitalTime: readout(plan.input),
-      message:     notification(plan.input)
+      pomodoro:    presentation(),
+      digitalTime: readout(),
+      message:     notification()
     }
   }
 
   // Send a representation of the model to the view for rendering,
   // then invoke possible next actions that result from current control state.
-  const render = () => {
-    let plan = {}  // boolean: session, input, submit, animate
-
-    switch (model.getState()) {
-      case action.inputSession:
-        plan = { session: true, input: true, submit: false, animate: false }
-        break
-      case action.inputBreak:
-        plan = { session: false, input: true, submit: false, animate: false }
-        break
-      case action.startSession:
-        plan = { session: true, input: false, submit: true, animate: true }
-        break
-      case action.startBreak:
-        plan = { session: false, input: false, submit: true, animate: true }
-        break
-      case action.runSession:
-        plan = { session: true, input: false, submit: false, animate: false }
-        break
-      case action.runBreak:
-        plan = { session: false, input: false, submit: false, animate: false }
-        break
-      case action.endSession:
-        plan = { session: false, input: false, submit: false, animate: true }
-        break
-      case action.endBreak:
-        plan = { session: true, input: false, submit: false, animate: true }
-        break
-      default:  // inputSession
-        plan = { session: true, input: true, submit: false, animate: false }
-        break
+  const render = (input) => {
+    // Read input values if they weren't provided and submit them to the model.
+    if (input !== undefined) {
+      submitInput(input)
+    } else {
+      input = readInput()  // reads from view and submits input to model
+    }
+    const { sessionTime, breakTime } = input
+    if ( model.startingAnimation() ) {
+      // Start the next session/break.
+      if ( model.inSession() ) {
+        startSession(sessionTime)
+      } else {
+        startBreak(breakTime)
+      }
+      // Update digital readout frequently while animating.
+      animator.addUpdate(view.showDigitalTime, SECOND / 5)
+    } else if ( model.inInputMode() ) {
+      // Don't update readout from model while user is inputting new data.
+      animator.removeUpdate(view.showDigitalTime, SECOND / 5)
+      // Display a preview of the input values being entered by the user.
+      if ( model.inSession() ) {
+        DEBUG && console.log('SESSION PREVIEW:', view.readSessionTime())
+        previewSession()
+      } else {
+        DEBUG && console.log('BREAK PREVIEW:', view.readSessionTime())
+        previewBreak()
+      }
     }
 
-    view.render( representation(plan) )
+    view.render( representation(input) )
 
     nextAction()
 
@@ -216,21 +166,29 @@ const makeStateControl = () => {
   const nextAction = () => {
     let next = null
     switch (model.getState()) {
-      case action.startSession:
+      case action.startSession: {
         next = action.runSession
         break
-      case action.startBreak:
+      }
+      case action.startBreak: {
         next = action.runBreak
         break
-      case action.endSession:
+      }
+      case action.endSession: {
+        sessionAnalog.deanimate()
+        clearCanvas()
         next = action.startBreak
         break
-      case action.endBreak:
+      }
+      case action.endBreak: {
+        breakAnalog.deanimate()
+        clearCanvas()
         next = action.startSession
         break
+      }
     }
-    DEBUG && console.log('Examining:', actionName(model.getState()), (next ? ` -> ${next}` : ''))
     if (next) {
+      DEBUG && console.log( 'NEXT TO:', actionName(next) )
       model.present(next)
     }
   }

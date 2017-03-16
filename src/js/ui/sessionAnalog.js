@@ -48,18 +48,26 @@ export const makeSessionAnalog = (spec = {}) => {
     state.seconds = makeSecondsArc({ animator: state.animator })
   }
 
-  // Style individual components.
-  const rotateSeconds = (time) => {
+  // Rotate the seconds arc so it tracks with the minutes arc.
+  const rotateSeconds = () => {
     state.seconds.setRotation(ARC_CLOCK_ROTATION + state.minutes.getEnd())
   }
 
-  // Style all components
+  // Style all components.
   const style = (time) => {
-    state.hours.style()
-    state.minutes.style()
-    state.seconds.style()
-    state.cursor.style()
-    rotateSeconds(time)
+    state.hours.style(time)
+    state.minutes.style(time)
+    state.seconds.style(time)
+    state.cursor.style(time)
+    rotateSeconds()
+  }
+
+  // Render all components,
+  const render = () => {
+    state.hours.render()
+    state.minutes.render()
+    state.seconds.render()
+    state.cursor.render()
   }
 
   // Return a reference to the periodicDispatcher.
@@ -104,6 +112,7 @@ export const makeSessionAnalog = (spec = {}) => {
     deanimate,
     getAnimator,
     setAnimator,
+    render,
     style
   })
 

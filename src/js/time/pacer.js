@@ -101,13 +101,15 @@ export const makePacer = (spec) => {
     while (true) {
       const elapsed = state.timer.elapsed()
       keys(state.schedule).map((interval) => {
-        const dispatcher = state.schedule[interval].dispatcher,
-              last = state.schedule[interval].last,
-              offset = state.schedule[interval].offset(),
-              delta = elapsed - last + offset
-        if (delta >= interval) {
-          dispatcher.next()
-          state.schedule[interval].last = elapsed
+        if (state.schedule[interval] && state.schedule[interval].dispatcher) {
+          const dispatcher = state.schedule[interval].dispatcher,
+                last = state.schedule[interval].last,
+                offset = state.schedule[interval].offset(),
+                delta = elapsed - last + offset
+          if (delta >= interval) {
+            dispatcher.next()
+            state.schedule[interval].last = elapsed
+          }
         }
       })
       // Next timestamp is passed in via next().

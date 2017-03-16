@@ -3,7 +3,7 @@ import { MINUTE, SECOND } from './constants'
 // Time settings
 
 export const DEFAULT_SESSION_TIME = 10 * SECOND
-export const DEFAULT_BREAK_TIME = 20 * SECOND
+export const DEFAULT_BREAK_TIME = 25 * SECOND
 
 // Styles
 

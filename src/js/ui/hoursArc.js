@@ -49,6 +49,7 @@ export const makeHoursArc = (spec) => {
 
   // Setup animation callbacks.
   const animate = () => {
+    arcTimer.animate()
     arcTimer.addUpdate(once(style), 0)  // Initial display
     arcTimer.addUpdate(style, arcTimer.getTimeUnit(), arcTimer.updateOffset)
     arcTimer.addRender(render)
@@ -56,6 +57,7 @@ export const makeHoursArc = (spec) => {
 
   // Teardown animation callbacks.
   const deanimate = () => {
+    arcTimer.deanimate()
     arcTimer.removeUpdate(style, arcTimer.getTimeUnit())
     arcTimer.removeRender(render)
   }
