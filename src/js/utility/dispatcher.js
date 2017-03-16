@@ -14,9 +14,12 @@ export const makeDispatcher = (spec = {}) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Add a callback.
+  // Add a callback. If the dispatcher already has the callback,
+  // it is not added to the list a second time.
   const addCallback = (cb) => {
-    state.callbacks.unshift(cb)
+    if ( !state.callbacks.includes(cb) ) {
+      state.callbacks.unshift(cb)
+    }
   }
 
   // Remove a callback from the list.
