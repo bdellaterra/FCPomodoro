@@ -105,7 +105,12 @@ const makeStateControl = () => {
   }
 
   // Adjust presentation with style classes for various control states.
-  const presentation = () => model.inSession() ? ['inSession'] : ['onBreak']
+  const presentation = () => {
+    const classes = []
+    classes.push(model.inSession() ? 'inSession' : 'onBreak')
+    // classes.push(model.inInputMode() ? 'inInputMode' : 'inAnimationMode')
+    return classes.join(' ')
+  }
 
   // Return a formatted value for the digital time display.
   const readout = () => {
