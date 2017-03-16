@@ -164,15 +164,12 @@ const makeStateControl = () => {
   }
 
   // Create a model that is easily consumed by the view.
-  const representation = ({ sessionTime, breakTime, isCancelHidden, restoringInput }) => {
+  const representation = ({ sessionTime, breakTime, isCancelHidden }) => {
     // Format time values for display.
     const [sessionHours, sessionMinutes, sessionSeconds]
             = formatTime(sessionTime).split(':'),
           [breakHours, breakMinutes, breakSeconds]
             = formatTime(breakTime).split(':')
-    if (restoringInput) {
-      console.log('ST:', formatTime(sessionTime), 'BT:', formatTime(breakTime))
-    }
     // Return data that can be fed directly into the view.
     return {
       sessionHours,
@@ -224,9 +221,8 @@ const makeStateControl = () => {
       }
       // Restore the input fields to the data contained in the model.
       Object.assign(input, {
-        sessionTime:    model.getSessionTime(),
-        breakTime:      model.getBreakTime(),
-        restoringInput: true
+        sessionTime: model.getSessionTime(),
+        breakTime:   model.getBreakTime()
       })
     } else if ( model.inInputMode() ) {
       // Don't animate while user is inputting new data.
