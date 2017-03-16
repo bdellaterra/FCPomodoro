@@ -1,5 +1,6 @@
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
 import { ARC_CLOCK_ROTATION, SECOND } from '../utility/constants'
+import { once } from '../utility/iter'
 import makeAnimator from '../time/animator'
 import makeBlinkingCursor from './blinkingCursor'
 import makeHoursArc from './hoursArc'
@@ -48,13 +49,17 @@ export const makeSessionAnalog = (spec = {}) => {
   }
 
   // Style individual components.
-  const styleSeconds = (time) => {
+  const rotateSeconds = (time) => {
     state.seconds.setRotation(ARC_CLOCK_ROTATION + state.minutes.getEnd())
   }
 
   // Style all components
   const style = (time) => {
-    styleSeconds(time)
+    state.hours.style()
+    state.minutes.style()
+    state.seconds.style()
+    state.cursor.style()
+    rotateSeconds(time)
   }
 
   // Return a reference to the periodicDispatcher.
@@ -63,10 +68,10 @@ export const makeSessionAnalog = (spec = {}) => {
   // Set session to use a different periodicDispatcher.
   const setAnimator = (v) => {
     state.animator = v
-    state.hours.setAnimator(t)
-    state.minutes.setAnimator(t)
-    state.seconds.setAnimator(t)
-    state.cursor.setAnimator(t)
+    state.hours.setAnimator(v)
+    state.minutes.setAnimator(v)
+    state.seconds.setAnimator(v)
+    state.cursor.setAnimator(v)
   }
 
   // Schedule hours/minutes/seconds updates to the periodic dispatcher.
@@ -75,7 +80,8 @@ export const makeSessionAnalog = (spec = {}) => {
     state.minutes.animate()
     state.seconds.animate()
     state.cursor.animate()
-    state.animator.addUpdate(style, SECOND)
+    state.animator.addUpdate(once(rotateSeconds), 0)  // Initial display
+    state.animator.addUpdate(rotateSeconds, SECOND)
   }
 
   // Unschedule hours/minutes/seconds updates.
@@ -84,6 +90,7 @@ export const makeSessionAnalog = (spec = {}) => {
     state.minutes.deanimate()
     state.seconds.deanimate()
     state.cursor.deanimate()
+    state.animator.removeUpdate(rotateSeconds, SECOND)
   }
 
   // Perform initialization.

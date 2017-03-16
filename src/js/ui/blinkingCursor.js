@@ -4,6 +4,7 @@ import { CURSOR_LINE_WIDTH, CURSOR_RADIUS,
          CURSOR_STROKE_STYLE_1, CURSOR_STROKE_STYLE_2
        } from '../utility/conf'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { once } from '../utility/iter'
 import makeArcTimer from './arcTimer'
 
 
@@ -66,6 +67,7 @@ export const makeBlinkingCursor = (spec) => {
 
   // Setup animation callbacks.
   const animate = () => {
+    arcTimer.addUpdate(once(style), 0)  // Initial display
     arcTimer.addUpdate(style, SECOND)
     arcTimer.addRender(arcTimer.render)
   }
