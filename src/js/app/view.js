@@ -25,8 +25,9 @@ const makeView = () => {
 
   // Declare output elements with their default content.
   const outputs = frozen({
-    digitalTime: 'START',
-    message:     'Click to Run Timer'
+    digitalTime:   'START',
+    message:       'Click to Run Timer',
+    cancelMessage: 'Click Here to Cancel Input'
   })
 
   // Pull DOM targets into an object.
@@ -68,6 +69,9 @@ const makeView = () => {
 
   // Attach input toggle to click event on the digital display.
   El.digitalTime.addEventListener('click', () => stateControl.toggleInputMode())
+
+  // Attach click event for cancel input link.
+  El.cancelMessage.addEventListener('click', () => stateControl.cancelInputMode())
 
   // Disable input.
   const disableInput = () => keys(inputs).map( (e) => El[e].disabled = true )

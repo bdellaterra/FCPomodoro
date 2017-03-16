@@ -23,6 +23,14 @@ const makeStateControl = () => {
   const sessionAnalog = makeSessionAnalog({ animator }),
         breakAnalog = makeBreakAnalog({ animator })
 
+  // Track callbacks for end of session/break so they can be
+  // unscheduled if progress is discontinued prematurely.
+  let endSessionCallback, endBreakCallback
+
+  // Track whether session/break animation was in progress so it can be
+  // restored when the user cancels input mode.
+  let wasSession
+
   // Handle changes to the input fields.
   const registerInput = () => {
     if ( model.inSession() ) {
@@ -40,7 +48,15 @@ const makeStateControl = () => {
           inputAction = inSession ? action.inputSession : action.inputBreak,
           startAction = inSession ? action.startSession : action.startBreak,
           toggleAction = model.inInputMode() ? startAction : inputAction
+    // Save session/break state so it can be restored if input is cancelled.
+    wasSession = inSession
+    // Present the corresponding input mode  to the model.
     model.present( toggleAction )
+  }
+
+  // Cancel input mode when the user clicks on the cancel link.
+  const cancelInputMode = () => {
+    model.present( wasSession ? action.runSession : action.runBreak )
   }
 
   // Show a session analog that visually represents the user input.
@@ -61,32 +77,47 @@ const makeStateControl = () => {
     console.log('PREVIEW BREAK:', breakTime)
   }
 
+  // Create a callback that will present a the provided action to the model.
+  const makeFutureAction = (a) => once(() => {
+    model.present(a)
+  })
+
+  // Animate the session display.
+  const animateSession = () => {
+    animator.run()  // Does nothing if already running
+    previewSession()
+    sessionAnalog.animate()
+  }
+
   // Start a session for the given length of time.
   const startSession = (duration) => {
     sessionAnalog.deanimate()
     breakAnalog.deanimate()
-    animator.run()  // Does nothing if already running
     animator.reset()
     animator.ending(animator.time() + duration)
-    animator.addUpdate(once(() => {
-      model.present(action.endSession)
-    }), duration)
-    previewSession()
-    sessionAnalog.animate()
+    animator.removeUpdate(endSessionCallback, duration)
+    endSessionCallback = makeFutureAction(action.endSession)
+    animator.addUpdate(endSessionCallback, duration)
+    animateSession()
+  }
+
+  // Animate the break display.
+  const animateBreak = () => {
+    animator.run()  // Does nothing if already running
+    previewBreak()
+    breakAnalog.animate()
   }
 
   // Start a break for the given length of time.
   const startBreak = (duration) => {
     sessionAnalog.deanimate()
     breakAnalog.deanimate()
-    animator.run()  // Does nothing if already running
     animator.reset()
     animator.ending(animator.time() + duration)
-    animator.addUpdate(once(() => {
-      model.present(action.endBreak)
-    }), duration)
-    previewBreak()
-    breakAnalog.animate()
+    animator.removeUpdate(endBreakCallback, duration)
+    endBreakCallback = makeFutureAction(action.endBreak)
+    animator.addUpdate(endBreakCallback, duration)
+    animateBreak()
   }
 
   // Submit provided session/break input to the model.
@@ -100,15 +131,17 @@ const makeStateControl = () => {
     const sessionTime = view.readSessionTime(),
           breakTime = view.readBreakTime(),
           input = { sessionTime, breakTime }
-    submitInput(input)
     return { sessionTime, breakTime }
   }
 
   // Adjust presentation with style classes for various control states.
-  const presentation = () => {
+  const presentation = ({ isCancelHidden = false }) => {
     const classes = []
     classes.push(model.inSession() ? 'inSession' : 'onBreak')
-    // classes.push(model.inInputMode() ? 'inInputMode' : 'inAnimationMode')
+    classes.push(model.inInputMode() ? 'inInputMode' : 'inAnimationMode')
+    if (isCancelHidden) {
+      classes.push('hideCancelMessage')
+    }
     return classes.join(' ')
   }
 
@@ -122,13 +155,24 @@ const makeStateControl = () => {
     return model.inInputMode() ? 'Click to Run Timer' : 'Click to Set Timer'
   }
 
+  // Provide user with a cancellation link
+  const cancellation = ({ isCancelHidden }) => {
+    const cancelMessage = model.inInputMode() && !isCancelHidden
+                        ? 'Click Here to Cancel Input'
+                        : ''
+    return cancelMessage
+  }
+
   // Create a model that is easily consumed by the view.
-  const representation = ({ sessionTime, breakTime }) => {
+  const representation = ({ sessionTime, breakTime, isCancelHidden, restoringInput }) => {
     // Format time values for display.
     const [sessionHours, sessionMinutes, sessionSeconds]
             = formatTime(sessionTime).split(':'),
           [breakHours, breakMinutes, breakSeconds]
             = formatTime(breakTime).split(':')
+    if (restoringInput) {
+      console.log('ST:', formatTime(sessionTime), 'BT:', formatTime(breakTime))
+    }
     // Return data that can be fed directly into the view.
     return {
       sessionHours,
@@ -137,9 +181,10 @@ const makeStateControl = () => {
       breakHours,
       breakMinutes,
       breakSeconds,
-      pomodoro:       presentation(),
+      pomodoro:       presentation({ isCancelHidden }),
       digitalTime:    readout(),
       message:        notification(),
+      cancelMessage:  cancellation({ isCancelHidden }),
       isInputAllowed: model.inInputMode()
     }
   }
@@ -147,26 +192,45 @@ const makeStateControl = () => {
   // Send a representation of the model to the view for rendering,
   // then invoke possible next actions that result from current control state.
   const render = (input) => {
-    // Read input values if they weren't provided and submit them to the model.
+    // Submit input values to the model or read them in if they weren't provided.
     if (input !== undefined) {
       submitInput(input)
+      Object.assign(input, { isCancelHidden: true })
     } else {
-      input = readInput()  // reads from view and submits input to model
+      input = readInput()
     }
     const { sessionTime, breakTime } = input
-    if ( model.startingAnimation() ) {
+    if ( model.startingAnimation() || model.resumingAnimation() ) {
+      // Animator resumes clearing the canvas when input mode is finished.
       animator.setClearCanvas(true)
+      // Update digital readout frequently while animating.
+      animator.addUpdate(view.showDigitalTime, SECOND / 5)
+    }
+    if ( model.startingAnimation() ) {
+      // Submit input to the model when starting a new animation.
+      submitInput(input)
       // Start the next session/break.
       if ( model.inSession() ) {
         startSession(sessionTime)
       } else {
         startBreak(breakTime)
       }
-      // Update digital readout frequently while animating.
-      animator.addUpdate(view.showDigitalTime, SECOND / 5)
+    } else if ( model.resumingAnimation() ) {
+      // Resume the existing session/break.
+      if ( model.inSession() ) {
+        animateSession()
+      } else {
+        animateBreak()
+      }
+      // Restore the input fields to the data contained in the model.
+      Object.assign(input, {
+        sessionTime:    model.getSessionTime(),
+        breakTime:      model.getBreakTime(),
+        restoringInput: true
+      })
     } else if ( model.inInputMode() ) {
-      animator.setClearCanvas(false)
       // Don't animate while user is inputting new data.
+      animator.setClearCanvas(false)
       sessionAnalog.deanimate()
       breakAnalog.deanimate()
       animator.removeUpdate(view.showDigitalTime, SECOND / 5)
@@ -213,16 +277,17 @@ const makeStateControl = () => {
 
   // Return interface.
   return frozen({
-    toggleInputMode,
+    cancelInputMode,
     presentation,
     readInput,
     readout,
     registerInput,
-    render
+    render,
+    toggleInputMode
   })
 
 }
 
-// Populate the imported stateControl object.
+// Populate the imported state control object.
 Object.assign(stateControl, makeStateControl())
 

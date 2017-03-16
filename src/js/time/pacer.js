@@ -106,10 +106,6 @@ export const makePacer = (spec) => {
                 last = state.schedule[interval].last,
                 offset = state.schedule[interval].offset(),
                 delta = elapsed - last + offset
-          if (Number(interval) === HOUR) {
-            console.clear()
-            console.log(delta)
-          }
           if (delta >= interval) {
             dispatcher.next()
             state.schedule[interval].last = elapsed

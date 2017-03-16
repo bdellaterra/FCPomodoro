@@ -51,7 +51,8 @@ export const makeModel = () => {
 
     switch (state) {
       case action.inputSession:
-        accept([action.inputSession, action.inputBreak, action.startSession])
+        accept([action.inputSession, action.inputBreak, action.startSession,
+                action.runSession, action.runBreak])
         break
       case action.startSession:
         accept([action.runSession])
@@ -63,7 +64,8 @@ export const makeModel = () => {
         accept([action.startBreak])
         break
       case action.inputBreak:
-        accept([action.inputSession, action.inputBreak, action.startBreak])
+        accept([action.inputSession, action.inputBreak, action.startBreak,
+                action.runSession, action.runBreak])
         break
       case action.startBreak:
         accept([action.runBreak])
@@ -89,9 +91,13 @@ export const makeModel = () => {
   // Return true if the app is in input-mode.
   const inInputMode = () => state.hasInput && !state.isRunning
 
-  // Return true if transitioning from input-mode to animation-mode.
+  // Return true if transitioning from input-mode to start-animation-mode.
   // If true, input must be submitted and animation must be initialized.
   const startingAnimation = () => state.hasInput && state.isRunning
+
+  // Return true if transitioning from input-mode to run-animation-mode.
+  // The user has cancelled input so the last animation should resume unaltered.
+  const resumingAnimation = () => !state.hasInput && state.isRunning
 
   // Return true if the app is focused on session time vs. break time.
   const inSession = () => state.inSession
@@ -104,6 +110,7 @@ export const makeModel = () => {
     inInputMode,
     inSession,
     present,
+    resumingAnimation,
     setBreakTime,
     setSessionTime,
     startingAnimation
