@@ -1,22 +1,14 @@
 import { frozen, keys, sealed } from '../utility/fn'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
-import { getAnimator, stateControl, view } from './index'
-import makeBreakAnalog from '../ui/breakAnalog'
-import makeSessionAnalog from '../ui/sessionAnalog'
+import { action, getAnimator, model, stateControl, view } from './index'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
 const makeView = () => {
 
-  // Get access to shared animator.
+  // Get access to the shared animator.
   const animator = getAnimator()
-
-  // Create analog display elements for the user interface.
-  const display = {
-    sessionAnalog: makeSessionAnalog({ animator }),
-    breakAnalog:   makeBreakAnalog({ animator })
-  }
 
   // Declare root element which will receive classes to adjust presentation.
   const app = frozen({ pomodoro: ['started'] })
@@ -33,7 +25,7 @@ const makeView = () => {
 
   // Declare output elements with their default content.
   const outputs = frozen({
-    digitalTime: '0:00:00',
+    digitalTime: 'START',
     message:     'Click to Run Timer'
   })
 
@@ -42,7 +34,7 @@ const makeView = () => {
   keys({ ...app, ...inputs, ...outputs })
     .map( (e) => El[e] = document.getElementById(e) )
 
-  // Limit the time inputs to a range of values
+  // Limit the time inputs to a range of positive values
   const limitHoursInput = (event) => {
     event.target.value = Math.min(9, Math.max(0, event.target.value))
   }
@@ -53,7 +45,7 @@ const makeView = () => {
     event.target.value = Math.min(59, Math.max(0, event.target.value))
   }
 
-  // Apply limits to the session/break input fields.
+  // Apply numeric limits to the session/break input fields.
   El.sessionHours.addEventListener('input', limitHoursInput)
   El.sessionMinutes.addEventListener('input', limitMinutesInput)
   El.sessionSeconds.addEventListener('input', limitSecondsInput)
@@ -64,6 +56,14 @@ const makeView = () => {
   // Attach input handler to the session/break input fields.
   keys(inputs).map( (e) => {
     El[e].addEventListener( 'input', () => stateControl.inputChange() )
+  })
+
+  // Attach presentation focus to the session/break input fields.
+  ;['sessionHours', 'sessionMinutes', 'sessionSeconds'].map( (e) => {
+    El[e].addEventListener( 'click', () => model.present(action.inputSession) )
+  })
+  ;['breakHours', 'breakMinutes', 'breakSeconds'].map( (e) => {
+    El[e].addEventListener( 'click', () => model.present(action.inputBreak) )
   })
 
   // Attach input toggle to click event on the digital display.
@@ -89,73 +89,28 @@ const makeView = () => {
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
+  // Set the text on the digital readout.
   const showDigitalTime = () => {
     El.digitalTime.innerHTML = stateControl.readout()
   }
 
-  // Show the analog display for proposed session time while the user
-  // is inputting values but has yet to click-start.
-  const proposeSessionDisplay = () => {
-    // Remove any time-triggered display.
-    display.sessionAnalog.deanimate()
-    display.breakAnalog.deanimate()
-    // Render based on session input fields.
-    display.sessionAnalog.style( readSessionTime() )
-    display.sessionAnalog.render()
-  }
-
-  // Show the analog display for proposed break time while the user
-  // is inputting values but has yet to click-start.
-  const proposeBreakDisplay = () => {
-    // Remove any time-triggered display.
-    display.sessionAnalog.deanimate()
-    display.breakAnalog.deanimate()
-    // Render based on session input fields.
-    display.breakAnalog.style( readSessionTime() )
-    display.breakAnalog.render()
-  }
-
-  // Show the analog display for session time.
-  const showSessionDisplay = () => {
-    // Disable break animation.
-    display.breakAnalog.deanimate()
-    // Enable session animation.
-    display.sessionAnalog.animate()
-  }
-
-  // Show the analog display for break time.
-  const showBreakDisplay = () => {
-    // Disable session animation.
-    display.sessionAnalog.deanimate()
-    // Enable break animation.
-    display.breakAnalog.animate()
-  }
-
-  // Show the analog display for break time.
-  const hideDisplay = () => {
-    // Disable session/break animation.
-    display.sessionAnalog.deanimate()
-    display.breakAnalog.deanimate()
+  const presentState = (data) => {
+    keys(app).map( (e) => El[e].className = data[e] )
   }
 
   // Render current state to the DOM.
   const render = (data) => {
-    keys(app).map( (e) => El[e].className = data[e] )
+    presentState(data)
     keys(inputs).map( (e) => El[e].value = data[e] )
     keys(outputs).map( (e) => El[e].innerHTML = data[e] )
   }
 
   // Return interface.
   return frozen({
-    hideDisplay,
-    proposeBreakDisplay,
-    proposeSessionDisplay,
     readBreakTime,
     readSessionTime,
     render,
-    showBreakDisplay,
-    showDigitalTime,
-    showSessionDisplay
+    showDigitalTime
   })
 
 }

@@ -1,9 +1,11 @@
 import { frozen } from '../utility/fn'
 import { once } from '../utility/iter'
 import { MILLISECOND, SECOND } from '../utility/constants'
-import { formatTime, msecsToHours, msecsToMinutes, msecsToSeconds
-       } from '../utility/conv'
+import { formatTime } from '../utility/conv'
 import { action, getAnimator, model, stateControl, view } from './index'
+import { actionName } from './action'
+import makeBreakAnalog from '../ui/breakAnalog'
+import makeSessionAnalog from '../ui/sessionAnalog'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
@@ -13,33 +15,57 @@ import { action, getAnimator, model, stateControl, view } from './index'
 // SAM methodology, but here it is called "state control" to disambiguate.
 const makeStateControl = () => {
 
-  // Get access to shared animator.
+  // Get access to the shared animator.
   const animator = getAnimator()
 
-  // Start a session/break from the beginning.
-  const start = () => {
-    const onBreak = model.onBreak(),
-          ending = onBreak ? model.getBreakTime() : model.getSessionTime()
-    view.hideDisplay()
-    animator.reset()
-    animator.ending(animator.time() + ending)
-    animator.addUpdate(once(() => model.present(action.start)), ending)
-    animator.run()  // Does nothing if already running
-    view.hideDisplay()
-    onBreak ? view.showBreakDisplay() : view.showSessionDisplay()
-  }
-
-  // Adjust presentation with style classes for various control states.
-  const presentation = () => model.onBreak() ? ['onBreak'] : ['inSession']
+  // Create analog display elements for the user interface.
+  const sessionAnalog = makeSessionAnalog({ animator }),
+        breakAnalog = makeBreakAnalog({ animator })
 
   // Handle changes to the input fields.
   const inputChange = () => {
-    model.present( action.input )
+    const inSession = model.getState(),
+          inputAction = inSession ? action.inputSession : action.inputBreak
+    model.present(inputAction)
   }
 
   // Toggle input mode when the user clicks the digital display.
   const inputToggle = () => {
-    model.present( model.isRunning() ? action.input : action.start )
+    const { inSession, hasInput, isRunning } = model.getState(),
+          inputAction = inSession ? action.inputSession : action.inputBreak,
+          startAction = inSession ? action.startSession : action.startBreak,
+          toggleAction = hasInput ? startAction : inputAction
+    model.present( toggleAction )
+  }
+
+  // Show a session analog that visually represents the user input.
+  const previewSession = () => {
+    sessionAnalog.style( view.readSessionTime() )
+  }
+
+  // Show a break analog that visually represents the user input.
+  const previewBreak = () => {
+    breakAnalog.style( view.readBreakTime() )
+  }
+
+  // Start a session for the given length of time.
+  const startSession = (duration) => {
+    animator.reset()
+    animator.ending(animator.time() + duration)
+    animator.addUpdate(once(() => {
+      model.present(action.endSession)
+    }), duration)
+    animator.run()  // Does nothing if already running
+  }
+
+  // Start a break for the given length of time.
+  const startBreak = (duration) => {
+    animator.reset()
+    animator.ending(animator.time() + duration)
+    animator.addUpdate(once(() => {
+      model.present(action.endBreak)
+    }), duration)
+    animator.run()  // Does nothing if already running
   }
 
   // Return consolidated input values.
@@ -50,22 +76,88 @@ const makeStateControl = () => {
     }
   }
 
+  // Submit user input to the model.
+  const submitInput = () => {
+    const { breakTime, sessionTime } = readInput()
+    model.setBreakTime(breakTime)
+    model.setSessionTime(sessionTime)
+  }
+
+  // Adjust presentation with style classes for various control states.
+  const presentation = (inSession) => inSession ? ['inSession'] : ['onBreak']
+
+  // Return true if input-mode is active.
+  const isInputMode = () => {
+    const state = model.getState()
+    return (state === action.inputSession || state === action.inputBreak)
+  }
+
   // Return a formatted value for the digital time display.
   const readout = () => {
-    return model.isRunning() ? formatTime(animator.remaining()) : formatTime(0)
+    return isInputMode() ? 'START' : formatTime(animator.remaining())
   }
 
   // Message user with instructions.
-  const notification = () => {
-    return model.isRunning() ? 'Click to Set Timer' : 'Click to Run Timer'
+  const notification = (isInputMode) => {
+    return isInputMode ? 'Click to Run Timer' : 'Click to Set Timer'
   }
 
   // Create a model that is easily consumed by the view.
-  const representation = () => {
+  // The representation is derived from the provided plan:
+  // session - true if focus should be on session time vs. break time.
+  // input - true if display should reflect input values vs. animation.
+  // submit - true if input values should be submitted to the model.
+  // animate - true if a new animation is beginning.
+  const representation = (plan) => {
+    // Submit input values to the model.
+    if (plan.submit) {
+      submitInput()
+    }
+    // Get time values from the model.
+    let sessionTime = model.getSessionTime(),
+        breakTime = model.getBreakTime()
+    // Disable animation for the session/break analog that's not in focus.
+    // Either animate the analog that is in focus, or if in input-mode,
+    // show a rendering that serves to preview the user's input values.
+    if (plan.session) {
+      breakAnalog.deanimate()
+      if (plan.input) {
+        previewSession()
+      } else {
+        if (plan.animate) {
+          startSession(sessionTime)  // Startup new animations.
+        }
+        sessionAnalog.animate()
+      }
+    } else {
+      // focus is on break
+      sessionAnalog.deanimate()
+      if (plan.input) {
+        previewBreak()
+      } else {
+        if (plan.animate) {
+          startBreak(breakTime)  // Startup new animations.
+        }
+        breakAnalog.animate()
+      }
+    }
+    // Create lexically scoped callback for animating digital readout.
+    if (plan.input) {
+      // Don't update from model while user is inputting new data.
+      const input = readInput()
+      breakTime = input.breakTime
+      sessionTime = input.sessionTime
+      animator.removeUpdate(view.showDigitalTime, SECOND / 5)
+    } else {
+      // Update digital readout frequently while animating.
+      animator.addUpdate(view.showDigitalTime, SECOND / 5)
+    }
+    // Format time values for display.
     const [sessionHours, sessionMinutes, sessionSeconds]
-            = formatTime( model.getSessionTime() ).split(':'),
+            = formatTime(sessionTime).split(':'),
           [breakHours, breakMinutes, breakSeconds]
-            = formatTime( model.getBreakTime() ).split(':')
+            = formatTime(breakTime).split(':')
+    // Return data that can be fed directly into the view.
     return {
       sessionHours,
       sessionMinutes,
@@ -73,46 +165,48 @@ const makeStateControl = () => {
       breakHours,
       breakMinutes,
       breakSeconds,
-      pomodoro:    presentation(),
-      digitalTime: readout(),
-      message:     notification()
+      pomodoro:    presentation(plan.session),
+      digitalTime: readout(plan.input),
+      message:     notification(plan.input)
     }
   }
 
   // Send a representation of the model to the view for rendering,
   // then invoke possible next actions that result from current control state.
   const render = () => {
+    let plan = {}  // boolean: session, input, submit, animate
 
-    if ( model.hasInput() ) {
-      if ( model.inSession() ) {
-        view.proposeSessionDisplay()
-      }
-      if ( model.onBreak() ) {
-        view.proposeBreakDisplay()
-      }
+    switch (model.getState()) {
+      case action.inputSession:
+        plan = { session: true, input: true, submit: false, animate: false }
+        break
+      case action.inputBreak:
+        plan = { session: false, input: true, submit: false, animate: false }
+        break
+      case action.startSession:
+        plan = { session: true, input: false, submit: true, animate: true }
+        break
+      case action.startBreak:
+        plan = { session: false, input: false, submit: true, animate: true }
+        break
+      case action.runSession:
+        plan = { session: true, input: false, submit: false, animate: false }
+        break
+      case action.runBreak:
+        plan = { session: false, input: false, submit: false, animate: false }
+        break
+      case action.endSession:
+        plan = { session: false, input: false, submit: false, animate: true }
+        break
+      case action.endBreak:
+        plan = { session: true, input: false, submit: false, animate: true }
+        break
+      default:  // inputSession
+        plan = { session: true, input: true, submit: false, animate: false }
+        break
     }
 
-    // if ( model.hasInput() && !model.isRunning() ) {
-    //   if ( model.inSession() ) {
-    //     view.proposeSessionDisplay()
-    //   }
-    //   if ( model.onBreak() ) {
-    //     view.proposeBreakDisplay()
-    //   }
-    // }
-    //
-    // if ( model.isRunning() || model.hasCancelled() ) {
-    //   if ( model.inSession() ) {
-    //     DEBUG && console.log('RUNNING SESSION:')
-    //     view.showSessionDisplay()
-    //   }
-    //   if ( model.onBreak() ) {
-    //     DEBUG && console.log('RUNNING BREAK:')
-    //     view.showBreakDisplay()
-    //   }
-    // }
-
-    view.render( representation() )
+    view.render( representation(plan) )
 
     nextAction()
 
@@ -121,27 +215,35 @@ const makeStateControl = () => {
   // Trigger actions that automatically follow certain control states.
   const nextAction = () => {
     let next = null
-    if ( model.atTimeout() && model.isRunning() ) {
-      DEBUG && console.log('TIMEOUT!')
-      next = action.start
-      // next = model.onBreak() ? action.session : action.break
+    switch (model.getState()) {
+      case action.startSession:
+        next = action.runSession
+        break
+      case action.startBreak:
+        next = action.runBreak
+        break
+      case action.endSession:
+        next = action.startBreak
+        break
+      case action.endBreak:
+        next = action.startSession
+        break
     }
-    // // DEBUG && console.log('CHECK FOR NEXT ACTION:')
-    // if ( model.isRunning() && model.atTimeout() ) {
-    //   DEBUG && console.log('TIMEOUT!')
-    //   if ( model.inSession() ) {
-    //     next = action.break
-    //   } else {
-    //     next = action.session
-    //   }
-    // }
+    DEBUG && console.log('Examining:', actionName(model.getState()), (next ? ` -> ${next}` : ''))
     if (next) {
       model.present(next)
     }
   }
 
   // Return interface.
-  return frozen({ inputChange, inputToggle, readInput, readout, render, start })
+  return frozen({
+    inputChange,
+    inputToggle,
+    presentation,
+    readInput,
+    readout,
+    render
+  })
 
 }
 

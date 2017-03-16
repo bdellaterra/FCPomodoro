@@ -1,4 +1,4 @@
-import { frozen } from '../utility/fn'
+import { frozen, keys } from '../utility/fn'
 // import { mapValues } from '../utility/fn'
 // import model from './model'
 
@@ -6,13 +6,24 @@ import { frozen } from '../utility/fn'
 
 
 export const action = frozen({
-  session: { onBreak: false },
-  break:   { onBreak: true },
-  start:   { isRunning: true },
-  stop:    { isRunning: false },
-  input:   { hasInput: true },
-  cancel:  { hasInput: false }
+  startSession: { inSession: true, hasInput: true, isRunning: true },
+  inputSession: { inSession: true, hasInput: true, isRunning: false },
+  runSession:   { inSession: true, hasInput: false, isRunning: true },
+  endSession:   { inSession: true, hasInput: false, isRunning: false },
+  startBreak:   { inSession: false, hasInput: true, isRunning: true },
+  inputBreak:   { inSession: false, hasInput: true, isRunning: false },
+  runBreak:     { inSession: false, hasInput: false, isRunning: true },
+  endBreak:     { inSession: false, hasInput: false, isRunning: false }
 })
 
+export const actionName = (v) => {
+  let name = ''
+  keys(action).map((n) => {
+    if (action[n] === v) {
+      name = n
+    }
+  })
+  return name
+}
 
 export default action

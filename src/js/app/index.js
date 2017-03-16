@@ -1,6 +1,7 @@
 import { clearCanvas } from '../ui/canvas'
 import { frozen } from '../utility/fn'
 import { SECOND } from '../utility/constants'
+import actionStates from './action'
 import makeAnimator from '../time/animator'
 import sleep from '../time/sleep'
 
@@ -8,14 +9,7 @@ import sleep from '../time/sleep'
 const animator = makeAnimator()
 
 // Export actions that can be presented to the model.
-export const action = frozen({
-  // session: { onBreak: false },
-  // break:   { onBreak: true },
-  start: { isRunning: true },
-  stop:  { isRunning: false }
-  // input:   { hasInput: true },
-  // cancel:  { hasInput: false }
-})
+export const action = actionStates
 
 // Export empty view/stateControl/model to avoid cyclical dependencies.
 export const view = {}
@@ -30,7 +24,6 @@ require('./view')
 require('./stateControl')
 require('./model')
 
-// Monitor for state changes.
-animator.addUpdate(view.showDigitalTime, SECOND / 5)
-// animator.addUpdate( () => model.present(action.monitor), SECOND )
+// Perform initial render.
+stateControl.render()
 

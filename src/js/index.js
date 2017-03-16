@@ -8,7 +8,3 @@ import makeBreakAnalog from './ui/breakAnalog'
 import makeSessionAnalog from './ui/sessionAnalog'
 import sleep from './time/sleep'
 
-const animator = getAnimator()
-
-model.present(action.input)
-
