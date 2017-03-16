@@ -15,13 +15,14 @@ export const makeAnimator = (spec) => {
 
   // Initialize state.
   const state = sealed({
-    lastTime:       0,
-    frameInterval:  0,
-    frameAvgInt:    16.5,  // Start with estimate.
-    frameRequestID: null,
-    isRunning:      false,
-    updater:        makePacer(spec),
-    renderer:       makeDispatcher(spec)
+    lastTime:        0,
+    frameInterval:   0,
+    frameAvgInt:     16.5,  // Start with estimate.
+    frameRequestID:  null,
+    isRunning:       false,
+    willClearCanvas: true,
+    updater:         makePacer(spec),
+    renderer:        makeDispatcher(spec)
   })
 
   // Adjust state to spec.
@@ -47,8 +48,17 @@ export const makeAnimator = (spec) => {
 
   // Trigger renders.
   const render = () => {
+    if (state.willClearCanvas) {
+      clearCanvas()
+    }
     state.renderer.next()
   }
+
+  // Return true if the animator will handle clearing the canvas by itself.
+  const willClearCanvas = () => state.willClearCanvas
+
+  // If set to true animator will assume responsibility for clearing the canvas.
+  const setClearCanvas = (v = true) => state.willClearCanvas = Boolean(v)
 
   // Add a render callback.
   const addRender = state.renderer.addCallback
@@ -135,8 +145,10 @@ export const makeAnimator = (spec) => {
     removeRender,
     removeUpdate,
     run,
+    setClearCanvas,
     setFrameInterval,
-    stop
+    stop,
+    willClearCanvas
   })
 
 }

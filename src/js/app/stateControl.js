@@ -155,7 +155,7 @@ const makeStateControl = () => {
     }
     const { sessionTime, breakTime } = input
     if ( model.startingAnimation() ) {
-      animator.addRender(clearCanvas)
+      animator.setClearCanvas(true)
       // Start the next session/break.
       if ( model.inSession() ) {
         startSession(sessionTime)
@@ -165,7 +165,7 @@ const makeStateControl = () => {
       // Update digital readout frequently while animating.
       animator.addUpdate(view.showDigitalTime, SECOND / 5)
     } else if ( model.inInputMode() ) {
-      animator.removeRender(clearCanvas)
+      animator.setClearCanvas(false)
       // Don't animate while user is inputting new data.
       sessionAnalog.deanimate()
       breakAnalog.deanimate()

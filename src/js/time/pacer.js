@@ -1,5 +1,5 @@
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
-import { MINUTE, SECOND } from '../utility/constants'
+import { HOUR, MINUTE, SECOND } from '../utility/constants'
 import makeDispatcher from '../utility/dispatcher.js'
 import makeTimer from './timer'
 
@@ -106,6 +106,10 @@ export const makePacer = (spec) => {
                 last = state.schedule[interval].last,
                 offset = state.schedule[interval].offset(),
                 delta = elapsed - last + offset
+          if (Number(interval) === HOUR) {
+            console.clear()
+            console.log(delta)
+          }
           if (delta >= interval) {
             dispatcher.next()
             state.schedule[interval].last = elapsed
