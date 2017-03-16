@@ -42,10 +42,40 @@ const makeView = () => {
   keys({ ...app, ...inputs, ...outputs })
     .map( (e) => El[e] = document.getElementById(e) )
 
+  // Limit the time inputs to a range of values
+  const limitHoursInput = (event) => {
+    event.target.value = Math.min(9, Math.max(0, event.target.value))
+  }
+  const limitMinutesInput = (event) => {
+    event.target.value = Math.min(59, Math.max(0, event.target.value))
+  }
+  const limitSecondsInput = (event) => {
+    event.target.value = Math.min(59, Math.max(0, event.target.value))
+  }
+
+  // Apply limits to the session/break input fields.
+  El.sessionHours.addEventListener('input', limitHoursInput)
+  El.sessionMinutes.addEventListener('input', limitMinutesInput)
+  El.sessionSeconds.addEventListener('input', limitSecondsInput)
+  El.breakHours.addEventListener('input', limitHoursInput)
+  El.breakMinutes.addEventListener('input', limitMinutesInput)
+  El.breakSeconds.addEventListener('input', limitSecondsInput)
+
+  // Attach input handler to the session/break input fields.
+  keys(inputs).map( (e) => {
+    El[e].addEventListener( 'input', () => stateControl.inputChange() )
+  })
+
+  // Attach input toggle to click event on the digital display.
+  El.digitalTime.addEventListener('click', () => stateControl.inputToggle())
+
   // Read session time from the relevant input fields.
   const readSessionTime = () => {
     const [h, m, s] = ['sessionHours', 'sessionMinutes', 'sessionSeconds']
       .map((e) => El[e].value)
+    sessionHours = Math.max(9, Math.min(0, sessionHours))
+    sessionMinutes = Math.max(59, Math.min(0, sessionMinutes))
+    sessionSeconds = Math.max(59, Math.min(0, sessionSeconds))
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
@@ -53,16 +83,10 @@ const makeView = () => {
   const readBreakTime = () => {
     const [h, m, s] = ['breakHours', 'breakMinutes', 'breakSeconds']
       .map((e) => El[e].value)
+    breakHours = Math.max(9, Math.min(0, breakHours))
+    breakMinutes = Math.max(59, Math.min(0, breakMinutes))
+    breakSeconds = Math.max(59, Math.min(0, breakSeconds))
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
-  }
-
-  // Return consolidated input values.
-  const readInput = () => {
-    DEBUG && console.log('READ INPUT:')
-    return {
-      breakTime:   readBreakTime(),
-      sessionTime: readSessionTime()
-    }
   }
 
   const showDigitalTime = () => {
@@ -107,6 +131,13 @@ const makeView = () => {
     display.breakAnalog.animate()
   }
 
+  // Show the analog display for break time.
+  const hideDisplay = () => {
+    // Disable session/break animation.
+    display.sessionAnalog.deanimate()
+    display.breakAnalog.deanimate()
+  }
+
   // Render current state to the DOM.
   const render = (data) => {
     keys(app).map( (e) => El[e].className = data[e] )
@@ -116,11 +147,14 @@ const makeView = () => {
 
   // Return interface.
   return frozen({
+    hideDisplay,
     proposeBreakDisplay,
     proposeSessionDisplay,
-    readInput,
+    readBreakTime,
+    readSessionTime,
     render,
     showBreakDisplay,
+    showDigitalTime,
     showSessionDisplay
   })
 

@@ -9,13 +9,12 @@ const animator = makeAnimator()
 
 // Export actions that can be presented to the model.
 export const action = frozen({
-  monitor: { },
-  session: { onBreak: false },
-  break:   { onBreak: true },
-  start:   { isRunning: true },
-  stop:    { isRunning: false },
-  input:   { hasInput: true },
-  cancel:  { hasInput: false }
+  // session: { onBreak: false },
+  // break:   { onBreak: true },
+  start: { isRunning: true },
+  stop:  { isRunning: false }
+  // input:   { hasInput: true },
+  // cancel:  { hasInput: false }
 })
 
 // Export empty view/stateControl/model to avoid cyclical dependencies.
@@ -32,5 +31,6 @@ require('./stateControl')
 require('./model')
 
 // Monitor for state changes.
-animator.addUpdate( () => model.present(action.monitor), SECOND )
+animator.addUpdate(view.showDigitalTime, SECOND / 5)
+// animator.addUpdate( () => model.present(action.monitor), SECOND )
 

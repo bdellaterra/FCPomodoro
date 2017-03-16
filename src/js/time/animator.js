@@ -103,11 +103,13 @@ export const makeAnimator = (spec) => {
 
   // Start loop. Update frameInterval if value provided.
   const run = (f) => {
-    state.lastTime = now()
-    setFrameInterval(f)
-    state.updater.resetCallbacks()
-    state.isRunning = true
-    loop(now())
+    if (!state.isRunning) {
+      state.lastTime = now()
+      setFrameInterval(f)
+      state.updater.resetCallbacks()
+      state.isRunning = true
+      loop(now())
+    }
   }
 
   // Stop the loop.
@@ -121,7 +123,7 @@ export const makeAnimator = (spec) => {
 
   // Return Interface.
   return frozen({
-    ...relay( state.updater.getTimer() ),
+    ...relay( state.updater ),
     addRender,
     addUpdate,
     getAverageFrameInterval,

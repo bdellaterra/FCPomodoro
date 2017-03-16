@@ -10,6 +10,5 @@ import sleep from './time/sleep'
 
 const animator = getAnimator()
 
-animator.run()
-model.present(action.start)
+model.present(action.input)
 

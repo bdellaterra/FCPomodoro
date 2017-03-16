@@ -12,9 +12,10 @@ export const makeTimer = (spec) => {
   // Initialize state.
   const state = sealed({
     beginning: 0,
-    now:       0,
+    time:      0,
     last:      0,
-    ending:    0
+    ending:    0,
+    alarm:     null
   })
 
   // Adjust state to spec.
@@ -22,20 +23,20 @@ export const makeTimer = (spec) => {
 
   // Return current time. (as of last upate) Optionally set time to a value.
   // NOTE: Generally sync() is preffered for updates, since it handles deltas.
-  const now = (time) => {
+  const time = (time) => {
     if (time !== undefined) {
-      state.now = time
+      state.time = time
     }
-    return state.now
+    return state.time
   }
 
   // Return time between updates.
-  const delta = () => state.now - state.last
+  const delta = () => state.time - state.last
 
   // Return time elapsed since start time. (as of last upate)
   // Optionally return time elapsed since a provided time value.
   const since = (time) => {
-    return state.now - (time !== undefined ? time : state.beginning)
+    return state.time - (time !== undefined ? time : state.beginning)
   }
 
   // Alias for since()
@@ -60,7 +61,7 @@ export const makeTimer = (spec) => {
   // Return time remaining until end time. (as of last upate)
   // Optionally return time remaining until a provided time value.
   const until = (time) => {
-    return Math.max(0, (time !== undefined ? time : state.ending ) - state.now)
+    return Math.max(0, (time !== undefined ? time : state.ending ) - state.time)
   }
 
   // Alias for until()
@@ -69,32 +70,32 @@ export const makeTimer = (spec) => {
   // Update current time to value provided. Save previous time for
   // calculating deltas. Update current time to now() if argument is undefined.
   const sync = (time) => {
-    state.last = state.now
-    state.now = (time !== undefined) ? time : now()
-    return state.now
+    state.last = state.time
+    state.time = (time !== undefined) ? time : now()
+    return state.time
   }
 
   // Synchronize all time values to now().
   // Optionally synchronize to a provided time value.
   const reset = (time) => {
-    state.now = (time !== undefined) ? time : now()
-    state.beginning = state.now
-    state.last = state.now
-    state.ending = state.now
-    return state.now
+    state.time = (time !== undefined) ? time : now()
+    state.beginning = state.time
+    state.last = state.time
+    state.ending = state.time
+    return state.time
   }
 
   // Return Interface.
   return frozen({
+    beginning,
     delta,
     elapsed,
     ending,
-    now,
     remaining,
     reset,
     since,
-    beginning,
     sync,
+    time,
     until
   })
 

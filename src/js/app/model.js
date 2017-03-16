@@ -1,4 +1,5 @@
 import { frozen, pick } from '../utility/fn'
+import { once } from '../utility/iter'
 import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
 import { action, getAnimator, model, stateControl, view } from './index'
 
@@ -30,7 +31,7 @@ export const makeModel = () => {
   const isRunning = () => state.isRunning
 
   // Return true if timer has run down to zero.
-  const atTimeout = () => isRunning() && state.animator.remaining() <= 0
+  const atTimeout = () => state.isRunning && state.animator.remaining() <= 0
 
   // Return true if display/input focus is on break time.
   const onBreak = () => state.onBreak
@@ -39,19 +40,19 @@ export const makeModel = () => {
   const inSession = () => !state.onBreak
 
   // Return true if in session and intent is for break.
-  const toBreak = () => inSession() && intent.onBreak
+  const toBreak = () => !state.onBreak && intent.onBreak
 
   // Return true if on break and intent is for session.
   const toSession = () => {
-    return onBreak() && (intent.onBreak !== undefined) && !intent.onBreak
+    return state.onBreak && (intent.onBreak !== undefined) && !intent.onBreak
   }
 
   // Return true if transitioning from stopped to running.
-  const toStart = () => !isRunning() && intent.isRunning
+  const toStart = () => !state.isRunning && intent.isRunning
 
   // Return true if transitioning from running to stopped.
   const toStop = () => {
-    return isRunning() && (intent.isRunning !== undefined) && !intent.isRunning
+    return state.isRunning && (intent.isRunning !== undefined) && !intent.isRunning
   }
 
   // Return true if input has changed.
@@ -75,51 +76,72 @@ export const makeModel = () => {
   }
 
   // Update state with the accepted new state.
-  const accept = (newState = {}) => {
-    state = { ...state, ...newState }
-    stateControl.render()
+  const accept = () => {
+    state = { ...state, ...intent }
+    intent = {}
   }
 
   // Present new state to the model for acceptance.
   const present = (newState = action.monitor) => {
     intent = newState
-    DEBUG && console.log('PRESENT:', newState)
-
-    if ( intent === action.monitor ) {
-      accept(intent)
+    switch (intent) {
+      case action.input:
+        DEBUG && console.log('input...')
+        intent = {
+          ...intent,
+          ...validate(stateControl.readInput()),
+          hasInput: false
+        }
+        accept()
+        break
+      case action.start:
+        DEBUG && console.log('starting...')
+        accept()
+        stateControl.start()
+        break
+      case action.stop:
+        DEBUG && console.log('stopping...')
+        accept()
+        break
+      default:
+        DEBUG && console.log('UNKNOWN ACTION!!')
     }
 
-    if (intent === action.session) {
-      accept(intent)
-    }
+    stateControl.render()
 
-    if (intent === action.break) {
-      accept(intent)
-    }
-
-    if (intent === action.start) {
-      if (state.hasInput) {
-        accept( { ...validate(view.readInput()), hasInput: false } )
-      }
-      state.animator.reset()
-      state.animator.ending(inSession() ? state.sessionTime : state.breakTime)
-      accept(intent)
-    }
-
-    if (intent === action.stop) {
-      state.animator.reset()
-      accept(intent)
-    }
-
-    if (intent === action.input) {
-      accept(intent)
-    }
-
-    if (intent === action.cancel) {
-      accept(intent)
-    }
-
-    intent = {}
+    // // DEBUG && console.log('State:', state)
+    // DEBUG && console.log('NewState:', newState, state.isRunning, state.animator.remaining())
+    // // DEBUG && console.log('Remaining:', state.animator.remaining())
+    //
+    // if ( intent === action.monitor ) {
+    //  // accept()
+    // } else if (intent === action.session) {
+    //   DEBUG && console.log('SWITCH TO SESSION:', action.break)
+    //   accept()
+    //   state.animator.ending(state.animator.time() + state.sessionTime)
+    // } else if (intent === action.break) {
+    //   DEBUG && console.log('SWITCH TO BREAK:', action.break)
+    //   accept()
+    //   state.animator.ending(state.animator.time() + state.breakTime)
+    // } else if (intent === action.start) {
+    //   console.log('starting...', intent)
+    //   if (state.hasInput) {
+    //     Object.assign( intent, { ...validate(view.readInput()), hasInput: false } )
+    //   }
+    //   accept()
+    //   let nextEnding = state.animator.time()
+    //                  + inSession() ? state.sessionTime : state.breakTime
+    //   state.animator.ending(nextEnding)
+    //   if (!state.animator.isRunning()) {
+    //     state.animator.run()
+    //   }
+    // } else if (intent === action.stop) {
+    //   accept()
+    // } else if (intent === action.input) {
+    //   accept()
+    // } else if (intent === action.cancel) {
+    //   accept()
+    // }
   }
 
   // Return interface.
