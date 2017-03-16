@@ -55,7 +55,7 @@ const makeView = () => {
 
   // Attach input handler to the session/break input fields.
   keys(inputs).map( (e) => {
-    El[e].addEventListener( 'input', () => stateControl.inputChange() )
+    El[e].addEventListener( 'input', () => stateControl.registerInput() )
   })
 
   // Attach presentation focus to the session/break input fields.
@@ -67,7 +67,13 @@ const makeView = () => {
   })
 
   // Attach input toggle to click event on the digital display.
-  El.digitalTime.addEventListener('click', () => stateControl.inputToggle())
+  El.digitalTime.addEventListener('click', () => stateControl.toggleInputMode())
+
+  // Disable input.
+  const disableInput = () => keys(inputs).map( (e) => El[e].disabled = true )
+
+  // Enable input.
+  const enableInput = () => keys(inputs).map( (e) => El[e].disabled = false )
 
   // Read session time from the relevant input fields.
   const readSessionTime = () => {
@@ -76,6 +82,7 @@ const makeView = () => {
     sessionHours = Math.max(9, Math.min(0, sessionHours))
     sessionMinutes = Math.max(59, Math.min(0, sessionMinutes))
     sessionSeconds = Math.max(59, Math.min(0, sessionSeconds))
+    DEBUG && console.log('READ SESSION:', hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s))
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
@@ -86,6 +93,7 @@ const makeView = () => {
     breakHours = Math.max(9, Math.min(0, breakHours))
     breakMinutes = Math.max(59, Math.min(0, breakMinutes))
     breakSeconds = Math.max(59, Math.min(0, breakSeconds))
+    DEBUG && console.log('READ BREAK:', hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s))
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
@@ -103,6 +111,11 @@ const makeView = () => {
     presentState(data)
     keys(inputs).map( (e) => El[e].value = data[e] )
     keys(outputs).map( (e) => El[e].innerHTML = data[e] )
+    if (data.isInputAllowed) {
+      enableInput()
+    } else {
+      disableInput()
+    }
   }
 
   // Return interface.

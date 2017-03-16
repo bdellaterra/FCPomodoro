@@ -1,6 +1,6 @@
 import { frozen } from '../utility/fn'
 import { once } from '../utility/iter'
-import { MILLISECOND, SECOND } from '../utility/constants'
+import { MILLISECOND, MINUTE, SECOND } from '../utility/constants'
 import { formatTime } from '../utility/conv'
 import { action, getAnimator, model, stateControl, view } from './index'
 import { actionName } from './action'
@@ -24,14 +24,18 @@ const makeStateControl = () => {
         breakAnalog = makeBreakAnalog({ animator })
 
   // Handle changes to the input fields.
-  const inputChange = () => {
-    const inSession = model.inSession(),
-          inputAction = inSession ? action.inputSession : action.inputBreak
-    model.present(inputAction)
+  const registerInput = () => {
+    if ( model.inSession() ) {
+      previewSession()
+      model.present(action.inputSession)
+    } else {
+      previewBreak()
+      model.present(action.inputBreak)
+    }
   }
 
   // Toggle input mode when the user clicks the digital display.
-  const inputToggle = () => {
+  const toggleInputMode = () => {
     const inSession = model.inSession(),
           inputAction = inSession ? action.inputSession : action.inputBreak,
           startAction = inSession ? action.startSession : action.startBreak,
@@ -41,36 +45,46 @@ const makeStateControl = () => {
 
   // Show a session analog that visually represents the user input.
   const previewSession = () => {
-    sessionAnalog.style( view.readSessionTime() )
+    const { sessionTime, breakTime } = readInput()
+    sessionAnalog.deanimate()
+    clearCanvas()
+    sessionAnalog.style( sessionTime )
     sessionAnalog.render()
   }
 
   // Show a break analog that visually represents the user input.
   const previewBreak = () => {
-    breakAnalog.style( view.readBreakTime() )
+    const { sessionTime, breakTime } = readInput()
+    breakAnalog.deanimate()
+    clearCanvas()
+    breakAnalog.style( breakTime )
     breakAnalog.render()
   }
 
   // Start a session for the given length of time.
   const startSession = (duration) => {
+    sessionAnalog.deanimate()
+    breakAnalog.deanimate()
+    animator.run()  // Does nothing if already running
     animator.reset()
     animator.ending(animator.time() + duration)
     animator.addUpdate(once(() => {
       model.present(action.endSession)
     }), duration)
-    animator.run()  // Does nothing if already running
     previewSession()
     sessionAnalog.animate()
   }
 
   // Start a break for the given length of time.
   const startBreak = (duration) => {
+    sessionAnalog.deanimate()
+    breakAnalog.deanimate()
+    animator.run()  // Does nothing if already running
     animator.reset()
     animator.ending(animator.time() + duration)
     animator.addUpdate(once(() => {
       model.present(action.endBreak)
     }), duration)
-    animator.run()  // Does nothing if already running
     previewBreak()
     breakAnalog.animate()
   }
@@ -118,9 +132,10 @@ const makeStateControl = () => {
       breakHours,
       breakMinutes,
       breakSeconds,
-      pomodoro:    presentation(),
-      digitalTime: readout(),
-      message:     notification()
+      pomodoro:       presentation(),
+      digitalTime:    readout(),
+      message:        notification(),
+      isInputAllowed: model.inInputMode()
     }
   }
 
@@ -175,14 +190,10 @@ const makeStateControl = () => {
         break
       }
       case action.endSession: {
-        sessionAnalog.deanimate()
-        clearCanvas()
         next = action.startBreak
         break
       }
       case action.endBreak: {
-        breakAnalog.deanimate()
-        clearCanvas()
         next = action.startSession
         break
       }
@@ -195,11 +206,11 @@ const makeStateControl = () => {
 
   // Return interface.
   return frozen({
-    inputChange,
-    inputToggle,
+    toggleInputMode,
     presentation,
     readInput,
     readout,
+    registerInput,
     render
   })
 

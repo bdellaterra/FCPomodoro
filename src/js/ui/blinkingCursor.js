@@ -69,14 +69,14 @@ export const makeBlinkingCursor = (spec) => {
   const animate = () => {
     arcTimer.animate()
     arcTimer.addUpdate(once(style), 0)  // Initial display
-    arcTimer.addUpdate(style, SECOND)
+    arcTimer.addUpdate(style, SECOND / 5) // sync with digital readout
     arcTimer.addRender(arcTimer.render)
   }
 
   // Teardown animation callbacks.
   const deanimate = () => {
     arcTimer.deanimate()
-    arcTimer.removeUpdate(style, SECOND)
+    arcTimer.removeUpdate(style, SECOND / 5)
     arcTimer.removeRender(arcTimer.render)
   }
 
