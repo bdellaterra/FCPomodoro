@@ -1,11 +1,11 @@
 import { BLINK } from '../utility/constants'
-import { action, animator, model, stateControl, view } from './index'
+import { action, animator, breakAnalog, model, sessionAnalog,
+         stateControl, view
+      } from './index'
 import { actionName } from './action'
 import { clearCanvas } from '../ui/canvas'
 import { formatTime } from '../utility/conv'
 import { frozen, sealed } from '../utility/fn'
-import { makeBreakAnalog } from '../ui/breakAnalog'
-import { makeSessionAnalog } from '../ui/sessionAnalog'
 import { once } from '../utility/iter'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
@@ -16,21 +16,15 @@ import { once } from '../utility/iter'
 // SAM methodology, but here it is called "state control" to disambiguate.
 const makeStateControl = () => {
 
-  // Initialize state
-  const state = sealed({
-    sessionAnalog: makeSessionAnalog({ animator }),
-    breakAnalog:   makeBreakAnalog({ animator })
-  })
-
   // Handle changes to the input fields.
   const registerInput = () => {
     if ( model.inSession() ) {
       clearCanvas()
-      state.sessionAnalog.draw()
+      sessionAnalog.draw()
       model.present(action.inputSession)
     } else {
       clearCanvas()
-      state.breakAnalog.draw()
+      breakAnalog.draw()
       model.present(action.inputBreak)
     }
   }
@@ -72,12 +66,12 @@ const makeStateControl = () => {
   const startSession = (() => {
     let endSessionCallback = Function.prototype
     return (duration) => {
-      state.breakAnalog.deanimate()
+      breakAnalog.deanimate()
       clearCanvas()
       animator.removeUpdate(endSessionCallback, duration)
       endSessionCallback = makeFutureAction(action.endSession)
       animator.addUpdate(endSessionCallback, duration)
-      state.sessionAnalog.countdown(duration)
+      sessionAnalog.countdown(duration)
     }
   })()
 
@@ -86,12 +80,12 @@ const makeStateControl = () => {
   const startBreak = (() => {
     let endBreakCallback = Function.prototype
     return (duration) => {
-      state.sessionAnalog.deanimate()
+      sessionAnalog.deanimate()
       clearCanvas()
       animator.removeUpdate(endBreakCallback, duration)
       endBreakCallback = makeFutureAction(action.endBreak)
       animator.addUpdate(endBreakCallback, duration)
-      state.breakAnalog.countdown(duration)
+      breakAnalog.countdown(duration)
     }
   })()
 
@@ -181,15 +175,15 @@ const makeStateControl = () => {
 
       // Don't animate while user is inputting new data.
       animator.setClearCanvas(false)
-      state.sessionAnalog.deanimate()
-      state.breakAnalog.deanimate()
+      sessionAnalog.deanimate()
+      breakAnalog.deanimate()
       animator.removeUpdate(view.showDigitalTime, BLINK)
       // Display a preview of the input values being entered by the user.
       clearCanvas()
       if ( model.inSession() ) {
-        state.sessionAnalog.draw(sessionTime)
+        sessionAnalog.draw(sessionTime)
       } else {
-        state.breakAnalog.draw(breakTime)
+        breakAnalog.draw(breakTime)
       }
 
     } else if ( model.inAnimationMode() ) {
@@ -214,9 +208,9 @@ const makeStateControl = () => {
         // Resume the previous session/break.
         clearCanvas()
         if ( model.inSession() ) {
-          state.sessionAnalog.animate()
+          sessionAnalog.animate()
         } else {
-          state.breakAnalog.animate()
+          breakAnalog.animate()
         }
         // Restore input fields to the data contained in the model.
         Object.assign(input, {
