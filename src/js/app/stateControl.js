@@ -1,6 +1,6 @@
 import { BLINK } from '../utility/constants'
-import { action, animator, breakAnalog, model, sessionAnalog,
-         stateControl, view
+import { action, animator, breakControl, breakDisplay, model,
+         sessionControl, sessionDisplay, stateControl, view
       } from './index'
 import { actionName } from './action'
 import { clearCanvas } from '../ui/canvas'
@@ -20,11 +20,11 @@ const makeStateControl = () => {
   const registerInput = () => {
     if ( model.inSession() ) {
       clearCanvas()
-      sessionAnalog.draw()
+      sessionDisplay.draw()
       model.present(action.inputSession)
     } else {
       clearCanvas()
-      breakAnalog.draw()
+      breakDisplay.draw()
       model.present(action.inputBreak)
     }
   }
@@ -66,12 +66,12 @@ const makeStateControl = () => {
   const startSession = (() => {
     let endSessionCallback = Function.prototype
     return (duration) => {
-      breakAnalog.deanimate()
+      breakControl.deanimate()
       clearCanvas()
       animator.removeUpdate(endSessionCallback, duration)
       endSessionCallback = makeFutureAction(action.endSession)
       animator.addUpdate(endSessionCallback, duration)
-      sessionAnalog.countdown(duration)
+      sessionControl.countdown(duration)
     }
   })()
 
@@ -80,12 +80,12 @@ const makeStateControl = () => {
   const startBreak = (() => {
     let endBreakCallback = Function.prototype
     return (duration) => {
-      sessionAnalog.deanimate()
+      sessionControl.deanimate()
       clearCanvas()
       animator.removeUpdate(endBreakCallback, duration)
       endBreakCallback = makeFutureAction(action.endBreak)
       animator.addUpdate(endBreakCallback, duration)
-      breakAnalog.countdown(duration)
+      breakControl.countdown(duration)
     }
   })()
 
@@ -175,15 +175,15 @@ const makeStateControl = () => {
 
       // Don't animate while user is inputting new data.
       animator.setClearCanvas(false)
-      sessionAnalog.deanimate()
-      breakAnalog.deanimate()
+      sessionControl.deanimate()
+      breakControl.deanimate()
       animator.removeUpdate(view.showDigitalTime, BLINK)
       // Display a preview of the input values being entered by the user.
       clearCanvas()
       if ( model.inSession() ) {
-        sessionAnalog.draw(sessionTime)
+        sessionDisplay.draw(sessionTime)
       } else {
-        breakAnalog.draw(breakTime)
+        breakDisplay.draw(breakTime)
       }
 
     } else if ( model.inAnimationMode() ) {
@@ -208,9 +208,9 @@ const makeStateControl = () => {
         // Resume the previous session/break.
         clearCanvas()
         if ( model.inSession() ) {
-          sessionAnalog.animate()
+          sessionControl.animate()
         } else {
-          breakAnalog.animate()
+          breakControl.animate()
         }
         // Restore input fields to the data contained in the model.
         Object.assign(input, {
