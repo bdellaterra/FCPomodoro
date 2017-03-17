@@ -71,7 +71,7 @@ export const makeArcTimer = (spec) => {
 
   // Return an offset for event schedulers that progress forward in time.
   // Used to schedule countdown events, such as remaining time reaching zero.
-  const updateOffset = () => {
+  const countdownOffset = () => {
     let offset = 0
     if (state.isCountdown) {
       offset = state.timeUnit - state.animator.ending() % state.timeUnit
@@ -82,7 +82,7 @@ export const makeArcTimer = (spec) => {
   // Setup animation callbacks.
   const animate = () => {
     state.animator.addUpdate(once(style), 0)  // Initial display
-    state.animator.addUpdate(style, state.timeUnit, updateOffset)
+    state.animator.addUpdate(style, state.timeUnit, countdownOffset)
     state.animator.addRender(arc.render)
   }
 
@@ -97,6 +97,7 @@ export const makeArcTimer = (spec) => {
     ...arc,
     ...relay(state.animator),
     animate,
+    countdownOffset,
     deanimate,
     getAnimator,
     getTimeUnit,
@@ -106,8 +107,7 @@ export const makeArcTimer = (spec) => {
     setAnimator,
     setTimeUnit,
     setUnitsPerCycle,
-    style,
-    updateOffset
+    style
   })
 
 }

@@ -52,7 +52,7 @@ export const makeHoursArc = (spec) => {
     arcTimer.addUpdate(once(style), 0)  // Initial display
     arcTimer.addUpdate(() => {
       style()
-    }, arcTimer.getTimeUnit(), arcTimer.updateOffset)
+    }, arcTimer.getTimeUnit(), arcTimer.countdownOffset)
     arcTimer.addRender(render)
   }
 
