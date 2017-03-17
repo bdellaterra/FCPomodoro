@@ -87,6 +87,9 @@ export const makeModel = () => {
   // Return true if the app is in input-mode.
   const inInputMode = () => state.hasInput && !state.isRunning
 
+  // Return true if the app is in animation-mode. Does not include end-states.
+  const inAnimationMode = () => state.isRunning
+
   // Return true if transitioning from input-mode to start-animation-mode.
   // If true, input must be submitted and animation must be initialized.
   const startingAnimation = () => state.hasInput && state.isRunning
@@ -103,6 +106,7 @@ export const makeModel = () => {
     getBreakTime,
     getSessionTime,
     getState,
+    inAnimationMode,
     inInputMode,
     inSession,
     present,

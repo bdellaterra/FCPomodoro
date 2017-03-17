@@ -177,40 +177,8 @@ const makeStateControl = () => {
 
     const { sessionTime, breakTime } = input
 
-    if ( model.startingAnimation() || model.resumingAnimation() ) {
-      // Animator is responsible for clearing the canvas when not in input-mode.
-      animator.setClearCanvas(true)
-      // Update digital readout frequently and in sync with blinking cursor.
-      animator.addUpdate(view.showDigitalTime, BLINK)
-    }
-
-    if ( model.startingAnimation() ) {
-      // Input is only presented to the model when an animation is starting.
-      submitInput(input)
-      // Start the next session/break.
-      if ( model.inSession() ) {
-        startSession(sessionTime)
-      } else {
-        startBreak(breakTime)
-      }
-    }
-
-    if ( model.resumingAnimation() ) {
-      // Resume the previous session/break.
-      clearCanvas()
-      if ( model.inSession() ) {
-        state.sessionAnalog.animate()
-      } else {
-        state.breakAnalog.animate()
-      }
-      // Restore input fields to the data contained in the model.
-      Object.assign(input, {
-        sessionTime: model.getSessionTime(),
-        breakTime:   model.getBreakTime()
-      })
-    }
-
     if ( model.inInputMode() ) {
+
       // Don't animate while user is inputting new data.
       animator.setClearCanvas(false)
       state.sessionAnalog.deanimate()
@@ -223,6 +191,40 @@ const makeStateControl = () => {
       } else {
         state.breakAnalog.draw(breakTime)
       }
+
+    } else if ( model.inAnimationMode() ) {
+
+      // Animator is responsible for clearing the canvas when not in input-mode.
+      animator.setClearCanvas(true)
+      // Update digital readout frequently and in sync with blinking cursor.
+      animator.addUpdate(view.showDigitalTime, BLINK)
+
+      if ( model.startingAnimation() ) {
+        // Input is only presented to the model when an animation is starting.
+        submitInput(input)
+        // Start the next session/break.
+        if ( model.inSession() ) {
+          startSession(sessionTime)
+        } else {
+          startBreak(breakTime)
+        }
+      }
+
+      if ( model.resumingAnimation() ) {
+        // Resume the previous session/break.
+        clearCanvas()
+        if ( model.inSession() ) {
+          state.sessionAnalog.animate()
+        } else {
+          state.breakAnalog.animate()
+        }
+        // Restore input fields to the data contained in the model.
+        Object.assign(input, {
+          sessionTime: model.getSessionTime(),
+          breakTime:   model.getBreakTime()
+        })
+      }
+
     }
 
     view.render( representation(input) )
@@ -253,7 +255,6 @@ const makeStateControl = () => {
       }
     }
     if (next) {
-      DEBUG && console.log( 'NEXT TO:', actionName(next) )
       model.present(next)
     }
   }
