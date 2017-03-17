@@ -1,6 +1,8 @@
-import { action, model, stateControl, view } from './index'
 import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from '../config'
+import { action, breakDisplay, model, sessionDisplay, stateControl, view
+       } from './index'
 import { frozen, keys } from '../utility/fn'
+import { clearCanvas } from '../ui/canvas'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
@@ -12,13 +14,19 @@ const makeView = () => {
   const root = frozen({ pomodoro: ['started'] })
 
   // Declare input fields with their default values.
-  const inputs = frozen({
+  const sessionInputs = frozen({
     sessionHours:   0,
     sessionMinutes: 0,
-    sessionSeconds: 0,
-    breakHours:     0,
-    breakMinutes:   0,
-    breakSeconds:   0
+    sessionSeconds: 0
+  })
+  const breakInputs = frozen({
+    breakHours:   0,
+    breakMinutes: 0,
+    breakSeconds: 0
+  })
+  const inputs = frozen({
+    ...sessionInputs,
+    ...breakInputs
   })
 
   // Declare output elements with their default content.
@@ -52,9 +60,20 @@ const makeView = () => {
   El.breakMinutes.addEventListener('input', limitMinutesInput)
   El.breakSeconds.addEventListener('input', limitSecondsInput)
 
-  // Attach input handler to the session/break input fields.
-  keys(inputs).map( (e) => {
-    El[e].addEventListener( 'input', () => stateControl.registerInput() )
+  // Attach input handlers to the session/break input fields.
+  keys(sessionInputs).map( (e) => {
+    El[e].addEventListener( 'input', () => {
+      clearCanvas()
+      sessionDisplay.draw()
+      stateControl.registerInput()
+    })
+  })
+  keys(breakInputs).map( (e) => {
+    El[e].addEventListener( 'input', () => {
+      clearCanvas()
+      breakDisplay.draw()
+      stateControl.registerInput()
+    })
   })
 
   // Attach presentation focus to the session/break input fields.

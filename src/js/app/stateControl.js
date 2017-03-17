@@ -19,12 +19,8 @@ const makeStateControl = () => {
   // Handle changes to the input fields.
   const registerInput = () => {
     if ( model.inSession() ) {
-      clearCanvas()
-      sessionDisplay.draw()
       model.present(action.inputSession)
     } else {
-      clearCanvas()
-      breakDisplay.draw()
       model.present(action.inputBreak)
     }
   }
