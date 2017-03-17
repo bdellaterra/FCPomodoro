@@ -99,6 +99,7 @@ export const makeTimerAnalog = (spec = {}) => {
     state.seconds.animate()
     state.cursor.animate()
     state.animator.addUpdate(rotateSeconds, SECOND)
+    state.animator.run()  // Does nothing if animator is already running.
   }
 
   // Stop animating hours/minutes/seconds changes.
@@ -112,9 +113,9 @@ export const makeTimerAnalog = (spec = {}) => {
 
   // Start new animation, counting down the given length of time.
   const countdown = (duration) => {
-    timerAnalog.deanimate()
+    deanimate()
     state.animator.countdown(duration)
-    timerAnalog.animate()
+    animate()
   }
 
   // Perform initialization.

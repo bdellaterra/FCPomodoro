@@ -67,51 +67,31 @@ const makeStateControl = () => {
     model.present(a)
   })
 
-  // Animate the session display.
-  const animateSession = () => {
-    animator.run()  // Does nothing if already running
-    clearCanvas()
-    state.sessionAnalog.draw()
-    state.sessionAnalog.animate()
-  }
-
   // Start a session for the given length of time.
   // Using closure to keep a private reference to the end-session callback.
   const startSession = (() => {
     let endSessionCallback = Function.prototype
     return (duration) => {
-      state.sessionAnalog.deanimate()
       state.breakAnalog.deanimate()
-      animator.reset()
-      animator.ending(animator.time() + duration)
+      clearCanvas()
       animator.removeUpdate(endSessionCallback, duration)
       endSessionCallback = makeFutureAction(action.endSession)
       animator.addUpdate(endSessionCallback, duration)
-      animateSession()
+      state.sessionAnalog.countdown(duration)
     }
   })()
-
-  // Animate the break display.
-  const animateBreak = () => {
-    animator.run()  // Does nothing if already running
-    clearCanvas()
-    state.breakAnalog.draw()
-    state.breakAnalog.animate()
-  }
 
   // Start a break for the given length of time.
   // Using closure to keep a private reference to the end-session callback.
   const startBreak = (() => {
     let endBreakCallback = Function.prototype
     return (duration) => {
-      state.breakAnalog.deanimate()
-      state.breakAnalog.deanimate()
-      animator.reset()
-      animator.ending(animator.time() + duration)
+      state.sessionAnalog.deanimate()
+      clearCanvas()
       animator.removeUpdate(endBreakCallback, duration)
       endBreakCallback = makeFutureAction(action.endBreak)
       animator.addUpdate(endBreakCallback, duration)
-      animateBreak()
+      state.breakAnalog.countdown(duration)
     }
   })()
 
@@ -209,10 +189,11 @@ const makeStateControl = () => {
       }
     } else if ( model.resumingAnimation() ) {
       // Resume the existing session/break.
+      clearCanvas()
       if ( model.inSession() ) {
-        animateSession()
+        state.sessionAnalog.animate()
       } else {
-        animateBreak()
+        state.breakAnalog.animate()
       }
       // Restore the input fields to the data contained in the model.
       Object.assign(input, {
