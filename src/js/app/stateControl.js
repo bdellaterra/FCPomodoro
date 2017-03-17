@@ -3,7 +3,7 @@ import { action, animator, model, stateControl, view } from './index'
 import { actionName } from './action'
 import { clearCanvas } from '../ui/canvas'
 import { formatTime } from '../utility/conv'
-import { frozen } from '../utility/fn'
+import { frozen, sealed } from '../utility/fn'
 import { makeBreakAnalog } from '../ui/breakAnalog'
 import { makeSessionAnalog } from '../ui/sessionAnalog'
 import { once } from '../utility/iter'
@@ -16,9 +16,11 @@ import { once } from '../utility/iter'
 // SAM methodology, but here it is called "state control" to disambiguate.
 const makeStateControl = () => {
 
-  // Create analog display elements for the user interface.
-  const sessionAnalog = makeSessionAnalog({ animator }),
-        breakAnalog = makeBreakAnalog({ animator })
+  // Initialize state
+  const state = sealed({
+    sessionAnalog: makeSessionAnalog({ animator }),
+    breakAnalog:   makeBreakAnalog({ animator })
+  })
 
   // Handle changes to the input fields.
   const registerInput = () => {
@@ -62,8 +64,8 @@ const makeStateControl = () => {
   const previewSession = () => {
     const { sessionTime, breakTime } = readInput()
     clearCanvas()
-    sessionAnalog.style( sessionTime )
-    sessionAnalog.render()
+    state.sessionAnalog.style( sessionTime )
+    state.sessionAnalog.render()
     console.log('PREVIEW SESSION:', sessionTime)
   }
 
@@ -71,8 +73,8 @@ const makeStateControl = () => {
   const previewBreak = () => {
     const { sessionTime, breakTime } = readInput()
     clearCanvas()
-    breakAnalog.style( breakTime )
-    breakAnalog.render()
+    state.breakAnalog.style( breakTime )
+    state.breakAnalog.render()
     console.log('PREVIEW BREAK:', breakTime)
   }
 
@@ -85,7 +87,7 @@ const makeStateControl = () => {
   const animateSession = () => {
     animator.run()  // Does nothing if already running
     previewSession()
-    sessionAnalog.animate()
+    state.sessionAnalog.animate()
   }
 
   // Start a session for the given length of time.
@@ -93,8 +95,8 @@ const makeStateControl = () => {
   const startSession = (() => {
     let endSessionCallback = Function.prototype
     return (duration) => {
-      sessionAnalog.deanimate()
-      breakAnalog.deanimate()
+      state.sessionAnalog.deanimate()
+      state.breakAnalog.deanimate()
       animator.reset()
       animator.ending(animator.time() + duration)
       animator.removeUpdate(endSessionCallback, duration)
@@ -108,7 +110,7 @@ const makeStateControl = () => {
   const animateBreak = () => {
     animator.run()  // Does nothing if already running
     previewBreak()
-    breakAnalog.animate()
+    state.breakAnalog.animate()
   }
 
   // Start a break for the given length of time.
@@ -116,8 +118,8 @@ const makeStateControl = () => {
   const startBreak = (() => {
     let endBreakCallback = Function.prototype
     return (duration) => {
-      breakAnalog.deanimate()
-      breakAnalog.deanimate()
+      state.breakAnalog.deanimate()
+      state.breakAnalog.deanimate()
       animator.reset()
       animator.ending(animator.time() + duration)
       animator.removeUpdate(endBreakCallback, duration)
@@ -234,8 +236,8 @@ const makeStateControl = () => {
     } else if ( model.inInputMode() ) {
       // Don't animate while user is inputting new data.
       animator.setClearCanvas(false)
-      sessionAnalog.deanimate()
-      breakAnalog.deanimate()
+      state.sessionAnalog.deanimate()
+      state.breakAnalog.deanimate()
       animator.removeUpdate(view.showDigitalTime, BLINK)
       // Display a preview of the input values being entered by the user.
       if ( model.inSession() ) {

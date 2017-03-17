@@ -125,8 +125,8 @@ export const makeTimerAnalog = (spec = {}) => {
   return frozen({
     ...relay(state.animator),  // support animator interface
     animate,
-    deanimate,
     countdown,
+    deanimate,
     draw,
     getAnimator,
     setAnimator,
