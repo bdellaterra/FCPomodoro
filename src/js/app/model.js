@@ -1,5 +1,5 @@
+import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '..//config'
 import { action, model, stateControl } from './index'
-import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
 import { actionName } from './action'
 import { frozen } from '../utility/fn'
 

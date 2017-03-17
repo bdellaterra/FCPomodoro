@@ -1,7 +1,7 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { HOUR, MINUTE, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
 import { HOURS_LINE_WIDTH, HOURS_RADIUS, HOURS_STROKE_STYLE
-       } from '../utility/conf'
+       } from '..//config'
 import { once } from '../utility/iter'
 import { context } from '../ui/canvas'
 import makeArcTimer from './arcTimer'

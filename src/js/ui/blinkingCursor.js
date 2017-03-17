@@ -2,7 +2,7 @@ import { ARC_CYCLE, BLINK, DEGREES_PER_CYCLE, SECOND, SECONDS_PER_HOUR
        } from '../utility/constants'
 import { CURSOR_LINE_WIDTH, CURSOR_RADIUS,
          CURSOR_STROKE_STYLE_1, CURSOR_STROKE_STYLE_2
-       } from '../utility/conf'
+       } from '..//config'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { makeArcTimer } from './arcTimer'
 import { once } from '../utility/iter'

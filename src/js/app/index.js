@@ -1,4 +1,4 @@
-import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
+import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '..//config'
 import makeAnimator from '../time/animator'
 
 export { action } from './action'

@@ -1,9 +1,15 @@
-import { MINUTE, SECOND } from './constants'
+import { MINUTE, SECOND } from './utility/constants'
 
 // Time settings
 
 export const DEFAULT_SESSION_TIME = 45 * MINUTE
 export const DEFAULT_BREAK_TIME = 15 * MINUTE
+
+// Text
+
+export const READOUT_START_TXT = 'START'
+export const MESSAGE_RUN_TXT = 'Click to Run Timer'
+export const INPUT_CANCEL_TXT = 'Click Here to Cancel Input'
 
 // Styles
 

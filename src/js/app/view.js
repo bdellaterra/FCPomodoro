@@ -1,4 +1,5 @@
 import { action, model, stateControl, view } from './index'
+import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from '../config'
 import { frozen, keys } from '../utility/fn'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
 
@@ -8,7 +9,7 @@ import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
 const makeView = () => {
 
   // Declare root element which will receive classes to adjust presentation.
-  const app = frozen({ pomodoro: ['started'] })
+  const root = frozen({ pomodoro: ['started'] })
 
   // Declare input fields with their default values.
   const inputs = frozen({
@@ -22,14 +23,14 @@ const makeView = () => {
 
   // Declare output elements with their default content.
   const outputs = frozen({
-    digitalTime:   'START',
-    message:       'Click to Run Timer',
-    cancelMessage: 'Click Here to Cancel Input'
+    digitalTime:   READOUT_START_TXT,
+    message:       MESSAGE_RUN_TXT,
+    cancelMessage: INPUT_CANCEL_TXT
   })
 
   // Pull DOM targets into an object.
   const El = {}
-  keys({ ...app, ...inputs, ...outputs })
+  keys({ ...root, ...inputs, ...outputs })
     .map( (e) => El[e] = document.getElementById(e) )
 
   // Limit the time inputs to a range of positive values
@@ -102,7 +103,7 @@ const makeView = () => {
   }
 
   const presentState = (data) => {
-    keys(app).map( (e) => El[e].className = data[e] )
+    keys(root).map( (e) => El[e].className = data[e] )
   }
 
   // Render current state to the DOM.

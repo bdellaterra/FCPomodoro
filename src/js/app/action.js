@@ -1,6 +1,4 @@
 import { frozen, keys } from '../utility/fn'
-// import { mapValues } from '../utility/fn'
-// import model from './model'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 

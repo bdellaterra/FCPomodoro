@@ -1,7 +1,7 @@
 import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
 import { SECOND, SECONDS_PER_HOUR } from '../utility/constants'
 import { BREAK_CURSOR_STYLE, BREAK_CURSOR_STYLE_2, BREAK_MINUTES_STYLE
-       } from '../utility/conf'
+       } from '..//config'
 import makeBlinkingCursor from './blinkingCursor'
 import makeMinutesArc from './minutesArc'
 import makeSessionAnalog from './sessionAnalog'

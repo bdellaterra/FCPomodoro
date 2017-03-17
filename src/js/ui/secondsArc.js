@@ -1,7 +1,7 @@
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
 import { MILLISECOND, MILLISECONDS_PER_MINUTE } from '../utility/constants'
 import { SECONDS_LINE_WIDTH, SECONDS_RADIUS, SECONDS_STROKE_STYLE
-       } from '../utility/conf'
+       } from '..//config'
 import makeArcTimer from './arcTimer'
 
 

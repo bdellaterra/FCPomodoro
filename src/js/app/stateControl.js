@@ -1,4 +1,4 @@
-import { SECOND } from '../utility/constants'
+import { BLINK } from '../utility/constants'
 import { action, animator, model, stateControl, view } from './index'
 import { actionName } from './action'
 import { clearCanvas } from '../ui/canvas'
@@ -19,10 +19,6 @@ const makeStateControl = () => {
   // Create analog display elements for the user interface.
   const sessionAnalog = makeSessionAnalog({ animator }),
         breakAnalog = makeBreakAnalog({ animator })
-
-  // Track callbacks for end of session/break so they can be
-  // unscheduled if progress is discontinued prematurely.
-  let endSessionCallback, endBreakCallback
 
   // Track whether session/break animation was in progress so it can be
   // restored when the user cancels input mode.
@@ -87,16 +83,20 @@ const makeStateControl = () => {
   }
 
   // Start a session for the given length of time.
-  const startSession = (duration) => {
-    sessionAnalog.deanimate()
-    breakAnalog.deanimate()
-    animator.reset()
-    animator.ending(animator.time() + duration)
-    animator.removeUpdate(endSessionCallback, duration)
-    endSessionCallback = makeFutureAction(action.endSession)
-    animator.addUpdate(endSessionCallback, duration)
-    animateSession()
-  }
+  // Using closure to keep a private reference to the end-session callback.
+  const startSession = (() => {
+    let endSessionCallback = Function.prototype
+    return (duration) => {
+      sessionAnalog.deanimate()
+      breakAnalog.deanimate()
+      animator.reset()
+      animator.ending(animator.time() + duration)
+      animator.removeUpdate(endSessionCallback, duration)
+      endSessionCallback = makeFutureAction(action.endSession)
+      animator.addUpdate(endSessionCallback, duration)
+      animateSession()
+    }
+  })()
 
   // Animate the break display.
   const animateBreak = () => {
@@ -106,16 +106,20 @@ const makeStateControl = () => {
   }
 
   // Start a break for the given length of time.
-  const startBreak = (duration) => {
-    sessionAnalog.deanimate()
-    breakAnalog.deanimate()
-    animator.reset()
-    animator.ending(animator.time() + duration)
-    animator.removeUpdate(endBreakCallback, duration)
-    endBreakCallback = makeFutureAction(action.endBreak)
-    animator.addUpdate(endBreakCallback, duration)
-    animateBreak()
-  }
+  // Using closure to keep a private reference to the end-session callback.
+  const startBreak = (() => {
+    let endBreakCallback = Function.prototype
+    return (duration) => {
+      breakAnalog.deanimate()
+      breakAnalog.deanimate()
+      animator.reset()
+      animator.ending(animator.time() + duration)
+      animator.removeUpdate(endBreakCallback, duration)
+      endBreakCallback = makeFutureAction(action.endBreak)
+      animator.addUpdate(endBreakCallback, duration)
+      animateBreak()
+    }
+  })()
 
   // Submit provided session/break input to the model.
   const submitInput = ({ sessionTime, breakTime }) => {
