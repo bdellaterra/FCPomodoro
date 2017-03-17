@@ -1,11 +1,11 @@
-import { ARC_CYCLE, ARC_ORIGIN, DEGREES_PER_CYCLE, SECOND, SECONDS_PER_HOUR
+import { ARC_CYCLE, BLINK, DEGREES_PER_CYCLE, SECOND, SECONDS_PER_HOUR
        } from '../utility/constants'
 import { CURSOR_LINE_WIDTH, CURSOR_RADIUS,
          CURSOR_STROKE_STYLE_1, CURSOR_STROKE_STYLE_2
        } from '../utility/conf'
 import { assign, frozen, keys, pick, sealed } from '../utility/fn'
+import { makeArcTimer } from './arcTimer'
 import { once } from '../utility/iter'
-import makeArcTimer from './arcTimer'
 
 
 // Create a cursor that traverses an arc-like path and blinks periodically.
@@ -69,14 +69,14 @@ export const makeBlinkingCursor = (spec) => {
   const animate = () => {
     arcTimer.animate()
     arcTimer.addUpdate(once(style), 0)  // Initial display
-    arcTimer.addUpdate(style, SECOND / 5) // sync with digital readout
+    arcTimer.addUpdate(style, BLINK)  // sync timing with digital readout
     arcTimer.addRender(arcTimer.render)
   }
 
   // Teardown animation callbacks.
   const deanimate = () => {
     arcTimer.deanimate()
-    arcTimer.removeUpdate(style, SECOND / 5)
+    arcTimer.removeUpdate(style, BLINK)
     arcTimer.removeRender(arcTimer.render)
   }
 

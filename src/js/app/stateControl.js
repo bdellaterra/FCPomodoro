@@ -1,3 +1,4 @@
+import { SECOND } from '../utility/constants'
 import { action, animator, model, stateControl, view } from './index'
 import { actionName } from './action'
 import { clearCanvas } from '../ui/canvas'
@@ -6,7 +7,6 @@ import { frozen } from '../utility/fn'
 import { makeBreakAnalog } from '../ui/breakAnalog'
 import { makeSessionAnalog } from '../ui/sessionAnalog'
 import { once } from '../utility/iter'
-import { SECOND } from '../utility/constants'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
@@ -197,8 +197,8 @@ const makeStateControl = () => {
     if ( model.startingAnimation() || model.resumingAnimation() ) {
       // Animator resumes clearing the canvas when input mode is finished.
       animator.setClearCanvas(true)
-      // Update digital readout frequently while animating.
-      animator.addUpdate(view.showDigitalTime, SECOND / 5)
+      // Update digital readout frequently and in sync with blinking cursor.
+      animator.addUpdate(view.showDigitalTime, BLINK)
     }
     if ( model.startingAnimation() ) {
       // Submit input to the model when starting a new animation.
@@ -226,7 +226,7 @@ const makeStateControl = () => {
       animator.setClearCanvas(false)
       sessionAnalog.deanimate()
       breakAnalog.deanimate()
-      animator.removeUpdate(view.showDigitalTime, SECOND / 5)
+      animator.removeUpdate(view.showDigitalTime, BLINK)
       // Display a preview of the input values being entered by the user.
       if ( model.inSession() ) {
         previewSession()
