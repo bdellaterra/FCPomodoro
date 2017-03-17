@@ -4,14 +4,14 @@ import { frozen, keys } from '../utility/fn'
 
 
 export const action = frozen({
-  startSession: { inSession: true, hasInput: true, isRunning: true },
-  inputSession: { inSession: true, hasInput: true, isRunning: false },
-  runSession:   { inSession: true, hasInput: false, isRunning: true },
-  endSession:   { inSession: true, hasInput: false, isRunning: false },
-  startBreak:   { inSession: false, hasInput: true, isRunning: true },
-  inputBreak:   { inSession: false, hasInput: true, isRunning: false },
-  runBreak:     { inSession: false, hasInput: false, isRunning: true },
-  endBreak:     { inSession: false, hasInput: false, isRunning: false }
+  startSession: frozen({ inSession: true, hasInput: true, isRunning: true }),
+  inputSession: frozen({ inSession: true, hasInput: true, isRunning: false }),
+  runSession:   frozen({ inSession: true, hasInput: false, isRunning: true }),
+  endSession:   frozen({ inSession: true, hasInput: false, isRunning: false }),
+  startBreak:   frozen({ inSession: false, hasInput: true, isRunning: true }),
+  inputBreak:   frozen({ inSession: false, hasInput: true, isRunning: false }),
+  runBreak:     frozen({ inSession: false, hasInput: false, isRunning: true }),
+  endBreak:     frozen({ inSession: false, hasInput: false, isRunning: false })
 })
 
 // Map a combination of states to their corresponding action name.

@@ -87,7 +87,7 @@ export const makeModel = () => {
     stateControl.render()
   }
 
-  // Return a copy of the state object.
+  // Return the (immutable) state object.
   const getState = () => state
 
   // Return true if the app is in input-mode.
