@@ -25,10 +25,12 @@ const makeStateControl = () => {
   // Handle changes to the input fields.
   const registerInput = () => {
     if ( model.inSession() ) {
-      previewSession()
+      clearCanvas()
+      state.sessionAnalog.draw()
       model.present(action.inputSession)
     } else {
-      previewBreak()
+      clearCanvas()
+      state.breakAnalog.draw()
       model.present(action.inputBreak)
     }
   }
@@ -60,24 +62,6 @@ const makeStateControl = () => {
   // Alias:
   const cancelInputMode = () => toggleInputMode({ cancellingInput: true })
 
-  // Show a session analog that visually represents the user input.
-  const previewSession = () => {
-    const { sessionTime, breakTime } = readInput()
-    clearCanvas()
-    state.sessionAnalog.style( sessionTime )
-    state.sessionAnalog.render()
-    console.log('PREVIEW SESSION:', sessionTime)
-  }
-
-  // Show a break analog that visually represents the user input.
-  const previewBreak = () => {
-    const { sessionTime, breakTime } = readInput()
-    clearCanvas()
-    state.breakAnalog.style( breakTime )
-    state.breakAnalog.render()
-    console.log('PREVIEW BREAK:', breakTime)
-  }
-
   // Create a callback that will present a the provided action to the model.
   const makeFutureAction = (a) => once(() => {
     model.present(a)
@@ -86,7 +70,8 @@ const makeStateControl = () => {
   // Animate the session display.
   const animateSession = () => {
     animator.run()  // Does nothing if already running
-    previewSession()
+    clearCanvas()
+    state.sessionAnalog.draw()
     state.sessionAnalog.animate()
   }
 
@@ -109,7 +94,8 @@ const makeStateControl = () => {
   // Animate the break display.
   const animateBreak = () => {
     animator.run()  // Does nothing if already running
-    previewBreak()
+    clearCanvas()
+    state.breakAnalog.draw()
     state.breakAnalog.animate()
   }
 
@@ -241,9 +227,11 @@ const makeStateControl = () => {
       animator.removeUpdate(view.showDigitalTime, BLINK)
       // Display a preview of the input values being entered by the user.
       if ( model.inSession() ) {
-        previewSession()
+        clearCanvas()
+        state.sessionAnalog.draw(sessionTime)
       } else {
-        previewBreak()
+        clearCanvas()
+        state.breakAnalog.draw(breakTime)
       }
     }
 
