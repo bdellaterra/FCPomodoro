@@ -63,15 +63,13 @@ const makeView = () => {
   // Attach input handlers to the session/break input fields.
   keys(sessionInputs).map( (e) => {
     El[e].addEventListener( 'input', () => {
-      clearCanvas()
-      sessionDisplay.draw()
+      previewInput({ inSession: true })
       stateControl.registerInput()
     })
   })
   keys(breakInputs).map( (e) => {
     El[e].addEventListener( 'input', () => {
-      clearCanvas()
-      breakDisplay.draw()
+      previewInput({ inSession: false })
       stateControl.registerInput()
     })
   })
@@ -95,6 +93,22 @@ const makeView = () => {
 
   // Enable input.
   const enableInput = () => keys(inputs).map( (e) => El[e].disabled = false )
+
+  // Display a preview of the input values being entered by the user.
+  const previewInput = ({ inSession, sessionTime, breakTime }) => {
+    if (sessionTime === undefined) {
+      sessionTime = readSessionTime()
+    }
+    if (breakTime === undefined) {
+      breakTime = readBreakTime()
+    }
+    clearCanvas()
+    if (inSession) {
+      sessionDisplay.draw(sessionTime)
+    } else {
+      breakDisplay.draw(breakTime)
+    }
+  }
 
   // Read session time from the relevant input fields.
   const readSessionTime = () => {
@@ -127,11 +141,13 @@ const makeView = () => {
 
   // Render current state to the DOM.
   const render = (data) => {
+    const { inInputMode, inSession } = data
     presentState(data)
     keys(inputs).map( (e) => El[e].value = data[e] )
     keys(outputs).map( (e) => El[e].innerHTML = data[e] )
-    if (data.isInputAllowed) {
+    if (inInputMode) {
       enableInput()
+      previewInput({ inSession })
     } else {
       disableInput()
     }

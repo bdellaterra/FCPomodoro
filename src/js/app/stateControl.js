@@ -94,8 +94,7 @@ const makeStateControl = () => {
   // Read session/break input from the view. Return the data as an object.
   const readInput = () => {
     const sessionTime = view.readSessionTime(),
-          breakTime = view.readBreakTime(),
-          input = { sessionTime, breakTime }
+          breakTime = view.readBreakTime()
     return { sessionTime, breakTime }
   }
 
@@ -131,6 +130,8 @@ const makeStateControl = () => {
 
   // Create a model that is easily consumed by the view.
   const representation = ({ sessionTime, breakTime, isCancelHidden }) => {
+    const inInputMode = model.inInputMode(),
+          inSession = model.inSession()
     // Format time values for display.
     const [sessionHours, sessionMinutes, sessionSeconds]
             = formatTime(sessionTime).split(':'),
@@ -138,17 +139,18 @@ const makeStateControl = () => {
             = formatTime(breakTime).split(':')
     // Return data that can be fed directly into the view.
     return {
+      inInputMode,
+      inSession,
       sessionHours,
       sessionMinutes,
       sessionSeconds,
       breakHours,
       breakMinutes,
       breakSeconds,
-      pomodoro:       presentation({ isCancelHidden }),
-      digitalTime:    readout(),
-      message:        notification(),
-      cancelMessage:  cancellation({ isCancelHidden }),
-      isInputAllowed: model.inInputMode()
+      pomodoro:      presentation({ isCancelHidden }),
+      digitalTime:   readout(),
+      message:       notification(),
+      cancelMessage: cancellation({ isCancelHidden })
     }
   }
 
@@ -174,13 +176,6 @@ const makeStateControl = () => {
       sessionControl.deanimate()
       breakControl.deanimate()
       animator.removeUpdate(view.showDigitalTime, BLINK)
-      // Display a preview of the input values being entered by the user.
-      clearCanvas()
-      if ( model.inSession() ) {
-        sessionDisplay.draw(sessionTime)
-      } else {
-        breakDisplay.draw(breakTime)
-      }
 
     } else if ( model.inAnimationMode() ) {
 
