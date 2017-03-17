@@ -35,6 +35,6 @@ export const SECONDS_LINE_WIDTH = 2
 export const SECONDS_STROKE_STYLE = 'rgb(0, 0, 0)'
 
 export const BREAK_MINUTES_STYLE = 'rgb(15, 190, 135)'
-export const BREAK_CURSOR_STYLE = 'rgb(10, 20, 50)'
+export const BREAK_CURSOR_STYLE = 'rgb(0, 100, 15)'
 export const BREAK_CURSOR_STYLE_2 = CURSOR_STROKE_STYLE_2
 
