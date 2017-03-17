@@ -62,7 +62,7 @@ const makeStateControl = () => {
   // Alias:
   const cancelInputMode = () => toggleInputMode({ cancellingInput: true })
 
-  // Create a callback that will present a the provided action to the model.
+  // Create a callback that will present the provided action to the model.
   const makeFutureAction = (a) => once(() => {
     model.present(a)
   })
@@ -101,7 +101,7 @@ const makeStateControl = () => {
     model.setBreakTime(breakTime)
   }
 
-  // Read and submit session/break input. Return the data as an object.
+  // Read session/break input from the view. Return the data as an object.
   const readInput = () => {
     const sessionTime = view.readSessionTime(),
           breakTime = view.readBreakTime(),
@@ -109,11 +109,12 @@ const makeStateControl = () => {
     return { sessionTime, breakTime }
   }
 
-  // Adjust presentation with style classes for various control states.
+  // Adjust app presentation using style classes for various control states.
   const presentation = ({ isCancelHidden = false }) => {
-    const classes = []
-    classes.push(model.inSession() ? 'inSession' : 'onBreak')
-    classes.push(model.inInputMode() ? 'inInputMode' : 'inAnimationMode')
+    const classes = [
+      model.inSession() ? 'inSession' : 'onBreak',
+      model.inInputMode() ? 'inInputMode' : 'inAnimationMode'
+    ]
     if (isCancelHidden) {
       classes.push('hideCancelMessage')
     }
@@ -164,22 +165,27 @@ const makeStateControl = () => {
   // Send a representation of the model to the view for rendering,
   // then invoke possible next actions that result from current control state.
   const render = (input) => {
-    // Submit input values to the model or read them in if they weren't provided.
+
     if (input !== undefined) {
+      // Submit provided input values to the model.
       submitInput(input)
       Object.assign(input, { isCancelHidden: true })
     } else {
+      // If no input provided, read values from the view.
       input = readInput()
     }
+
     const { sessionTime, breakTime } = input
+
     if ( model.startingAnimation() || model.resumingAnimation() ) {
-      // Animator resumes clearing the canvas when input mode is finished.
+      // Animator is responsible for clearing the canvas when not in input-mode.
       animator.setClearCanvas(true)
       // Update digital readout frequently and in sync with blinking cursor.
       animator.addUpdate(view.showDigitalTime, BLINK)
     }
+
     if ( model.startingAnimation() ) {
-      // Submit input to the model when starting a new animation.
+      // Input is only presented to the model when an animation is starting.
       submitInput(input)
       // Start the next session/break.
       if ( model.inSession() ) {
@@ -187,31 +193,34 @@ const makeStateControl = () => {
       } else {
         startBreak(breakTime)
       }
-    } else if ( model.resumingAnimation() ) {
-      // Resume the existing session/break.
+    }
+
+    if ( model.resumingAnimation() ) {
+      // Resume the previous session/break.
       clearCanvas()
       if ( model.inSession() ) {
         state.sessionAnalog.animate()
       } else {
         state.breakAnalog.animate()
       }
-      // Restore the input fields to the data contained in the model.
+      // Restore input fields to the data contained in the model.
       Object.assign(input, {
         sessionTime: model.getSessionTime(),
         breakTime:   model.getBreakTime()
       })
-    } else if ( model.inInputMode() ) {
+    }
+
+    if ( model.inInputMode() ) {
       // Don't animate while user is inputting new data.
       animator.setClearCanvas(false)
       state.sessionAnalog.deanimate()
       state.breakAnalog.deanimate()
       animator.removeUpdate(view.showDigitalTime, BLINK)
       // Display a preview of the input values being entered by the user.
+      clearCanvas()
       if ( model.inSession() ) {
-        clearCanvas()
         state.sessionAnalog.draw(sessionTime)
       } else {
-        clearCanvas()
         state.breakAnalog.draw(breakTime)
       }
     }
