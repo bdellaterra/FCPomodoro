@@ -48,12 +48,25 @@ export const makeTimerAnalog = (spec = {}) => {
     state.seconds = makeSecondsArc({ animator: state.animator })
   }
 
+  // Return a reference to the animator.
+  const getAnimator = () => state.animator
+
+  // Set analog to use a different animator.
+  const setAnimator = (v) => {
+    state.animator = v
+    state.hours.setAnimator(v)
+    state.minutes.setAnimator(v)
+    state.seconds.setAnimator(v)
+    state.cursor.setAnimator(v)
+  }
+
   // Rotate the seconds arc so it tracks with the minutes arc.
   const rotateSeconds = () => {
     state.seconds.setRotation(ARC_CLOCK_ROTATION + state.minutes.getEnd())
   }
 
-  // Style all components.
+  // Style all components to represent the current time.
+  // Optionally style them to represent the time value provided.
   const style = (time) => {
     state.hours.style(time)
     state.minutes.style(time)
@@ -70,25 +83,21 @@ export const makeTimerAnalog = (spec = {}) => {
     state.cursor.render()
   }
 
-  // Return a reference to the animator.
-  const getAnimator = () => state.animator
-
-  // Set analog to use a different animator.
-  const setAnimator = (v) => {
-    state.animator = v
-    state.hours.setAnimator(v)
-    state.minutes.setAnimator(v)
-    state.seconds.setAnimator(v)
-    state.cursor.setAnimator(v)
+  // Immediately draw the analog styled to the current time,
+  // or styled to an optional time value.
+  const draw = (time) => {
+    style(time)
+    render()
   }
 
   // Animate hours/minutes/seconds changes.
   const animate = () => {
+    state.animator.sync()
+    draw()
     state.hours.animate()
     state.minutes.animate()
     state.seconds.animate()
     state.cursor.animate()
-    state.animator.addUpdate(once(rotateSeconds), 0)  // Initial display
     state.animator.addUpdate(rotateSeconds, SECOND)
   }
 
@@ -101,6 +110,13 @@ export const makeTimerAnalog = (spec = {}) => {
     state.animator.removeUpdate(rotateSeconds, SECOND)
   }
 
+  // Start new animation, counting down the given length of time.
+  const countdown = (duration) => {
+    timerAnalog.deanimate()
+    state.animator.countdown(duration)
+    timerAnalog.animate()
+  }
+
   // Perform initialization.
   style()
   animate()
@@ -110,6 +126,8 @@ export const makeTimerAnalog = (spec = {}) => {
     ...relay(state.animator),  // support animator interface
     animate,
     deanimate,
+    countdown,
+    draw,
     getAnimator,
     setAnimator,
     render,
