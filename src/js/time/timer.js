@@ -63,7 +63,6 @@ export const makeTimer = (spec) => {
   const until = (time) => {
     return Math.max(0, (time !== undefined ? time : state.ending ) - state.time)
   }
-
   // Alias for until()
   const remaining = until
 
@@ -85,9 +84,16 @@ export const makeTimer = (spec) => {
     return state.time
   }
 
+  // Reset timer and count down the given length of time.
+  const countdown = (duration = 0) => {
+    reset()
+    ending(state.time + duration)
+  }
+
   // Return Interface.
   return frozen({
     beginning,
+    countdown,
     delta,
     elapsed,
     ending,

@@ -69,6 +69,8 @@ export const makeArcTimer = (spec) => {
   // If changed this affects the arc's start and end position.
   const setCountdown = (v) => state.isCountdown = Boolean(v)
 
+  // Return an offset for event schedulers that progress forward in time.
+  // Used to schedule countdown events, such as remaining time reaching zero.
   const updateOffset = () => {
     let offset = 0
     if (state.isCountdown) {

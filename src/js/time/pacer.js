@@ -86,6 +86,12 @@ export const makePacer = (spec) => {
     resetCallbacks()
   }
 
+  // Reset and have timer count down the given length of time.
+  const countdown = (duration = 0) => {
+    reset()
+    state.timer.countdown(duration)
+  }
+
   // Return the timer.
   const getTimer = () => state.timer
 
@@ -124,6 +130,7 @@ export const makePacer = (spec) => {
   assign( p, {
     ...relay(state.timer),  // provide timer interface
     addCallback,
+    countdown,
     getTimer,
     numCallbacks,
     removeCallback,
