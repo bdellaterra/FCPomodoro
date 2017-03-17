@@ -1,14 +1,11 @@
-import { frozen, keys, sealed } from '../utility/fn'
+import { action, model, stateControl, view } from './index'
+import { frozen, keys } from '../utility/fn'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
-import { action, getAnimator, model, stateControl, view } from './index'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
 const makeView = () => {
-
-  // Get access to the shared animator.
-  const animator = getAnimator()
 
   // Declare root element which will receive classes to adjust presentation.
   const app = frozen({ pomodoro: ['started'] })

@@ -1,12 +1,12 @@
-import { frozen } from '../utility/fn'
-import { once } from '../utility/iter'
-import { MILLISECOND, MINUTE, SECOND } from '../utility/constants'
-import { formatTime } from '../utility/conv'
-import { action, getAnimator, model, stateControl, view } from './index'
+import { action, animator, model, stateControl, view } from './index'
 import { actionName } from './action'
 import { clearCanvas } from '../ui/canvas'
-import makeBreakAnalog from '../ui/breakAnalog'
-import makeSessionAnalog from '../ui/sessionAnalog'
+import { formatTime } from '../utility/conv'
+import { frozen } from '../utility/fn'
+import { makeBreakAnalog } from '../ui/breakAnalog'
+import { makeSessionAnalog } from '../ui/sessionAnalog'
+import { once } from '../utility/iter'
+import { SECOND } from '../utility/constants'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
@@ -15,9 +15,6 @@ import makeSessionAnalog from '../ui/sessionAnalog'
 // The layer between the view and model is typically called "state" in the
 // SAM methodology, but here it is called "state control" to disambiguate.
 const makeStateControl = () => {
-
-  // Get access to the shared animator.
-  const animator = getAnimator()
 
   // Create analog display elements for the user interface.
   const sessionAnalog = makeSessionAnalog({ animator }),

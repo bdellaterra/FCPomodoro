@@ -1,16 +1,12 @@
-import { frozen, pick } from '../utility/fn'
-import { once } from '../utility/iter'
+import { action, model, stateControl } from './index'
 import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '../utility/conf'
-import { action, getAnimator, model, stateControl, view } from './index'
 import { actionName } from './action'
+import { frozen } from '../utility/fn'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
 export const makeModel = () => {
-
-  // Get access to the shared animator.
-  const animator = getAnimator()
 
   // Initialize state
   let state = action.inputSession,  // inSession, hasInput, !isRunning
