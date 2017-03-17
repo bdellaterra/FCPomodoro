@@ -47,8 +47,11 @@ export const makeModel = () => {
 
     switch (state) {
       case action.inputSession:
-        accept([action.inputSession, action.inputBreak, action.startSession,
-                action.runSession, action.runBreak])
+        accept([action.inputSession, action.inputBreak,
+                action.startSession,
+                action.runSession, action.runBreak,
+                action.endSession, action.endBreak
+        ])
         break
       case action.startSession:
         accept([action.runSession])
@@ -60,8 +63,11 @@ export const makeModel = () => {
         accept([action.startBreak])
         break
       case action.inputBreak:
-        accept([action.inputSession, action.inputBreak, action.startBreak,
-                action.runSession, action.runBreak])
+        accept([action.inputSession, action.inputBreak,
+                action.startBreak,
+                action.runSession, action.runBreak,
+                action.endSession, action.endBreak
+        ])
         break
       case action.startBreak:
         accept([action.runBreak])
