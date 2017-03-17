@@ -20,10 +20,6 @@ const makeStateControl = () => {
   const sessionAnalog = makeSessionAnalog({ animator }),
         breakAnalog = makeBreakAnalog({ animator })
 
-  // Track whether session/break animation was in progress so it can be
-  // restored when the user cancels input mode.
-  let wasSession
-
   // Handle changes to the input fields.
   const registerInput = () => {
     if ( model.inSession() ) {
@@ -36,21 +32,31 @@ const makeStateControl = () => {
   }
 
   // Toggle input mode when the user clicks the digital display.
-  const toggleInputMode = () => {
-    const inSession = model.inSession(),
-          inputAction = inSession ? action.inputSession : action.inputBreak,
-          startAction = inSession ? action.startSession : action.startBreak,
-          toggleAction = model.inInputMode() ? startAction : inputAction
-    // Save session/break state so it can be restored if input is cancelled.
-    wasSession = inSession
-    // Present the corresponding input mode  to the model.
-    model.present( toggleAction )
-  }
-
-  // Cancel input mode when the user clicks on the cancel link.
-  const cancelInputMode = () => {
-    model.present( wasSession ? action.runSession : action.runBreak )
-  }
+  // Using closure to privately track whether session/break was in progress.
+  const toggleInputMode = (() => {
+    let wasInSession
+    return ({ cancellingInput = false } = {}) => {
+      const inSession = model.inSession(),
+            inputAction = inSession ? action.inputSession : action.inputBreak,
+            startAction = inSession ? action.startSession : action.startBreak
+      let toggleAction = model.inInputMode() ? startAction : inputAction
+      // Save animation state so it can be restored if input is cancelled.
+      if (toggleAction === inputAction) {
+        wasInSession = inSession
+      }
+      // If input mode is being cancelled, return to the previous animation.
+      if (cancellingInput) {
+        if (toggleAction === startAction) {
+          toggleAction = wasInSession ? action.runSession : action.runBreak
+        } else {
+          return // RETURN: When not in input mode cancel request does nothing.
+        }
+      }
+      model.present( toggleAction )
+    }
+  })()
+  // Alias:
+  const cancelInputMode = () => toggleInputMode({ cancellingInput: true })
 
   // Show a session analog that visually represents the user input.
   const previewSession = () => {
