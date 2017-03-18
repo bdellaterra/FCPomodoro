@@ -20,6 +20,10 @@ export const DEFAULT_ARC_RADIUS = 200
 export const DEFAULT_ARC_LINE_WIDTH = 18
 export const DEFAULT_ARC_STROKE_STYLE = 'blue'
 
+export const CIRCLE_RADIUS = 91
+export const CIRCLE_LINE_WIDTH = 200
+export const CIRCLE_STROKE_STYLE = '#b0c0d0'
+
 export const CURSOR_RADIUS = DEFAULT_ARC_RADIUS
 export const CURSOR_LINE_WIDTH = DEFAULT_ARC_LINE_WIDTH - 2
 export const CURSOR_STROKE_STYLE_1 = 'rgb(0, 20, 250)'

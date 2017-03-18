@@ -7,7 +7,7 @@ import makeEntity from 'ui/entity'
 
 // Create an entity that has a display location on the canvas.
 // Centered by default.
-const makeDisplayer = (spec) => {
+export const makeDisplayer = (spec) => {
 
   // Extends:
   const entity = makeEntity(spec)

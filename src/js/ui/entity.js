@@ -3,7 +3,7 @@ import now from 'present'
 
 
 // Create a unique entity with it's own ID.
-const makeEntity = (spec) => {
+export const makeEntity = (spec) => {
 
   // Initialize state.
   const state = sealed({ id: now() })

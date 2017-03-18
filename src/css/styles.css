@@ -7,7 +7,7 @@ html {
 html,
 body,
 #pomodoro {
-  background: #aabbcc;
+  background: #a3b3c3;
   border-radius: 0;
   box-sizing: border-box;
   margin:0;
@@ -83,18 +83,9 @@ select {
   border-color: rgb(15, 190, 135);
 }
 
-/* #pomodoro added for specificity. */
-/*
-#pomodoro textarea:focus,
-#pomodoro input:focus,
-#pomodoro select:focus {
-  border-color: #000000;
-}
-*/
-
-textarea:disabled,
-input:disabled,
-select:disabled {
+#pomodoro.inAnimationMode textarea,
+#pomodoro.inAnimationMode input,
+#pomodoro.inAnimationMode select  {
   background-color: #e6eefc;
   border-color: #889099;
   color:#111111;
