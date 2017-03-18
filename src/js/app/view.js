@@ -1,16 +1,16 @@
-import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from '../config'
+import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from 'config'
 import { action, breakDisplay, model, sessionDisplay, stateControl, view
-       } from './index'
-import { frozen, keys } from '../utility/fn'
-import { clearCanvas } from '../ui/canvas'
-import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from '../utility/conv'
+       } from 'app'
+import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from 'utility/conv'
+import { frozen, keys } from 'utility/fn'
+import { clearCanvas } from 'ui/canvas'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
 const makeView = () => {
 
-  // Declare root element which will receive classes to adjust presentation.
+  // Declare root element, which will receive classes to adjust presentation.
   const root = frozen({ pomodoro: ['started'] })
 
   // Declare input fields with their default values.
@@ -75,10 +75,10 @@ const makeView = () => {
   })
 
   // Attach presentation focus to the session/break input fields.
-  ;['sessionHours', 'sessionMinutes', 'sessionSeconds'].map( (e) => {
+  keys(sessionInputs).map( (e) => {
     El[e].addEventListener( 'click', () => model.present(action.inputSession) )
   })
-  ;['breakHours', 'breakMinutes', 'breakSeconds'].map( (e) => {
+  keys(breakInputs).map( (e) => {
     El[e].addEventListener( 'click', () => model.present(action.inputBreak) )
   })
 
@@ -86,7 +86,9 @@ const makeView = () => {
   El.digitalTime.addEventListener('click', () => stateControl.toggleInputMode())
 
   // Attach click event for cancel input link.
-  El.cancelMessage.addEventListener('click', () => stateControl.cancelInputMode())
+  El.cancelMessage.addEventListener('click', () => {
+    stateControl.cancelInputMode()
+  })
 
   // Disable input.
   const disableInput = () => keys(inputs).map( (e) => El[e].disabled = true )
@@ -112,21 +114,13 @@ const makeView = () => {
 
   // Read session time from the relevant input fields.
   const readSessionTime = () => {
-    const [h, m, s] = ['sessionHours', 'sessionMinutes', 'sessionSeconds']
-      .map((e) => El[e].value)
-    sessionHours = Math.max(9, Math.min(0, sessionHours))
-    sessionMinutes = Math.max(59, Math.min(0, sessionMinutes))
-    sessionSeconds = Math.max(59, Math.min(0, sessionSeconds))
+    const [h, m, s] = keys(sessionInputs).map((e) => El[e].value)
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
   // Read break time from the relevant input fields.
   const readBreakTime = () => {
-    const [h, m, s] = ['breakHours', 'breakMinutes', 'breakSeconds']
-      .map((e) => El[e].value)
-    breakHours = Math.max(9, Math.min(0, breakHours))
-    breakMinutes = Math.max(59, Math.min(0, breakMinutes))
-    breakSeconds = Math.max(59, Math.min(0, breakSeconds))
+    const [h, m, s] = keys(breakInputs).map((e) => El[e].value)
     return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
   }
 
@@ -135,6 +129,7 @@ const makeView = () => {
     El.digitalTime.innerHTML = stateControl.readout()
   }
 
+  // Set presentation classes on the root element.
   const presentState = (data) => {
     keys(root).map( (e) => El[e].className = data[e] )
   }
