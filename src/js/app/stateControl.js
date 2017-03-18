@@ -1,4 +1,5 @@
 import { BLINK } from 'utility/constants'
+import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from 'config'
 import { action, animator, breakControl, model,
          sessionControl, stateControl, view
        } from 'app'
@@ -24,28 +25,40 @@ const makeStateControl = () => {
     }
   }
 
+
   // Toggle input mode when the user clicks the digital display.
-  // Using closure to privately track whether session/break was in progress.
   const toggleInputMode = (() => {
-    let wasInSession
+    // Using closure to privately track whether session/break was in progress.
+    let previousAnimation
     return ({ cancellingInput = false } = {}) => {
       const inSession = model.inSession(),
+            inInputMode = model.inInputMode(),
             inputAction = inSession ? action.inputSession : action.inputBreak,
             startAction = inSession ? action.startSession : action.startBreak
-      let toggleAction = model.inInputMode() ? startAction : inputAction
+      let nextAction = model.inInputMode() ? startAction : inputAction
       // Save animation state so it can be restored if input is cancelled.
-      if (toggleAction === inputAction) {
-        wasInSession = inSession
+      if (nextAction === inputAction) {
+        previousAnimation = inSession ? action.runSession : action.runBreak
       }
-      // If input mode is being cancelled, return to the previous animation.
+      // If input mode is being cancelled...
       if (cancellingInput) {
-        if (toggleAction === startAction) {
-          toggleAction = wasInSession ? action.runSession : action.runBreak
+        if (inInputMode) {
+          if (previousAnimation) {
+            // ...return to the previous animation.
+            nextAction = previousAnimation
+          } else {
+            // ...Or if cancelling initial input restore to default values.
+            render({
+              sessionTime: DEFAULT_SESSION_TIME,
+              breakTime:   DEFAULT_BREAK_TIME
+            })
+            return // RETURN: Remain in input mode.
+          }
         } else {
-          return // RETURN: When not in input mode cancel request does nothing.
+          return // RETURN: Outside of input mode, cancel request does nothing.
         }
       }
-      model.present( toggleAction )
+      model.present( nextAction )
     }
   })()
   // Alias:
@@ -57,8 +70,8 @@ const makeStateControl = () => {
   })
 
   // Start a session for the given length of time.
-  // Using closure to keep a private reference to the end-session callback.
   const startSession = (() => {
+    // Using closure to keep a private reference to the end-session callback.
     let endSessionCallback = Function.prototype
     return (duration) => {
       breakControl.deanimate()
@@ -71,8 +84,8 @@ const makeStateControl = () => {
   })()
 
   // Start a break for the given length of time.
-  // Using closure to keep a private reference to the end-session callback.
   const startBreak = (() => {
+    // Using closure to keep a private reference to the end-session callback.
     let endBreakCallback = Function.prototype
     return (duration) => {
       sessionControl.deanimate()

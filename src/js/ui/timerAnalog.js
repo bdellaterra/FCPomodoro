@@ -76,10 +76,10 @@ export const makeTimerAnalog = (spec = {}) => {
   // Optionally style them to represent the time value provided.
   const style = (time) => {
     state.circle.style(time)
-    state.cursor.style(time)
     state.hours.style(time)
     state.minutes.style(time)
     state.seconds.style(time)
+    state.cursor.style(time)
     rotateSeconds()
   }
 
