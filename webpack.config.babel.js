@@ -23,6 +23,13 @@ const baseConfig = {
     path:     resolve('dist'),
     filename: '[chunkhash].[name].js'
   },
+  resolve: {
+    modules: [
+      resolve('src', 'js'),
+      resolve('src'),
+      resolve('node_modules')
+    ]
+  },
   plugins: [
     DefinePlugin,
     new webpack.optimize.CommonsChunkPlugin({
