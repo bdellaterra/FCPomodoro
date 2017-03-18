@@ -1,4 +1,5 @@
 /* global DEBUG */
+import { SECOND } from 'utility/constants'
 import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from 'config'
 import { action, model, stateControl } from 'app'
 import { actionName } from 'app/action'
@@ -21,8 +22,9 @@ export const makeModel = () => {
   // Return time value from last session input.
   const getSessionTime = () => sessionTime
 
-  // Set session time to the provided value.
-  const setSessionTime = (t) => sessionTime = validateTime(t)
+  // Set session time to the provided value. To prevent a state where
+  // all time values are zero, minimum session length is one second.
+  const setSessionTime = (t) => sessionTime = Math.max(SECOND, validateTime(t))
 
   // Return time value from last break input.
   const getBreakTime = () => breakTime
