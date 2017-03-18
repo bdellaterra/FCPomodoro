@@ -1,6 +1,6 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import canvas from './canvas'
-import makeEntity from './entity'
+import { assign, frozen, keys, pick, sealed } from 'utility/fn'
+import canvas from 'ui/canvas'
+import makeEntity from 'ui/entity'
 
 // USAGE NOTE: X,Y coordinates are pixel offsets from the top left corner.
 
@@ -13,10 +13,10 @@ const makeDisplayer = (spec) => {
   const entity = makeEntity(spec)
 
   // Initialize state.
-  const state = {
+  const state = sealed({
     x: canvas.width / 2,
     y: canvas.height / 2
-  }
+  })
 
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))

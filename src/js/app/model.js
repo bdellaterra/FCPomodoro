@@ -1,7 +1,8 @@
-import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from '..//config'
-import { action, model, stateControl } from './index'
-import { actionName } from './action'
-import { frozen } from '../utility/fn'
+/* global DEBUG */
+import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from 'config'
+import { action, model, stateControl } from 'app'
+import { actionName } from 'app/action'
+import { frozen } from 'utility/fn'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 

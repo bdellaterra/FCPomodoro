@@ -1,10 +1,10 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { HOUR, MINUTE, SECOND, SECONDS_PER_HOUR } from '../utility/constants'
+import { HOUR } from 'utility/constants'
 import { HOURS_LINE_WIDTH, HOURS_RADIUS, HOURS_STROKE_STYLE
-       } from '..//config'
-import { once } from '../utility/iter'
-import { context } from '../ui/canvas'
-import makeArcTimer from './arcTimer'
+       } from 'config'
+import { assign, frozen, keys, pick, sealed } from 'utility/fn'
+import { context } from 'ui/canvas'
+import { makeArcTimer } from 'ui/arcTimer'
+import { once } from 'utility/iter'
 
 
 // Create a full-circle minutes arc to indicate additional hours remaining.

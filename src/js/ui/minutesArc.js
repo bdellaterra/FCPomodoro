@@ -1,8 +1,8 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { SECOND, SECONDS_PER_HOUR } from '../utility/constants'
+import { SECOND, SECONDS_PER_HOUR } from 'utility/constants'
 import { MINUTES_LINE_WIDTH, MINUTES_RADIUS, MINUTES_STROKE_STYLE
-       } from '..//config'
-import makeArcTimer from './arcTimer'
+       } from 'config'
+import { frozen } from 'utility/fn'
+import { makeArcTimer } from 'ui/arcTimer'
 
 
 // Create a thick arc that animates slowly in a counterclockwise direction

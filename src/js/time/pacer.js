@@ -1,7 +1,6 @@
-import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
-import { HOUR, MINUTE, SECOND } from '../utility/constants'
-import makeDispatcher from '../utility/dispatcher.js'
-import makeTimer from './timer'
+import { assign, frozen, keys, pick, relay, sealed } from 'utility/fn'
+import { makeDispatcher } from 'utility/dispatcher.js'
+import { makeTimer } from 'time/timer'
 
 
 // Create a pacer that keeps a schedule of time intervals and

@@ -1,8 +1,8 @@
 import { BREAK_CURSOR_STYLE, BREAK_CURSOR_STYLE_2, BREAK_MINUTES_STYLE
-       } from '../config'
-import { makeBlinkingCursor } from './blinkingCursor'
-import { makeMinutesArc } from './minutesArc'
-import { makeTimerAnalog } from './timerAnalog'
+       } from 'config'
+import { makeBlinkingCursor } from 'ui/blinkingCursor'
+import { makeMinutesArc } from 'ui/minutesArc'
+import { makeTimerAnalog } from 'ui/timerAnalog'
 
 
 // Create analog display for break time.

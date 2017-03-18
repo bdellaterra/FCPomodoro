@@ -1,4 +1,4 @@
-import { MINUTE, SECOND } from './utility/constants'
+import { MINUTE } from 'utility/constants'
 
 // Time settings
 

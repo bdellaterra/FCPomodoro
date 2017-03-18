@@ -1,19 +1,18 @@
-import { BLINK } from '../utility/constants'
-import { action, animator, breakControl, breakDisplay, model,
-         sessionControl, sessionDisplay, stateControl, view
-      } from './index'
-import { actionName } from './action'
-import { clearCanvas } from '../ui/canvas'
-import { formatTime } from '../utility/conv'
-import { frozen, sealed } from '../utility/fn'
-import { once } from '../utility/iter'
+import { BLINK } from 'utility/constants'
+import { action, animator, breakControl, model,
+         sessionControl, stateControl, view
+       } from 'app'
+import { clearCanvas } from 'ui/canvas'
+import { formatTime } from 'utility/conv'
+import { frozen } from 'utility/fn'
+import { once } from 'utility/iter'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
 // The term "state" can be ambiguous. ("control state" vs. "internal state")
-// The layer between the view and model is typically called "state" in the
-// SAM methodology, but here it is called "state control" to disambiguate.
+// In the SAM methodology, the layer between the view and model is typically
+// called just "state". Here it is "stateControl" to emphasize "control state".
 const makeStateControl = () => {
 
   // Handle changes to the input fields.
@@ -120,7 +119,7 @@ const makeStateControl = () => {
     return model.inInputMode() ? 'Click to Run Timer' : 'Click to Set Timer'
   }
 
-  // Provide user with a cancellation link
+  // Provide user with a cancellation link.
   const cancellation = ({ isCancelHidden }) => {
     const cancelMessage = model.inInputMode() && !isCancelHidden
                         ? 'Click Here to Cancel Input'

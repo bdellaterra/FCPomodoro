@@ -1,7 +1,7 @@
 import { DEGREES_PER_HALF_CYCLE, MILLISECONDS_PER_HOUR,
          MILLISECONDS_PER_MINUTE, MILLISECONDS_PER_SECOND,
          MINUTES_PER_HOUR, SECONDS_PER_MINUTE
-       } from './constants'
+       } from 'utility/constants'
 
 // Convert degrees to radians
 export const degToRadians = (deg) => deg * Math.PI / DEGREES_PER_HALF_CYCLE

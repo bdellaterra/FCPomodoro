@@ -1,8 +1,10 @@
-import { frozen, keys } from '../utility/fn'
+import { frozen, keys } from 'utility/fn'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
 
+// Actions will be presented to the model to direct app behavior.
+// Every combination of control states must map to an action.
 export const action = frozen({
   startSession: frozen({ inSession: true, hasInput: true, isRunning: true }),
   inputSession: frozen({ inSession: true, hasInput: true, isRunning: false }),
@@ -14,7 +16,8 @@ export const action = frozen({
   endBreak:     frozen({ inSession: false, hasInput: false, isRunning: false })
 })
 
-// Map a combination of states to their corresponding action name.
+
+// Map an action object to it's human-readable name.
 export const actionName = (v) => {
   let name = ''
   keys(action).map((n) => {
@@ -24,5 +27,6 @@ export const actionName = (v) => {
   })
   return name
 }
+
 
 export default action

@@ -1,11 +1,10 @@
-import { ARC_CLOCK_ROTATION, SECOND } from '../utility/constants'
-import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
-import { makeAnimator } from '../time/animator'
-import { makeBlinkingCursor } from './blinkingCursor'
-import { makeHoursArc } from './hoursArc'
-import { makeMinutesArc } from './minutesArc'
-import { makeSecondsArc } from './secondsArc'
-import { once } from '../utility/iter'
+import { ARC_CLOCK_ROTATION, SECOND } from 'utility/constants'
+import { assign, frozen, keys, pick, relay, sealed } from 'utility/fn'
+import { makeAnimator } from 'time/animator'
+import { makeBlinkingCursor } from 'ui/blinkingCursor'
+import { makeHoursArc } from 'ui/hoursArc'
+import { makeMinutesArc } from 'ui/minutesArc'
+import { makeSecondsArc } from 'ui/secondsArc'
 
 
 // Create analog display for visually representing a timer.

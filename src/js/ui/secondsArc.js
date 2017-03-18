@@ -1,8 +1,8 @@
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { MILLISECOND, MILLISECONDS_PER_MINUTE } from '../utility/constants'
+import { MILLISECOND, MILLISECONDS_PER_MINUTE } from 'utility/constants'
 import { SECONDS_LINE_WIDTH, SECONDS_RADIUS, SECONDS_STROKE_STYLE
-       } from '..//config'
-import makeArcTimer from './arcTimer'
+       } from 'config'
+import { frozen } from 'utility/fn'
+import { makeArcTimer } from 'ui/arcTimer'
 
 
 // Create a thin line that animates smoothly with one

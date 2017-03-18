@@ -1,8 +1,8 @@
-import { ARC_CYCLE, SECOND, SECONDS_PER_MINUTE } from '../utility/constants'
-import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
-import { once } from '../utility/iter'
-import makeAnimator from '../time/animator'
-import makeArc from './arc'
+import { ARC_CYCLE, SECOND, SECONDS_PER_MINUTE } from 'utility/constants'
+import { assign, frozen, keys, pick, relay, sealed } from 'utility/fn'
+import { once } from 'utility/iter'
+import makeAnimator from 'time/animator'
+import makeArc from 'ui/arc'
 
 
 // Create an arc that updates itself over time.

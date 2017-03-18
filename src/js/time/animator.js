@@ -1,9 +1,8 @@
-import { SECOND } from '../utility/constants'
-import { assign, frozen, keys, pick, relay, sealed } from '../utility/fn'
-import { filterNext } from '../utility/iter'
-import { clearCanvas } from '../ui/canvas'
-import makeDispatcher from '../utility/dispatcher.js'
-import makePacer from '../time/pacer.js'
+import { SECOND } from 'utility/constants'
+import { assign, frozen, keys, pick, relay, sealed } from 'utility/fn'
+import { clearCanvas } from 'ui/canvas'
+import { makeDispatcher } from 'utility/dispatcher.js'
+import { makePacer } from 'time/pacer.js'
 import now from 'present'
 
 // USAGE NOTE: All time values are in milliseconds, unless noted otherwise.

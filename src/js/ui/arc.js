@@ -1,10 +1,10 @@
 import { ARC_CLOCK_ROTATION, ARC_CYCLE, ARC_ORIGIN
-       } from '../utility/constants'
+       } from 'utility/constants'
 import { DEFAULT_ARC_LINE_WIDTH, DEFAULT_ARC_RADIUS, DEFAULT_ARC_STROKE_STYLE
-       } from '..//config'
-import { assign, frozen, keys, pick, sealed } from '../utility/fn'
-import { context } from './canvas'
-import makeDisplayer from './displayer'
+       } from 'config'
+import { assign, frozen, keys, pick, sealed } from 'utility/fn'
+import { context } from 'ui/canvas'
+import makeDisplayer from 'ui/displayer'
 
 
 // Create a partial circle.

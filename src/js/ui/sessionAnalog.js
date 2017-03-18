@@ -1,4 +1,4 @@
-import { makeTimerAnalog } from './timerAnalog'
+import { makeTimerAnalog } from 'ui/timerAnalog'
 
 
 // Create analog display for session time using the default settings.
