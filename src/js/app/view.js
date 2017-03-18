@@ -61,6 +61,16 @@ const makeView = () => {
   El.breakMinutes.addEventListener('input', limitMinutesInput)
   El.breakSeconds.addEventListener('input', limitSecondsInput)
 
+  // Attach presentation focus to the session/break input fields.
+  keys(sessionInputs).map( (e) => {
+    El[e].addEventListener( 'input', () => model.present(action.inputSession) )
+    El[e].addEventListener( 'click', () => model.present(action.inputSession) )
+  })
+  keys(breakInputs).map( (e) => {
+    El[e].addEventListener( 'input', () => model.present(action.inputBreak) )
+    El[e].addEventListener( 'click', () => model.present(action.inputBreak) )
+  })
+
   // Attach input handlers to the session/break input fields.
   keys(sessionInputs).map( (e) => {
     El[e].addEventListener( 'input', () => {
@@ -73,14 +83,6 @@ const makeView = () => {
       previewInput({ inSession: false })
       stateControl.registerInput()
     })
-  })
-
-  // Attach presentation focus to the session/break input fields.
-  keys(sessionInputs).map( (e) => {
-    El[e].addEventListener( 'click', () => model.present(action.inputSession) )
-  })
-  keys(breakInputs).map( (e) => {
-    El[e].addEventListener( 'click', () => model.present(action.inputBreak) )
   })
 
   // Attach input toggle to click event on the digital display.
@@ -152,12 +154,7 @@ const makeView = () => {
     presentState(data)
     keys(inputs).map( (e) => El[e].value = data[e] )
     keys(outputs).map( (e) => El[e].innerHTML = data[e] )
-    if (inInputMode) {
-      enableInput()
-      previewInput({ inSession })
-    } else {
-      disableInput()
-    }
+    previewInput({ inSession })
   }
 
   // Return interface.
