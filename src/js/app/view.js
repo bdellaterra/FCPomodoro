@@ -1,4 +1,5 @@
 import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from 'config'
+import { ARC_CYCLE, MILLISECOND, MINUTE, SECOND } from 'utility/constants'
 import { action, breakDisplay, model, sessionDisplay, stateControl, view
        } from 'app'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from 'utility/conv'
@@ -104,6 +105,17 @@ const makeView = () => {
     if (breakTime === undefined) {
       breakTime = readBreakTime()
     }
+    // Adjust for edge case where floating-point math causes seconds analog
+    // to sometimes display empty and sometimes as a full-circle.
+    if (Number(El.sessionSeconds.value) === 0
+      && Number(El.sessionMinutes.value) !== 0) {
+      sessionTime -= 1
+    }
+    if (Number(El.breakSeconds.value) === 0
+      && Number(El.breakMinutes.value) !== 0) {
+      breakTime -= 1
+    }
+    // Display timer analog set to user input.
     clearCanvas()
     if (inSession) {
       sessionDisplay.draw(sessionTime)
