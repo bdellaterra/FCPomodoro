@@ -1,6 +1,8 @@
 /* global DEBUG */
 import { SECOND } from 'utility/constants'
-import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from 'config'
+import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME,
+         MINIMUM_BREAK_TIME, MINIMUM_SESSION_TIME
+       } from 'config'
 import { action, model, stateControl } from 'app'
 import { actionName } from 'app/action'
 import { frozen } from 'utility/fn'
@@ -24,13 +26,17 @@ export const makeModel = () => {
 
   // Set session time to the provided value. To prevent a state where
   // all time values are zero, minimum session length is one second.
-  const setSessionTime = (t) => sessionTime = Math.max(SECOND, validateTime(t))
+  const setSessionTime = (t) => {
+    sessionTime = Math.max(SECOND, MINIMUM_SESSION_TIME, validateTime(t))
+  }
 
   // Return time value from last break input.
   const getBreakTime = () => breakTime
 
   // Set break time to the provided value.
-  const setBreakTime = (t) => breakTime = validateTime(t)
+  const setBreakTime = (t) => {
+    breakTime = Math.max(MINIMUM_BREAK_TIME, validateTime(t))
+  }
 
   // Update state if intent is for any of the accepted valid states.
   const accept = (validStates) => {

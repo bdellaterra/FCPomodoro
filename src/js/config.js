@@ -1,9 +1,12 @@
-import { MINUTE } from 'utility/constants'
+import { MINUTE, SECOND } from 'utility/constants'
 
 // Time settings
 
 export const DEFAULT_SESSION_TIME = 45 * MINUTE
 export const DEFAULT_BREAK_TIME = 15 * MINUTE
+
+export const MINIMUM_SESSION_TIME = SECOND
+export const MINIMUM_BREAK_TIME = 0
 
 // Text
 
