@@ -4,4 +4,6 @@
 # Except these...
 !.gitignore
 !index.html
+!*.main.js
+!*.vendor.js
 
