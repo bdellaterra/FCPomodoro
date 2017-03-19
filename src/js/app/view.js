@@ -100,6 +100,51 @@ const makeView = () => {
   // Enable input.
   const enableInput = () => keys(inputs).map( (e) => El[e].disabled = false )
 
+  // Calculate total time in milliseconds using hours/minutes/seconds values.
+  const calcTime = ({ hours, minutes, seconds }) => {
+    return hoursToMsecs(hours)
+           + minutesToMsecs(minutes)
+           + secondsToMsecs(seconds)
+  }
+
+  // Read time values from the session input fields.
+  const readSessionValues = () => {
+    const [h, m, s] = keys(sessionInputs).map((e) => El[e].value)
+    return { sessionHours: h, sessionMinutes: m, sessionSeconds: s }
+  }
+
+  // Calculate the next session time.
+  const calcSessionTime = (data) => {
+    if (data === undefined) {
+      data = readSessionValues()
+    }
+    const { sessionHours, sessionMinutes, sessionSeconds } = data
+    return calcTime({
+      hours:   sessionHours,
+      minutes: sessionMinutes,
+      seconds: sessionSeconds
+    })
+  }
+
+  // Read time values from the break input fields.
+  const readBreakValues = () => {
+    const [h, m, s] = keys(breakInputs).map((e) => El[e].value)
+    return { breakHours: h, breakMinutes: m, breakSeconds: s }
+  }
+
+  // Calculate the next break time.
+  const calcBreakTime = (data) => {
+    if (data === undefined) {
+      data = readBreakValues()
+    }
+    const { breakHours, breakMinutes, breakSeconds } = data
+    return calcTime({
+      hours:   breakHours,
+      minutes: breakMinutes,
+      seconds: breakSeconds
+    })
+  }
+
   // Adjust for edge case where floating-point math causes seconds analog
   // to sometimes display empty and sometimes as a full-circle.
   const calcPreviewTimes = (data) => {
@@ -146,40 +191,6 @@ const makeView = () => {
     } else {
       breakDisplay.draw(breakTime)
     }
-  }
-
-  // Read time values from the session input fields.
-  const readSessionValues = () => {
-    const [h, m, s] = keys(sessionInputs).map((e) => El[e].value)
-    return { sessionHours: h, sessionMinutes: m, sessionSeconds: s }
-  }
-
-  // Calculate session time in milliseconds using hours/minutes/seconds values.
-  const calcSessionTime = (data) => {
-    if (data === undefined) {
-      data = readSessionValues()
-    }
-    const { sessionHours, sessionMinutes, sessionSeconds } = data
-    return hoursToMsecs(sessionHours)
-           + minutesToMsecs(sessionMinutes)
-           + secondsToMsecs(sessionSeconds)
-  }
-
-  // Read time values from the break input fields.
-  const readBreakValues = () => {
-    const [h, m, s] = keys(breakInputs).map((e) => El[e].value)
-    return { breakHours: h, breakMinutes: m, breakSeconds: s }
-  }
-
-  // Read break time from the relevant input fields.
-  const calcBreakTime = (data) => {
-    if (data === undefined) {
-      data = readBreakValues()
-    }
-    const { breakHours, breakMinutes, breakSeconds } = data
-    return hoursToMsecs(breakHours)
-           + minutesToMsecs(breakMinutes)
-           + secondsToMsecs(breakSeconds)
   }
 
   // Set the text on the digital readout.
