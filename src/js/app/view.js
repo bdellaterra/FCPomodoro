@@ -2,9 +2,8 @@ import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from 'config'
 import { ARC_CYCLE, MILLISECOND, MINUTE, SECOND } from 'utility/constants'
 import { action, breakDisplay, model, sessionDisplay, stateControl, view
        } from 'app'
-import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from 'utility/conv'
-import { formatTime } from 'utility/conv'
 import { frozen, keys } from 'utility/fn'
+import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from 'utility/conv'
 import { clearCanvas } from 'ui/canvas'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
@@ -65,11 +64,15 @@ const makeView = () => {
   // Attach presentation focus to the session/break input fields.
   keys(sessionInputs).map( (e) => {
     El[e].addEventListener( 'input', () => model.present(action.inputSession) )
-    El[e].addEventListener( 'click', () => model.present(action.inputSession) )
+    El[e].addEventListener( 'click', () => {
+      stateControl.inputMode({ inSession: true })
+    })
   })
   keys(breakInputs).map( (e) => {
     El[e].addEventListener( 'input', () => model.present(action.inputBreak) )
-    El[e].addEventListener( 'click', () => model.present(action.inputBreak) )
+    El[e].addEventListener( 'click', () => {
+      stateControl.inputMode({ inSession: false })
+    })
   })
 
   // Attach input handlers to the session/break input fields.
@@ -87,7 +90,7 @@ const makeView = () => {
   })
 
   // Attach input toggle to click event on the digital display.
-  El.digitalTime.addEventListener('click', () => stateControl.toggleInputMode())
+  El.digitalTime.addEventListener( 'click', () => stateControl.toggleMode() )
 
   // Attach click event for cancel input link.
   El.cancelMessage.addEventListener('click', () => {

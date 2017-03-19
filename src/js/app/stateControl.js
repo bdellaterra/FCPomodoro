@@ -25,44 +25,56 @@ const makeStateControl = () => {
     }
   }
 
+  // Transition to input mode. Optionally specify if session input has focus.
+  const inputMode = ({ inSession } = {}) => {
+    if (inSession === undefined) {
+      inSession = model.inSession()
+    }
+    if (!model.inInputMode()) {
+      model.present(inSession ? action.inputSession : action.inputBreak)
+    }
+  }
 
-  // Toggle input mode when the user clicks the digital display.
-  const toggleInputMode = (() => {
+  // Transition to animation mode.
+  const animationMode = () => {
+    if (!model.inAnimationMode()) {
+      model.present(model.inSession() ? action.startSession : action.startBreak)
+    }
+  }
+
+  // Toggle mode when the user clicks the digital display.
+  const toggleMode = (() => {
     // Using closure to privately track whether session/break was in progress.
-    let previousAnimation
+    let lastAnimation
     return ({ cancellingInput = false } = {}) => {
-      const inSession = model.inSession(),
-            inInputMode = model.inInputMode(),
-            inputAction = inSession ? action.inputSession : action.inputBreak,
-            startAction = inSession ? action.startSession : action.startBreak
-      let nextAction = model.inInputMode() ? startAction : inputAction
-      // Save animation state so it can be restored if input is cancelled.
-      if (nextAction === inputAction) {
-        previousAnimation = inSession ? action.runSession : action.runBreak
-      }
-      // If input mode is being cancelled...
-      if (cancellingInput) {
-        if (inInputMode) {
-          if (previousAnimation) {
-            // ...return to the previous animation.
-            nextAction = previousAnimation
+      if ( model.inInputMode() ) {
+        if (cancellingInput) {
+          if (lastAnimation) {
+            // Restore previous animation if cancelling input.
+            model.present(lastAnimation)
           } else {
-            // ...Or if cancelling initial input restore to default values.
+            // If cancelling the initial input there is no previous animation,
+            // so restore the default values instead.
             render({
               sessionTime: DEFAULT_SESSION_TIME,
               breakTime:   DEFAULT_BREAK_TIME
             })
-            return // RETURN: Remain in input mode.
           }
         } else {
-          return // RETURN: Outside of input mode, cancel request does nothing.
+          // Toggle from input mode to animation mode.
+          animationMode()
+          lastAnimation = model.inSession()
+                        ? action.runSession
+                        : action.runBreak
         }
+      } else {
+        // Toggle from animation mode to input mode.
+        input()
       }
-      model.present( nextAction )
     }
   })()
   // Alias:
-  const cancelInputMode = () => toggleInputMode({ cancellingInput: true })
+  const cancelInputMode = () => toggleMode({ cancellingInput: true })
 
   // Create a callback that will present the provided action to the model.
   const makeFutureAction = (a) => once(() => {
@@ -260,13 +272,15 @@ const makeStateControl = () => {
 
   // Return interface.
   return frozen({
+    animationMode,
     cancelInputMode,
+    inputMode,
     presentation,
     readInput,
     readout,
     registerInput,
     render,
-    toggleInputMode
+    toggleMode
   })
 
 }
