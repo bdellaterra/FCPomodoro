@@ -69,7 +69,7 @@ const makeStateControl = () => {
         }
       } else {
         // Toggle from animation mode to input mode.
-        input()
+        inputMode()
       }
     }
   })()
