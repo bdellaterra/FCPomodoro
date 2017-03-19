@@ -14,11 +14,11 @@ export const makeTimerAnalog = (spec = {}) => {
   // Initialize state.
   const state = sealed({
     animator: null,
-    circle:   null,
     cursor:   null,
     hours:    null,
     minutes:  null,
-    seconds:  null
+    seconds:  null,
+    circle:   null
   })
 
   // Adjust state to spec.
@@ -27,11 +27,6 @@ export const makeTimerAnalog = (spec = {}) => {
   // Create an animator if none provided.
   if (!state.animator) {
     state.animator = makeAnimator(spec)
-  }
-
-  // Create a circle that displays continuously.
-  if (!state.circle) {
-    state.circle = makeStaticCircle({ animator: state.animator })
   }
 
   // Create a cursor.
@@ -54,17 +49,22 @@ export const makeTimerAnalog = (spec = {}) => {
     state.seconds = makeSecondsArc({ animator: state.animator })
   }
 
+  // Create a circle to define the shape of the UI.
+  if (!state.circle) {
+    state.circle = makeStaticCircle({ animator: state.animator })
+  }
+
   // Return a reference to the animator.
   const getAnimator = () => state.animator
 
   // Set analog to use a different animator.
   const setAnimator = (v) => {
     state.animator = v
-    state.circle.setAnimator(v)
-    state.cursor.setAnimator(v)
     state.hours.setAnimator(v)
     state.minutes.setAnimator(v)
     state.seconds.setAnimator(v)
+    state.cursor.setAnimator(v)
+    state.circle.setAnimator(v)
   }
 
   // Rotate the seconds arc so it tracks with the minutes arc.
@@ -75,11 +75,11 @@ export const makeTimerAnalog = (spec = {}) => {
   // Style all components to represent the current time.
   // Optionally style them to represent the time value provided.
   const style = (time) => {
-    state.circle.style(time)
     state.hours.style(time)
     state.minutes.style(time)
     state.seconds.style(time)
     state.cursor.style(time)
+    state.circle.style(time)
     rotateSeconds()
   }
 
@@ -104,21 +104,21 @@ export const makeTimerAnalog = (spec = {}) => {
     state.animator.sync()
     draw()
     state.circle.animate()
-    state.cursor.animate()
     state.hours.animate()
     state.minutes.animate()
     state.seconds.animate()
+    state.cursor.animate()
     state.animator.addUpdate(rotateSeconds, SECOND)
     state.animator.run()  // Does nothing if animator is already running.
   }
 
   // Stop animating hours/minutes/seconds changes.
   const deanimate = () => {
-    state.circle.deanimate()
-    state.cursor.deanimate()
     state.hours.deanimate()
     state.minutes.deanimate()
     state.seconds.deanimate()
+    state.cursor.deanimate()
+    state.circle.deanimate()
     state.animator.removeUpdate(rotateSeconds, SECOND)
   }
 
