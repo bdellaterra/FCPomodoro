@@ -43,7 +43,7 @@ body,
   margin-right: auto;
 }
 
-#content {
+#clock {
   z-index: 10;
 }
 
@@ -52,6 +52,12 @@ a, textarea, input, select {
   text-decoration: none;
   color: inherit;
   z-index:25;
+}
+
+#clock a:hover,
+#clock a:active,
+#clock a:focus {
+  outline: 0;
 }
 
 textarea,
