@@ -8,64 +8,37 @@ import { makeArcTimer } from 'ui/arcTimer'
 import { once } from 'utility/iter'
 
 
-// Create a full-circle minutes arc to indicate additional hours remaining.
-// The arc fades over time as fewer hours remain.
+// Create a full-circle that remains in place.
 export const makeStaticCircle = (spec) => {
 
   // Extends:
   const arcTimer = makeArcTimer({
-    radius:        CIRCLE_RADIUS,
-    lineWidth:     CIRCLE_LINE_WIDTH,
-    strokeStyle:   CIRCLE_STROKE_STYLE,
-    timeUnit:      HOUR,
-    unitsPerCycle: 1,
-    isCountdown:   true,
+    radius:      CIRCLE_RADIUS,
+    lineWidth:   CIRCLE_LINE_WIDTH,
+    strokeStyle: CIRCLE_STROKE_STYLE,
     ...spec
   })
 
-  // Initialize state.
-  const state = sealed({
-    opacity:     0,
-    opacityStep: 0.09
-  })
-
-  // Adjust state to spec.
-  assign(state, pick(spec, keys(state)))
-
-  // Style as an opacity change. The arc remains a full-circle.
-  const style = (t) => {
-    const time = (t !== undefined) ? t : arcTimer.remaining(),
-          hoursRemaining = time / HOUR
-    state.opacity = Math.floor(hoursRemaining) * state.opacityStep
-    state.opacity = 1
-  }
+  // Don't style. Just remain a full-circle.
+  const style = Function.prototype
 
   // Render the circle, adjusting opacity via the context alpha setting.
   const render = (time) => {
-    const saveGlobalAlpha = context.globalAlpha
-    context.globalAlpha = state.opacity
-    arcTimer.render(time)
-    context.globalAlpha = saveGlobalAlpha
+    arcTimer.render(0)
     return time
   }
 
   // Setup animation callbacks.
   const animate = () => {
-    arcTimer.addUpdate(once(style), 0)  // Initial display
-    arcTimer.addUpdate(() => {
-      style()
-    }, arcTimer.getTimeUnit(), arcTimer.countdownOffset)
     arcTimer.addRender(render)
   }
 
   // Teardown animation callbacks.
   const deanimate = () => {
-    arcTimer.removeUpdate(style, arcTimer.getTimeUnit())
     arcTimer.removeRender(render)
   }
 
   // Perform initialization.
-  style()
   animate()
 
   // Return Interface.
