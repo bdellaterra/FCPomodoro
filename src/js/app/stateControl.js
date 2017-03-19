@@ -105,8 +105,8 @@ const makeStateControl = () => {
 
   // Read session/break input from the view. Return the data as an object.
   const readInput = () => {
-    const sessionTime = view.readSessionTime(),
-          breakTime = view.readBreakTime()
+    const sessionTime = view.calcSessionTime(),
+          breakTime = view.calcBreakTime()
     return { sessionTime, breakTime }
   }
 
@@ -156,9 +156,11 @@ const makeStateControl = () => {
       sessionHours,
       sessionMinutes,
       sessionSeconds,
+      sessionTime,
       breakHours,
       breakMinutes,
       breakSeconds,
+      breakTime,
       pomodoro:      presentation({ isCancelHidden }),
       digitalTime:   readout(),
       message:       notification(),

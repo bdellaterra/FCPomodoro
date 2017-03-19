@@ -3,6 +3,7 @@ import { ARC_CYCLE, MILLISECOND, MINUTE, SECOND } from 'utility/constants'
 import { action, breakDisplay, model, sessionDisplay, stateControl, view
        } from 'app'
 import { hoursToMsecs, minutesToMsecs, secondsToMsecs } from 'utility/conv'
+import { formatTime } from 'utility/conv'
 import { frozen, keys } from 'utility/fn'
 import { clearCanvas } from 'ui/canvas'
 
@@ -99,25 +100,46 @@ const makeView = () => {
   // Enable input.
   const enableInput = () => keys(inputs).map( (e) => El[e].disabled = false )
 
+  // Adjust for edge case where floating-point math causes seconds analog
+  // to sometimes display empty and sometimes as a full-circle.
+  const calcPreviewTimes = (data) => {
+    const gotSession = (data.sessionTime !== undefined),
+          gotBreak = (data.breakTime !== undefined)
+    let { sessionTime } = gotSession ? data : calcSessionTime(),
+        { breakTime } = gotBreak ? data : calcBreakTime()
+    // On edge-case for session seconds at minute-mark...
+    if (Number(El.sessionSeconds.value) === 0) {
+      // ...Bias towards empty seconds analog
+      if (Number(El.sessionMinutes.value) !== 0) {
+        sessionTime -= MILLISECOND
+      }
+      // ...Bias towards full hours analog
+      if (Number(El.sessionHours.value) !== 0) {
+        if (Number(El.sessionMinutes.value) === 0) {
+          sessionTime += MILLISECOND
+        }
+      }
+    }
+    // On edge-case for break seconds at minute-mark...
+    if (Number(El.breakSeconds.value) === 0) {
+      // ...Bias towards empty seconds analog
+      if (Number(El.breakMinutes.value) !== 0) {
+        breakTime -= MILLISECOND
+      }
+      // ...Bias towards full hours analog
+      if (Number(El.breakHours.value) !== 0) {
+        if (Number(El.breakMinutes.value) === 0) {
+          breakTime += MILLISECOND
+        }
+      }
+    }
+    return { sessionTime, breakTime }
+  }
+
   // Display a preview of the input values being entered by the user.
-  const previewInput = ({ inSession, sessionTime, breakTime }) => {
-    if (sessionTime === undefined) {
-      sessionTime = readSessionTime()
-    }
-    if (breakTime === undefined) {
-      breakTime = readBreakTime()
-    }
-    // Adjust for edge case where floating-point math causes seconds analog
-    // to sometimes display empty and sometimes as a full-circle.
-    if (Number(El.sessionSeconds.value) === 0
-      && Number(El.sessionMinutes.value) !== 0) {
-      sessionTime -= 1
-    }
-    if (Number(El.breakSeconds.value) === 0
-      && Number(El.breakMinutes.value) !== 0) {
-      breakTime -= 1
-    }
-    // Display timer analog set to user input.
+  const previewInput = (data) => {
+    const { inSession } = data,
+          { sessionTime, breakTime } = calcPreviewTimes(data)
     clearCanvas()
     if (inSession) {
       sessionDisplay.draw(sessionTime)
@@ -126,16 +148,38 @@ const makeView = () => {
     }
   }
 
-  // Read session time from the relevant input fields.
-  const readSessionTime = () => {
+  // Read time values from the session input fields.
+  const readSessionValues = () => {
     const [h, m, s] = keys(sessionInputs).map((e) => El[e].value)
-    return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
+    return { sessionHours: h, sessionMinutes: m, sessionSeconds: s }
+  }
+
+  // Calculate session time in milliseconds using hours/minutes/seconds values.
+  const calcSessionTime = (data) => {
+    if (data === undefined) {
+      data = readSessionValues()
+    }
+    const { sessionHours, sessionMinutes, sessionSeconds } = data
+    return hoursToMsecs(sessionHours)
+           + minutesToMsecs(sessionMinutes)
+           + secondsToMsecs(sessionSeconds)
+  }
+
+  // Read time values from the break input fields.
+  const readBreakValues = () => {
+    const [h, m, s] = keys(breakInputs).map((e) => El[e].value)
+    return { breakHours: h, breakMinutes: m, breakSeconds: s }
   }
 
   // Read break time from the relevant input fields.
-  const readBreakTime = () => {
-    const [h, m, s] = keys(breakInputs).map((e) => El[e].value)
-    return hoursToMsecs(h) + minutesToMsecs(m) + secondsToMsecs(s)
+  const calcBreakTime = (data) => {
+    if (data === undefined) {
+      data = readBreakValues()
+    }
+    const { breakHours, breakMinutes, breakSeconds } = data
+    return hoursToMsecs(breakHours)
+           + minutesToMsecs(breakMinutes)
+           + secondsToMsecs(breakSeconds)
   }
 
   // Set the text on the digital readout.
@@ -154,13 +198,15 @@ const makeView = () => {
     presentState(data)
     keys(inputs).map( (e) => El[e].value = data[e] )
     keys(outputs).map( (e) => El[e].innerHTML = data[e] )
-    previewInput({ inSession })
+    previewInput(data)
   }
 
   // Return interface.
   return frozen({
-    readBreakTime,
-    readSessionTime,
+    calcBreakTime,
+    calcSessionTime,
+    readBreakValues,
+    readSessionValues,
     render,
     showDigitalTime
   })
