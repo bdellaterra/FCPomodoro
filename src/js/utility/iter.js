@@ -13,13 +13,6 @@ export const GeneratorFunction
 export function* once(cb, ...args) {
   yield cb(...args)
 }
-// Return iterator
-// export const once = (cb, ...args) => {
-//   return (function* (cb, ...args) {
-//     yield cb(...args)
-//   }())
-// }
-
 
 // Minimal null-form of an iterator.
 export const isIterable = (x) => x && typeof x[Symbol.iterator] === 'function'

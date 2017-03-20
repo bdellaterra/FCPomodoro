@@ -25,7 +25,7 @@ export const makeDispatcher = (spec = {}) => {
   // Remove a callback from the list.
   const removeCallback = (cb) => {
     const index = state.callbacks.indexOf(cb)
-    if (index >= 0) {
+    if (cb && index >= 0) {
       Array.splice(state.callbacks, index, 1)
     }
   }

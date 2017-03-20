@@ -1,6 +1,6 @@
 import { assign, frozen, keys, pick, relay, sealed } from 'utility/fn'
 import { makeDispatcher } from 'utility/dispatcher.js'
-import { makeTimer } from 'time/timer'
+import { makeCountdownTimer } from 'time/countdownTimer'
 
 
 // Create a pacer that keeps a schedule of time intervals and
@@ -19,7 +19,7 @@ export const makePacer = (spec) => {
 
   // Create a timer if none was provided.
   if (!state.timer) {
-    state.timer = makeTimer(spec)
+    state.timer = makeCountdownTimer(spec)
   }
 
   // Add a callback to the dispatcher for the specified time interval.

@@ -45,8 +45,10 @@ export const makeCountdownTimer = (spec) => {
     const currentTime = timer.sync(time)
     // If the countdown is complete...
     if (remaining() === 0) {
-      // Resolve promise by sending boolean true
-      state.notifier.next(true)
+      // Resolve any pending promise by sending boolean true
+      if (state.promise) {
+        state.notifier.next(true)
+      }
       // Clear the promise/notifier
       state.promise = null
       state.notifier = null

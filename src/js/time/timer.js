@@ -13,9 +13,7 @@ export const makeTimer = (spec) => {
   const state = sealed({
     beginning: 0,
     time:      0,
-    last:      0,
-    ending:    0,
-    alarm:     null
+    last:      0
   })
 
   // Adjust state to spec.
@@ -38,33 +36,16 @@ export const makeTimer = (spec) => {
   const since = (time) => {
     return state.time - (time !== undefined ? time : state.beginning)
   }
-
-  // Alias for since()
+  // Alias:
   const elapsed = since
 
-  // Return the start time. Optionally set begin time to provided value.
+  // Return beginning time. Optionally set it to provided value.
   const beginning = (time) => {
     if (time !== undefined) {
       state.beginning = time
     }
     return state.beginning
   }
-
-  // Return the ending time. Optionally set ending time to provided value.
-  const ending = (time) => {
-    if (time !== undefined) {
-      state.ending = time
-    }
-    return state.ending
-  }
-
-  // Return time remaining until end time. (as of last upate)
-  // Optionally return time remaining until a provided time value.
-  const until = (time) => {
-    return Math.max(0, (time !== undefined ? time : state.ending ) - state.time)
-  }
-  // Alias for until()
-  const remaining = until
 
   // Update current time to value provided. Save previous time for
   // calculating deltas. Update current time to now() if argument is undefined.
@@ -80,29 +61,18 @@ export const makeTimer = (spec) => {
     state.time = (time !== undefined) ? time : now()
     state.beginning = state.time
     state.last = state.time
-    state.ending = state.time
     return state.time
-  }
-
-  // Reset timer and count down the given length of time.
-  const countdown = (duration = 0) => {
-    reset()
-    ending(state.time + duration)
   }
 
   // Return Interface.
   return frozen({
     beginning,
-    countdown,
     delta,
     elapsed,
-    ending,
-    remaining,
     reset,
     since,
     sync,
-    time,
-    until
+    time
   })
 
 }

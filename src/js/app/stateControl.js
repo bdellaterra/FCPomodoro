@@ -81,42 +81,30 @@ const makeStateControl = () => {
     model.present(a)
   })
 
-  // Present session end to model after scheduled duration.
-  const scheduleEndSession = (() => {
-    // Using closure to keep a private reference to the end-session callback.
-    let endSessionCallback = Function.prototype
-    return (duration) => {
-      animator.removeUpdate(endSessionCallback, duration)
-      endSessionCallback = makeFutureAction(action.endSession)
-      animator.addUpdate(endSessionCallback, duration)
-    }
-  })()
+  // There are currently no actions required when cancelling sessions.
+  const cancelSession = Function.prototype
+
+  // There are currently no actions required when cancelling breaks.
+  const cancelBreak = Function.prototype
 
   // Start a session for the given length of time.
   const startSession = (duration) => {
     breakControl.deanimate()
     clearCanvas()
-    scheduleEndSession(duration)
     sessionControl.countdown(duration)
+    animator.waitAlarm()
+      .then(() => model.present(action.endSession))
+      .catch(cancelSession)
   }
-
-  // Present session end to model after scheduled duration.
-  const scheduleEndBreak = (() => {
-    // Using closure to keep a private reference to the end-session callback.
-    let endBreakCallback = Function.prototype
-    return (duration) => {
-      animator.removeUpdate(endBreakCallback, duration)
-      endBreakCallback = makeFutureAction(action.endBreak)
-      animator.addUpdate(endBreakCallback, duration)
-    }
-  })()
 
   // Start a break for the given length of time.
   const startBreak = (duration) => {
     sessionControl.deanimate()
     clearCanvas()
-    scheduleEndBreak()
     breakControl.countdown(duration)
+    animator.waitAlarm()
+      .then(() => model.present(action.endBreak))
+      .catch(cancelBreak)
   }
 
   // Submit provided session/break input to the model.
