@@ -4,6 +4,12 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <title>FCPomodoro"</title>
+        <style>
+            /* Prevent FOUC (Flash of Unstyled Content) */
+            body > div {
+                visibility: hidden;
+            }
+        </style>
     </head>
     <body>
         <!-- Root div will receive classes from app to control presentation -->
