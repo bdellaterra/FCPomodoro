@@ -81,33 +81,43 @@ const makeStateControl = () => {
     model.present(a)
   })
 
-  // Start a session for the given length of time.
-  const startSession = (() => {
+  // Present session end to model after scheduled duration.
+  const scheduleEndSession = (() => {
     // Using closure to keep a private reference to the end-session callback.
     let endSessionCallback = Function.prototype
     return (duration) => {
-      breakControl.deanimate()
-      clearCanvas()
       animator.removeUpdate(endSessionCallback, duration)
       endSessionCallback = makeFutureAction(action.endSession)
       animator.addUpdate(endSessionCallback, duration)
-      sessionControl.countdown(duration)
+    }
+  })()
+
+  // Start a session for the given length of time.
+  const startSession = (duration) => {
+    breakControl.deanimate()
+    clearCanvas()
+    scheduleEndSession(duration)
+    sessionControl.countdown(duration)
+  }
+
+  // Present session end to model after scheduled duration.
+  const scheduleEndBreak = (() => {
+    // Using closure to keep a private reference to the end-session callback.
+    let endBreakCallback = Function.prototype
+    return (duration) => {
+      animator.removeUpdate(endBreakCallback, duration)
+      endBreakCallback = makeFutureAction(action.endBreak)
+      animator.addUpdate(endBreakCallback, duration)
     }
   })()
 
   // Start a break for the given length of time.
-  const startBreak = (() => {
-    // Using closure to keep a private reference to the end-session callback.
-    let endBreakCallback = Function.prototype
-    return (duration) => {
-      sessionControl.deanimate()
-      clearCanvas()
-      animator.removeUpdate(endBreakCallback, duration)
-      endBreakCallback = makeFutureAction(action.endBreak)
-      animator.addUpdate(endBreakCallback, duration)
-      breakControl.countdown(duration)
-    }
-  })()
+  const startBreak = (duration) => {
+    sessionControl.deanimate()
+    clearCanvas()
+    scheduleEndBreak()
+    breakControl.countdown(duration)
+  }
 
   // Submit provided session/break input to the model.
   const submitInput = ({ sessionTime, breakTime }) => {
