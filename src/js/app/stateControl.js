@@ -1,5 +1,8 @@
 import { BLINK } from 'utility/constants'
-import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME } from 'config'
+import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME, INDICATOR_BREAK_START_TXT,
+         INDICATOR_FLASH_DURATION, INDICATOR_SESSION_START_TXT,
+         INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, MESSAGE_SET_TXT, READOUT_START_TXT
+       } from 'config'
 import { action, animator, breakControl, model,
          sessionControl, stateControl, view
        } from 'app'
@@ -7,6 +10,7 @@ import { clearCanvas } from 'ui/canvas'
 import { formatTime } from 'utility/conv'
 import { frozen } from 'utility/fn'
 import { once } from 'utility/iter'
+import { sleep } from 'time/sleep'
 
 // USAGE NOTE: This module is part of a State-Action-Model (SAM) pattern.
 
@@ -92,7 +96,10 @@ const makeStateControl = () => {
     breakControl.deanimate()
     clearCanvas()
     sessionControl.countdown(duration)
+    // Get promise for countdown reaching zero.
+    // Transition to break once it resolves.
     animator.waitAlarm()
+      .then(() => indicator({ flash: INDICATOR_BREAK_START_TXT }))
       .then(() => model.present(action.endSession))
       .catch(cancelSession)
   }
@@ -102,7 +109,10 @@ const makeStateControl = () => {
     sessionControl.deanimate()
     clearCanvas()
     breakControl.countdown(duration)
+    // Get promise for countdown reaching zero.
+    // Transition to session once it resolves.
     animator.waitAlarm()
+      .then(() => indicator({ flash: INDICATOR_SESSION_START_TXT }))
       .then(() => model.present(action.endBreak))
       .catch(cancelBreak)
   }
@@ -132,20 +142,34 @@ const makeStateControl = () => {
     return classes.join(' ')
   }
 
+  // Return readout text to indicate app state to the user.
+  const indicator = (() => {
+    // Using closure to keep a special message that will display temporarily.
+    let specialMessage
+    return ({ flash } = {}) => {
+      if (flash) {
+        specialMessage = flash
+        sleep(INDICATOR_FLASH_DURATION).then(() => specialMessage = null)
+      }
+      // Return current time reading unless there is a special message.
+      return specialMessage ? specialMessage : formatTime(animator.remaining())
+    }
+  })()
+
   // Return a formatted value for the digital time display.
   const readout = () => {
-    return model.inInputMode() ? 'START' : formatTime(animator.remaining())
+    return model.inInputMode() ? READOUT_START_TXT : indicator()
   }
 
   // Message user with instructions.
   const notification = () => {
-    return model.inInputMode() ? 'Click to Run Timer' : 'Click to Set Timer'
+    return model.inInputMode() ? MESSAGE_RUN_TXT : MESSAGE_SET_TXT
   }
 
   // Provide user with a cancellation link.
   const cancellation = ({ isCancelHidden }) => {
     const cancelMessage = model.inInputMode() && !isCancelHidden
-                        ? 'Click Here to Cancel Input'
+                        ? INPUT_CANCEL_TXT
                         : ''
     return cancelMessage
   }

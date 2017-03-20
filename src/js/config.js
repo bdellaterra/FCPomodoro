@@ -8,11 +8,16 @@ export const DEFAULT_BREAK_TIME = 15 * MINUTE
 export const MINIMUM_SESSION_TIME = SECOND
 export const MINIMUM_BREAK_TIME = 0
 
+export const INDICATOR_FLASH_DURATION = 3 * SECOND
+
 // Text
 
 export const READOUT_START_TXT = 'START'
 export const MESSAGE_RUN_TXT = 'Click to Run Timer'
+export const MESSAGE_SET_TXT = 'Click to Run Timer'
 export const INPUT_CANCEL_TXT = 'Click Here to Cancel Input'
+export const INDICATOR_SESSION_START_TXT = 'SESSION!'
+export const INDICATOR_BREAK_START_TXT = 'BREAK!'
 
 // Styles
 
