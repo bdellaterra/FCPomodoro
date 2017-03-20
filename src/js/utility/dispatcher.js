@@ -24,7 +24,10 @@ export const makeDispatcher = (spec = {}) => {
 
   // Remove a callback from the list.
   const removeCallback = (cb) => {
-    Array.splice(state.callbacks, state.callbacks.indexOf(cb), 1)
+    const index = state.callbacks.indexOf(cb)
+    if (index >= 0) {
+      Array.splice(state.callbacks, index, 1)
+    }
   }
 
   // Return the number of callbacks.
