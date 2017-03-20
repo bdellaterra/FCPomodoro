@@ -85,7 +85,8 @@ export const makeCountdownTimer = (spec) => {
   }
 
   // Return the promise that resolves when the countdown reaches zero.
-  const waitAlarm = () => state.promise
+  // If the time remaining is zero, return a promise that resolves immediately.
+  const waitAlarm = () => state.promise || Promise.resolve()
 
   // Return Interface.
   return frozen({

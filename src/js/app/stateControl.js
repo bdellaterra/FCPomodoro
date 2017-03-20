@@ -98,9 +98,7 @@ const makeStateControl = () => {
     sessionControl.countdown(duration)
     // Get promise for countdown reaching zero.
     // Transition to break once it resolves.
-    const waitAlarm = animator.waitAlarm()
-                    || Promise.resolve()  // Time remaining might be zero.
-    waitAlarm
+    animator.waitAlarm()
       .then(() => indicator({ flash: INDICATOR_BREAK_START_TXT }))
       .then(() => model.present(action.endSession))
       .catch(cancelSession)
@@ -113,9 +111,7 @@ const makeStateControl = () => {
     breakControl.countdown(duration)
     // Get promise for countdown reaching zero.
     // Transition to session once it resolves.
-    const waitAlarm = animator.waitAlarm()
-                    || Promise.resolve()  // Time remaining might be zero.
-    waitAlarm
+    animator.waitAlarm()
       .then(() => indicator({ flash: INDICATOR_SESSION_START_TXT }))
       .then(() => model.present(action.endBreak))
       .catch(cancelBreak)
