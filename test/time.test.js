@@ -171,7 +171,7 @@ test.skip('Pacer can add iterators and remove them when done.', (t) => {
 // Feed
 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-test.skip('Initial call to feed() returns null if given positive value.', (t) => {
+test.skip('Initial call to feed() with positive value returns null.', (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed(1) === null)
 })
@@ -183,7 +183,7 @@ test.skip('feed() with zero value performs immediate iteration.', async (t) => {
   t.true(feed(0).value === 2)
 })
 
-test.skip('Intial call to feed() with no arg implies pace of zero.', async (t) => {
+test.skip('Intial call to feed() with no arg implies zero pace.', async (t) => {
   let feed = makeFeeder(countTo(3))
   t.true(feed().value === 1)
   await sleep(jiffy)
