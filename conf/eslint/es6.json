@@ -19,7 +19,7 @@
     "no-const-assign": "error",
     "no-new-symbol": "error",
     "no-this-before-super": "error",
-    "require-yield": "error",
+    "require-yield": "warn",
 
     // Legal, but possibly errors or bad style
     //"class-methods-use-this": "warn",
