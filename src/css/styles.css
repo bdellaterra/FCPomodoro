@@ -7,7 +7,7 @@ html {
 html,
 body,
 #pomodoro {
-  background: #a3b3c3;
+  background: rgb(163, 179, 195);
   border-radius: 0;
   box-sizing: border-box;
   margin:0;
@@ -21,7 +21,7 @@ body,
 #pomodoro {
   text-align:center;
   font:16px sans-serif; 
-  color: #222222;
+  color: rgb(34, 34, 34);
   visibility: visible;
 }
 
@@ -70,7 +70,7 @@ select {
   padding: 0;
   outline: 0;
   font-size: 14px;
-  border: 1px solid #cccccc;
+  border: 1px solid rgb(204, 204, 204);
   margin-left: 5px;
   margin-right: 5px;
   padding-left: 5px;
@@ -94,9 +94,9 @@ select {
 #pomodoro.inAnimationMode textarea,
 #pomodoro.inAnimationMode input,
 #pomodoro.inAnimationMode select  {
-  background-color: #e6eefc;
-  border-color: #889099;
-  color:#111111;
+  background-color: rgb(230, 238, 252);
+  border-color: rgb(136, 144, 153);
+  color: rgb(17, 17, 17);
 }
 
 input[type=number] {
@@ -128,8 +128,8 @@ input[type=number] {
   width: 300px;
   height: 50px;
   margin-top:25px;
-  background-color: #112233;
-  color: #eeeeee;
+  background-color: rgb(17, 34, 51);
+  color: rgb(238, 238, 238);
   font-size: 38px;
 }
 
@@ -138,7 +138,7 @@ input[type=number] {
   height:25px;
   padding-top:5px;
   font-size: 16px;
-  color: #222222;
+  color: rgb(34, 34, 34);
   text-transform: uppercase;
   visibility: hidden;
   z-index: 50;
@@ -167,7 +167,7 @@ input[type=number] {
 #message {
   position:static;
   font-size: 12px;
-  color: #222222;
+  color: rgb(34, 34, 34);
   text-transform: uppercase;
   margin-top: 5px;
 }

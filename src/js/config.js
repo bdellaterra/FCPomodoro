@@ -14,7 +14,7 @@ export const INDICATOR_FLASH_DURATION = 3 * SECOND
 
 export const READOUT_START_TXT = 'START'
 export const MESSAGE_RUN_TXT = 'Click to Run Timer'
-export const MESSAGE_SET_TXT = 'Click to Run Timer'
+export const MESSAGE_SET_TXT = 'Click to Set Timer'
 export const INPUT_CANCEL_TXT = 'Click Here to Cancel Input'
 export const INDICATOR_SESSION_START_TXT = 'SESSION!'
 export const INDICATOR_BREAK_START_TXT = 'BREAK!'
@@ -26,8 +26,8 @@ export const DEFAULT_ARC_LINE_WIDTH = 18
 export const DEFAULT_ARC_STROKE_STYLE = 'blue'
 
 export const CIRCLE_RADIUS = 91
-export const CIRCLE_LINE_WIDTH = 200
-export const CIRCLE_STROKE_STYLE = '#b0c0d0'
+export const CIRCLE_LINE_WIDTH = 201
+export const CIRCLE_STROKE_STYLE = 'rgb(176, 192, 208)'
 
 export const CURSOR_RADIUS = DEFAULT_ARC_RADIUS
 export const CURSOR_LINE_WIDTH = DEFAULT_ARC_LINE_WIDTH - 2
