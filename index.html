@@ -1,1 +1,49 @@
-This is the html.
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>FCPomodoro"</title>
+        <style>
+            /* Prevent FOUC (Flash of Unstyled Content) */
+            body > div {
+                visibility: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Root div will receive classes from app to control presentation -->
+        <div id="pomodoro">
+            <div class="main">
+                <div id="clock">
+                    <div id="session">
+                        <div class="container">
+                            <div class="heading">Session:</div>
+                            H<input id="sessionHours" type="number" value="0" min="0" max="9" />
+                            M<input id="sessionMinutes" type="number" value="0" min="0" max="59" />
+                            S<input id="sessionSeconds" type="number" value="0" min="0" max="59" />
+                        </div>
+                    </div>
+                    <a id="toggle" href="#">
+                        <div id="readout">
+                            <div id="cancelMessage"></div>
+                            <div class="container">
+                                <div id="digitalTime"></div>
+                            </div>
+                            <div id="message"></div>
+                        </div>
+                    </a>
+                    <div id="break">
+                        <div class="container">
+                            H<input id="breakHours" type="number" value="0" min="0" max="9" />
+                            M<input id="breakMinutes" type="number" value="0" min="0" max="59" />
+                            S<input id="breakSeconds" type="number" value="0" min="0" max="59" />
+                            <div class="heading">Break:</div>
+                        </div>
+                    </div>
+                </div>
+                <canvas id="canvas" width="500" height="500"></canvas>
+            </div>
+        </div>
+    <script type="text/javascript" src="fe599820aadfe9137805.vendor.js?840f07a01fdc8189c74e"></script><script type="text/javascript" src="ff1800c314c4da3f7a9b.main.js?840f07a01fdc8189c74e"></script></body>
+</html>
