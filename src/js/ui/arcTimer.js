@@ -22,7 +22,7 @@ export const makeArcTimer = (spec) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
-  // Create a timer if none was provided.
+  // Create an animator if none was provided.
   if (!state.animator) {
     state.animator = makeAnimator(spec)
   }
@@ -44,10 +44,10 @@ export const makeArcTimer = (spec) => {
     arc.setEnd( (Math.abs(end) > step) ? end : 0 )
   }
 
-  // Return a reference to the timer.
+  // Return a reference to the animator.
   const getAnimator = () => state.animator
 
-  // Set the arc to track a different timer.
+  // Set the arc to track a different animator.
   const setAnimator = (v) => state.animator = v
 
   // Return the time unit indicated by the arc timer.

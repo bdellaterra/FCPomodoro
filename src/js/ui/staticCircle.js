@@ -22,7 +22,7 @@ export const makeStaticCircle = (spec) => {
   // Don't style. Just remain a full-circle.
   const style = Function.prototype
 
-  // Render the circle, adjusting opacity via the context alpha setting.
+  // Render the circle with no concern for timer values.
   const render = (time) => {
     arcTimer.render(0)
     return time
