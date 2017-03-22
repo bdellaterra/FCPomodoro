@@ -30,7 +30,7 @@ test('Can be updated predictably.', (t) => {
   t.true(timer.elapsed() === 2 * JIFFY)
 })
 
-test.skip('Supports specifications', (t) => {
+test('Supports specifications', (t) => {
   let timer = makeTimer({ beginning: JIFFY, time: 3 * JIFFY, last: 2 * JIFFY })
   t.true(timer.time() === 3 * JIFFY)
   t.true(timer.delta() === JIFFY)
