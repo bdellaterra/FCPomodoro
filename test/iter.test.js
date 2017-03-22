@@ -17,7 +17,11 @@ test('Once() allows a single iteration.', (t) => {
   t.true(i.next().done)
 })
 
-test('filerNext() removes iterators that are done.', (t) => {
+test('filterNext() returns empty array unchanged.', (t) => {
+  t.true(filterNext([]).length === 0)
+})
+
+test('filterNext() removes iterators that are done.', (t) => {
   let i = once(() => 0),
       arr = [nullIterator, i]
   t.true(arr.length === 2)
