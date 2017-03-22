@@ -1,32 +1,32 @@
-var test = require( process.env.JS_TEST_LIB ).test
+var test = require(process.env.JS_TEST_LIB).test
 
-import { assign, keys, pick, relay, sealed } from '../src/js/utility/fn'
+import { assign, keys, pick, relay, sealed } from 'utility/fn'
 
 
-test( "Empty spec object doesn't change state.", (t) => {
+test("Empty spec object doesn't change state.", (t) => {
   let spec = {},
       state = sealed({ a: 1, b: 2, c: 3 }),
       origState = state
-  assign(state, pick( spec, keys( state )))
+  assign(state, pick(spec, keys(state)))
   t.deepEqual(state, origState)
 })
 
-test( 'Spec object overrides state.', (t) => {
+test('Spec object overrides state.', (t) => {
   let spec = { a: 5, c: 7 },
       state = sealed({ a: 1, b: 2, c: 3 })
-  assign( state, pick( spec, keys( state )) )
-  t.deepEqual( state, { a: 5, b: 2, c: 7 } )
+  assign(state, pick(spec, keys(state)))
+  t.deepEqual(state, { a: 5, b: 2, c: 7 })
 })
 
-test( 'Spec object does not extend state.', (t) => {
+test('Spec object does not extend state.', (t) => {
   let spec = { d: 9 },
       state = sealed({ a: 1, b: 2, c: 3 }),
       origState = state
-  assign( state, pick( spec, keys( state )) )
+  assign(state, pick(spec, keys(state)))
   t.deepEqual(state, origState)
 })
 
-test( 'Relay forwards API calls lazily.', (t) => {
+test('Relay forwards API calls lazily.', (t) => {
   let f = () => 'original',
       g = () => 'new',
       o = { query: f },

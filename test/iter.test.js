@@ -1,15 +1,14 @@
 var test = require(process.env.JS_TEST_LIB).test
 
-import { filterNext, isIterable, nullIterator, once
-       } from '../src/js/utility/iter'
+import { filterNext, isIterable, nullIterator, once } from 'utility/iter'
 
 
 test('Null iterator is iterable.', (t) => {
-  t.true( isIterable(nullIterator) )
+  t.true(isIterable(nullIterator))
 })
 
 test('Once produces iterator.', (t) => {
-  t.true( isIterable(once()) )
+  t.true(isIterable(once()))
 })
 
 test('Once() allows a single iteration.', (t) => {

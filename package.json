@@ -11,10 +11,10 @@
     "dev": "webpack -d && webpack-dev-server --watch-poll",
     "build": "cross-env NODE_ENV=production webpack",
     "lint": "eslint . --quiet --cache --ignore-path .gitignore",
-    "cover": "cross-env JS_TEST_LIB=ava nyc ava",
-    "tap": "cross-env JS_TEST_LIB=ava ava --tap",
-    "test": "cross-env JS_TEST_LIB=ava ava",
-    "watch": "cross-env JS_TEST_LIB=ava ava --watch"
+    "cover": "cross-env NODE_PATH=src/js JS_TEST_LIB=ava nyc ava",
+    "tap": "cross-env NODE_PATH=src/js JS_TEST_LIB=ava ava --tap",
+    "test": "cross-env NODE_PATH=src/js JS_TEST_LIB=ava ava",
+    "watch": "cross-env NODE_PATH=src/js JS_TEST_LIB=ava ava --watch"
   },
   "devDependencies": {
     "ava": "^0.17.0",

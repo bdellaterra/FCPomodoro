@@ -1,9 +1,10 @@
 var test = require(process.env.JS_TEST_LIB).test
 
-import { JIFFY, MICROJIFFY, NANOJIFFY } from '../src/js/utility/constants'
-import { makeTimer } from '../src/js/time/timer'
-import { sleep } from '../src/js/time/sleep'
+import { JIFFY, MICROJIFFY } from 'utility/constants'
+import { makeTimer } from 'time/timer'
+import { sleep } from 'time/sleep'
 import now from 'present'
+
 
 test('Aliases are just aliases.', (t) => {
   let timer = makeTimer()
