@@ -14,10 +14,14 @@ export const makeDispatcher = (spec = {}) => {
   // Adjust state to spec.
   assign(state, pick(spec, keys(state)))
 
+  // Intuitively, callbacks should be provided in order-of-execution.
+  // They are implemented in reverse for efficiency, so spec order is adjusted.
+  state.callbacks.reverse()
+
   // Add a callback. If the dispatcher already has the callback,
   // it is not added to the list a second time.
   const addCallback = (cb) => {
-    if ( !state.callbacks.includes(cb) ) {
+    if (!state.callbacks.includes(cb)) {
       state.callbacks.unshift(cb)
     }
   }
@@ -45,9 +49,9 @@ export const makeDispatcher = (spec = {}) => {
         if (typeof cb === 'function') {
           // Call functions.
           cb(...args)
-        } else if ( isIterable(cb) ) {
+        } else if (isIterable(cb)) {
           // Call next() for iterators, removing them if iteration is done.
-          if ( cb.next(...args).done ) {
+          if (cb.next(...args).done) {
             removeCallback(cb)
           }
         }
@@ -67,7 +71,7 @@ export const makeDispatcher = (spec = {}) => {
   })
 
   // Prime and return the generator.
-  d.next()
+  // d.next()
   return frozen(d)
 
 }
