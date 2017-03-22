@@ -28,17 +28,6 @@ export const makeTimer = (spec) => {
     return state.time
   }
 
-  // Return time between updates.
-  const delta = () => state.time - state.last
-
-  // Return time elapsed since start time. (as of last upate)
-  // Optionally return time elapsed since a provided time value.
-  const since = (time) => {
-    return state.time - (time !== undefined ? time : state.beginning)
-  }
-  // Alias:
-  const elapsed = since
-
   // Return beginning time. Optionally set it to provided value.
   const beginning = (time) => {
     if (time !== undefined) {
@@ -47,13 +36,24 @@ export const makeTimer = (spec) => {
     return state.beginning
   }
 
+  // Return time elapsed since beginning. (as of last upate)
+  // Optionally return time elapsed since a provided time value.
+  const since = (time) => {
+    return state.time - (time !== undefined ? time : state.beginning)
+  }
+  // Alias:
+  const elapsed = since
+
   // Update current time to value provided. Save previous time for
   // calculating deltas. Update current time to now() if argument is undefined.
-  const sync = (time) => {
+  const sync = (t) => {
     state.last = state.time
-    state.time = (time !== undefined) ? time : now()
+    time( t !== undefined ? t : now() )
     return state.time
   }
+
+  // Return time since last update.
+  const delta = () => state.time - state.last
 
   // Synchronize all time values to now().
   // Optionally synchronize to a provided time value.

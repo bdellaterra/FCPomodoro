@@ -21,12 +21,11 @@ export const BLINK = SECOND / 5
 // Safe delay for testing asynchronous timing operations
 export const JIFFY = 50
 
-
 // Margin of error to account for time-shift during operations
-export const MICROJIFFY = JIFFY / 10
+export const MICROJIFFY = JIFFY / 5
 
 // For testing close-to-exact time values
-export const NANOJIFFY = JIFFY / 100
+export const NANOJIFFY = JIFFY / 10
 
 
 // Arc units based in radians
