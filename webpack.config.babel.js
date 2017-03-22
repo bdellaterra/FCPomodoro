@@ -31,22 +31,14 @@ const baseConfig = {
     ]
   },
   plugins: [
-    DefinePlugin,
-    new webpack.optimize.CommonsChunkPlugin({
-      name:      'vendor',
-      minChunks: ({ userRequest }) => (
-        userRequest
-        && userRequest.indexOf('node_modules') >= 0
-        && userRequest.match(/\.js$/)
-      )
-    })
+    DefinePlugin
   ]
 }
 
 // Use source maps if debugging.
 if (debug) { baseConfig.devtool = 'source-map' }
 
-// Minify if not debugging.
+// Minify for production
 if (production) {
   baseConfig.plugins.push(
     new webpack.optimize.UglifyJsPlugin({
