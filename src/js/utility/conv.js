@@ -14,13 +14,10 @@ export const secondsToMsecs = (s) => s * MILLISECONDS_PER_SECOND
 export const minutesToMsecs = (m) => m * MILLISECONDS_PER_MINUTE
 export const hoursToMsecs = (h) => h * MILLISECONDS_PER_HOUR
 
-// Pad numers less than ten with a leading zero.
-// Assumes argument is a positive number.
-export const zeroPad = (n) => (n < 10 ? '0' : '') + n
-
 // Converts a millisecond time value to HH:MM:SS formatted string.
 export const formatTime = (t) => {
-  const time = Math.max(0, t)
+  const time = Math.max(0, t),
+        zeroPad = (n) => (n < 10 ? '0' : '') + n
   let hours = Math.floor(msecsToHours(t))
   let minutes = Math.floor(msecsToMinutes(t) % MINUTES_PER_HOUR)
   let seconds = msecsToSeconds(t) % SECONDS_PER_MINUTE
