@@ -17,7 +17,7 @@ export function* once(cb, ...args) {
 // Minimal null-form of an iterator.
 export const isIterable = (x) => x && typeof x[Symbol.iterator] === 'function'
 
-// Iterate each generator in a list, removing those that are done.
-// If an optional value is provided it is passed to the generators.
-export const filterNext = (gs, v) => gs.filter((g) => !g.next(v).done)
+// Increment each iterator in a list, removing those that are done.
+// If an optional value is provided it is passed during each call to next().
+export const filterNext = (iters, v) => iters.filter((i) => !i.next(v).done)
 
