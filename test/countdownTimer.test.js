@@ -91,3 +91,14 @@ test('Resets properly.', (t) => {
          && timer.delta() === 0 && timer.remaining() === 0)
 })
 
+test('Alarm triggers callback.', async (t) => {
+  const state = { result: 0 },
+        f = () => state.result += 100,
+        timer = makeCountdownTimer()
+  t.true(state.result === 0)
+  timer.countdown(JIFFY)
+  let alarm = timer.waitAlarm()
+  await alarm
+  t.true(state.result === 100)
+})
+
