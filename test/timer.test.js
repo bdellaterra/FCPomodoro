@@ -9,7 +9,6 @@ import now from 'present'
 test('Aliases are just aliases.', (t) => {
   let timer = makeTimer()
   t.true(makeTimer.since === makeTimer.elapsed)
-  t.true(makeTimer.until === makeTimer.remaining)
 })
 
 test('Defaults to zeroes.', (t) => {

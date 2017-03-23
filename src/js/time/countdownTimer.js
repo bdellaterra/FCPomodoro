@@ -53,6 +53,7 @@ export const makeCountdownTimer = (spec) => {
       state.promise = null
       state.notifier = null
     }
+    return currentTime
   }
 
   // Reset time values and clear promise/notifier.
