@@ -71,7 +71,7 @@ export const makePacer = (spec) => {
     return num
   }
 
-  // Reset the time for all callbacks
+  // Zero-out the last-time reading for all callbacks.
   const resetCallbacks = () => keys(state.schedule).map((interval) => {
     state.schedule[interval].last = 0
   })
@@ -79,7 +79,7 @@ export const makePacer = (spec) => {
   // Reset the timer
   const resetTimer = () => state.timer.reset()
 
-  // Reset the timer and zero-out the last time reading for all callbacks.
+  // Reset the timer, and the timing for all callbacks.
   const reset = () => {
     resetTimer()
     resetCallbacks()
@@ -100,7 +100,7 @@ export const makePacer = (spec) => {
     resetCallbacks()
   }
 
-  // Create a pacer to trigger callbacks that have waited
+  // Generate a pacer to trigger callbacks that have waited
   // for a specified timer interval or longer.
   function* pacer() {
     while (true) {
@@ -122,12 +122,12 @@ export const makePacer = (spec) => {
     }
   }
 
-  // Create the generator.
+  // Create the iterator.
   const p = pacer()
 
   // Add additional methods.
-  assign( p, {
-    ...relay(state.timer),  // provide timer interface
+  assign(p, {
+    ...relay(state.timer),  // Provide timer interface.
     addCallback,
     countdown,
     getTimer,
@@ -139,10 +139,8 @@ export const makePacer = (spec) => {
     setTimer
   })
 
-  // Prime and return the generator.
+  // Prime and return the iterator.
   p.next()
-
-  // Return Interface.
   return frozen(p)
 
 }
