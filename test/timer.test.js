@@ -2,14 +2,12 @@ var test = require(process.env.JS_TEST_LIB).test
 
 import { JIFFY, MICROJIFFY } from 'utility/constants'
 import { makeTimer } from 'time/timer'
-import { sleep } from 'time/sleep'
 import now from 'present'
 
 
 test('Aliases are just aliases.', (t) => {
   let timer = makeTimer()
   t.true(makeTimer.since === makeTimer.elapsed)
-  t.true(makeTimer.until === makeTimer.remaining)
 })
 
 test('Defaults to zeroes.', (t) => {
