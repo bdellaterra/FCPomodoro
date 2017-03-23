@@ -14,7 +14,7 @@ export function* once(cb, ...args) {
   yield cb(...args)
 }
 
-// Minimal null-form of an iterator.
+// Return true if value tested is an iterator.
 export const isIterable = (x) => x && typeof x[Symbol.iterator] === 'function'
 
 // Increment each iterator in a list, removing those that are done.
