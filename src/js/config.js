@@ -16,8 +16,8 @@ export const READOUT_START_TXT = 'START'
 export const MESSAGE_RUN_TXT = 'Click to Run Timer'
 export const MESSAGE_SET_TXT = 'Click to Set Timer'
 export const INPUT_CANCEL_TXT = 'Click Here to Cancel Input'
-export const INDICATOR_SESSION_START_TXT = 'SESSION!'
-export const INDICATOR_BREAK_START_TXT = 'BREAK!'
+export const INDICATOR_SESSION_TXT = 'SESSION!'
+export const INDICATOR_BREAK_TXT = 'BREAK!'
 
 // Styles
 

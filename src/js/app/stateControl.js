@@ -1,6 +1,5 @@
 import { BLINK } from 'utility/constants'
-import { DEFAULT_BREAK_TIME, DEFAULT_SESSION_TIME, INDICATOR_BREAK_START_TXT,
-         INDICATOR_FLASH_DURATION, INDICATOR_SESSION_START_TXT,
+import { INDICATOR_BREAK_TXT, INDICATOR_FLASH_DURATION, INDICATOR_SESSION_TXT,
          INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, MESSAGE_SET_TXT, READOUT_START_TXT
        } from 'config'
 import { action, animator, breakControl, model,
@@ -20,109 +19,6 @@ import { sleep } from 'time/sleep'
 // called just "state". Here it is "stateControl" to emphasize "control state".
 const makeStateControl = () => {
 
-  // Handle changes to the input fields.
-  const registerInput = () => {
-    if ( model.inSession() ) {
-      model.present(action.inputSession)
-    } else {
-      model.present(action.inputBreak)
-    }
-  }
-
-  // Transition to input mode. Optionally specify if session input has focus.
-  const inputMode = ({ inSession } = {}) => {
-    if (inSession === undefined) {
-      inSession = model.inSession()
-    }
-    if (!model.inInputMode()) {
-      model.present(inSession ? action.inputSession : action.inputBreak)
-    }
-  }
-
-  // Transition to animation mode.
-  const animationMode = () => {
-    if (!model.inAnimationMode()) {
-      model.present(model.inSession() ? action.startSession : action.startBreak)
-    }
-  }
-
-  // Toggle mode when the user clicks the digital display.
-  const toggleMode = (() => {
-    // Using closure to privately track whether session/break was in progress.
-    let lastAnimation
-    return ({ cancellingInput = false } = {}) => {
-      if ( model.inInputMode() ) {
-        if (cancellingInput) {
-          if (lastAnimation) {
-            // Restore previous animation if cancelling input.
-            model.present(lastAnimation)
-          } else {
-            // If cancelling the initial input there is no previous animation,
-            // so restore the default values instead.
-            render({
-              sessionTime: DEFAULT_SESSION_TIME,
-              breakTime:   DEFAULT_BREAK_TIME
-            })
-          }
-        } else {
-          // Toggle from input mode to animation mode.
-          animationMode()
-          lastAnimation = model.inSession()
-                        ? action.runSession
-                        : action.runBreak
-        }
-      } else {
-        // Toggle from animation mode to input mode.
-        inputMode()
-      }
-    }
-  })()
-  // Alias:
-  const cancelInputMode = () => toggleMode({ cancellingInput: true })
-
-  // Create a callback that will present the provided action to the model.
-  const makeFutureAction = (a) => once(() => {
-    model.present(a)
-  })
-
-  // There are currently no actions required when cancelling sessions.
-  const cancelSession = Function.prototype
-
-  // There are currently no actions required when cancelling breaks.
-  const cancelBreak = Function.prototype
-
-  // Start a session for the given length of time.
-  const startSession = (duration) => {
-    breakControl.deanimate()
-    clearCanvas()
-    sessionControl.countdown(duration)
-    // Get promise for countdown reaching zero.
-    // Transition to break once it resolves.
-    animator.waitAlarm()
-      .then(() => indicator({ flash: INDICATOR_BREAK_START_TXT }))
-      .then(() => model.present(action.endSession))
-      .catch(cancelSession)
-  }
-
-  // Start a break for the given length of time.
-  const startBreak = (duration) => {
-    sessionControl.deanimate()
-    clearCanvas()
-    breakControl.countdown(duration)
-    // Get promise for countdown reaching zero.
-    // Transition to session once it resolves.
-    animator.waitAlarm()
-      .then(() => indicator({ flash: INDICATOR_SESSION_START_TXT }))
-      .then(() => model.present(action.endBreak))
-      .catch(cancelBreak)
-  }
-
-  // Submit provided session/break input to the model.
-  const submitInput = ({ sessionTime, breakTime }) => {
-    model.setSessionTime(sessionTime)
-    model.setBreakTime(breakTime)
-  }
-
   // Read session/break input from the view. Return the data as an object.
   const readInput = () => {
     const sessionTime = view.calcSessionTime(),
@@ -130,11 +26,89 @@ const makeStateControl = () => {
     return { sessionTime, breakTime }
   }
 
+  // Return toggle action for when the user clicks the digital display.
+  const modeToggle = ({ isAnimating } = {}) => {
+    if (isAnimating) {
+      return () => model.present(action.input)
+    } else {
+      const payload = readInput()
+      return () => model.present(action.start, payload)
+    }
+  }
+
+  // Return input cancel action.
+  const inputCancel = ({ isAnimating } = {}) => {
+    if (isAnimating) {
+      return Function.prototype  // Do nothing if not in input mode.
+    } else {
+      return () => model.present(action.run)
+    }
+  }
+
+  // Create a callback that will present the provided action to the model.
+  const makeFutureAction = (a) => once(() => {
+    model.present(a)
+  })
+
+  // Setup user input mode.
+  const startInput = () => {
+    // Don't animate while user is inputting new data.
+    animator.setClearCanvas(false)
+    sessionControl.deanimate()
+    breakControl.deanimate()
+    animator.removeUpdate(view.showReadout, BLINK)
+  }
+
+  // There are currently no actions for cancelling animations.
+  const cancelAnimation = Function.prototype
+
+  // Setup a new session/break for the given length of time.
+  const startAnimation = ({ sessionTime, breakTime, isOnBreak } = {}) => {
+    let activeAnalog, inactiveAnalog, duration, flash, endAction
+    if (isOnBreak) {
+      activeAnalog = breakControl
+      inactiveAnalog = sessionControl
+      duration = breakTime,
+      flash = INDICATOR_BREAK_TXT
+      endAction = action.endBreak
+    } else {
+      activeAnalog = sessionControl
+      inactiveAnalog = breakControl
+      duration = sessionTime,
+      flash = INDICATOR_SESSION_TXT
+      endAction = action.endSession
+    }
+    inactiveAnalog.deanimate()
+    clearCanvas()
+    activeAnalog.countdown(duration)  // triggers animation
+    // Get promise for countdown reaching zero.
+    // Transition to break once it resolves.
+    animator.waitAlarm()
+      .then(() => indicator({ flash }))
+      .then(() => model.present(endAction))
+      .catch(cancelAnimation)
+  }
+
+  // Animate a session/break analog.
+  const runAnimation = ({ isOnBreak } = {}) => {
+    if (isOnBreak) {
+      sessionControl.deanimate()
+      breakControl.animate()
+    } else {
+      breakControl.deanimate()
+      sessionControl.animate()
+    }
+    // Animator is responsible for clearing the canvas when not in input-mode.
+    animator.setClearCanvas(true)
+    // Update digital readout frequently and in sync with blinking cursor.
+    animator.addUpdate(view.showReadout, BLINK)
+  }
+
   // Adjust app presentation using style classes for various control states.
-  const presentation = ({ isCancelHidden = false }) => {
+  const presentation = ({ isOnBreak, isAnimating, isCancelHidden } = {}) => {
     const classes = [
-      model.inSession() ? 'inSession' : 'onBreak',
-      model.inInputMode() ? 'inInputMode' : 'inAnimationMode'
+      isOnBreak ? 'onBreak' : 'inSession',
+      isAnimating ? 'inAnimationMode' : 'inInputMode'
     ]
     if (isCancelHidden) {
       classes.push('hideCancelMessage')
@@ -142,7 +116,7 @@ const makeStateControl = () => {
     return classes.join(' ')
   }
 
-  // Return readout text to indicate app state to the user.
+  // Return text to indicate important state transitions to the user.
   const indicator = (() => {
     // Using closure to keep a special message that will display temporarily.
     let specialMessage
@@ -151,33 +125,33 @@ const makeStateControl = () => {
         specialMessage = flash
         sleep(INDICATOR_FLASH_DURATION).then(() => specialMessage = null)
       }
-      // Return current time reading unless there is a special message.
-      return specialMessage ? specialMessage : formatTime(animator.remaining())
+      // Return special message or null
+      return specialMessage
     }
   })()
 
-  // Return a formatted value for the digital time display.
-  const readout = () => {
-    return model.inInputMode() ? READOUT_START_TXT : indicator()
+  // Return a formatted string for the digital time display.
+  // Important state transitions will flash special alerts over this readout.
+  const information = ({ isAnimating } = {}) => {
+    return indicator()
+           || isAnimating ? READOUT_START_TXT : formatTime(animator.remaining())
   }
 
   // Message user with instructions.
-  const notification = () => {
-    return model.inInputMode() ? MESSAGE_RUN_TXT : MESSAGE_SET_TXT
+  const instructions = ({ isAnimating } = {}) => {
+    return isAnimating ? MESSAGE_SET_TXT : MESSAGE_RUN_TXT
   }
 
   // Provide user with a cancellation link.
-  const cancellation = ({ isCancelHidden }) => {
-    const cancelMessage = model.inInputMode() && !isCancelHidden
-                        ? INPUT_CANCEL_TXT
-                        : ''
-    return cancelMessage
+  const cancellation = ({ isCancelHidden } = {}) => {
+    return isCancelHidden ? '' : INPUT_CANCEL_TXT
   }
 
   // Create a model that is easily consumed by the view.
-  const representation = ({ sessionTime, breakTime, isCancelHidden }) => {
-    const inInputMode = model.inInputMode(),
-          inSession = model.inSession()
+  const representation = (data) => {
+    const { mode, sessionTime, breakTime, isOnBreak } = data,
+          isAnimating = mode !== action.input,
+          isCancelHidden = isOnBreak === null  // hide for first input
     // Format time values for display.
     const [sessionHours, sessionMinutes, sessionSeconds]
             = formatTime(sessionTime).split(':'),
@@ -185,125 +159,78 @@ const makeStateControl = () => {
             = formatTime(breakTime).split(':')
     // Return data that can be fed directly into the view.
     return {
-      inInputMode,
-      inSession,
-      sessionHours,
-      sessionMinutes,
-      sessionSeconds,
-      sessionTime,
+      isAnimating,
+      isCancelHidden,
+      isOnBreak,
       breakHours,
       breakMinutes,
       breakSeconds,
       breakTime,
-      pomodoro:      presentation({ isCancelHidden }),
-      digitalTime:   readout(),
-      message:       notification(),
-      cancelMessage: cancellation({ isCancelHidden })
+      sessionHours,
+      sessionMinutes,
+      sessionSeconds,
+      sessionTime,
+      cancelMessage: cancellation({ isCancelHidden }),
+      readout:       information({ isAnimating }),
+      message:       instructions({ isAnimating }),
+      onInputCancel: inputCancel({ isAnimating }),
+      onToggle:      modeToggle({ isAnimating }),
+      pomodoro:      presentation({ isCancelHidden })
     }
   }
 
   // Send a representation of the model to the view for rendering,
   // then invoke possible next actions that result from current control state.
-  const render = (input) => {
+  const render = (data) => {
 
-    if (input !== undefined) {
-      // Submit provided input values to the model.
-      submitInput(input)
-      Object.assign(input, { isCancelHidden: true })
-    } else {
-      // If no input provided, read values from the view.
-      input = readInput()
+    switch (data.mode) {
+      case action.input: {
+        startInput()
+        break
+      }
+      case action.start: {
+        startAnimation(data)
+        break
+      }
+      case action.run:
+        runAnimation(data)
+        break
+      case action.end:
+        break
+      default:
+        // All actions/states have been accounted for.
+        break
     }
 
-    const { sessionTime, breakTime } = input
+    view.render(representation(data))
 
-    if ( model.inInputMode() ) {
-
-      // Don't animate while user is inputting new data.
-      animator.setClearCanvas(false)
-      sessionControl.deanimate()
-      breakControl.deanimate()
-      animator.removeUpdate(view.showDigitalTime, BLINK)
-
-    } else if ( model.inAnimationMode() ) {
-
-      // Animator is responsible for clearing the canvas when not in input-mode.
-      animator.setClearCanvas(true)
-      // Update digital readout frequently and in sync with blinking cursor.
-      animator.addUpdate(view.showDigitalTime, BLINK)
-
-      if ( model.startingAnimation() ) {
-        // Input is only presented to the model when an animation is starting.
-        submitInput(input)
-        // Start the next session/break.
-        if ( model.inSession() ) {
-          startSession(sessionTime)
-        } else {
-          startBreak(breakTime)
-        }
-      }
-
-      if ( model.resumingAnimation() ) {
-        // Resume the previous session/break.
-        clearCanvas()
-        if ( model.inSession() ) {
-          sessionControl.animate()
-        } else {
-          breakControl.animate()
-        }
-        // Restore input fields to the data contained in the model.
-        Object.assign(input, {
-          sessionTime: model.getSessionTime(),
-          breakTime:   model.getBreakTime()
-        })
-      }
-
-    }
-
-    view.render( representation(input) )
-
-    nextAction()
+    nextAction(data.mode)
 
   }
 
   // Trigger actions that automatically follow certain control states.
-  const nextAction = () => {
+  const nextAction = (mode) => {
     let next = null
-    switch (model.getState()) {
-      case action.startSession: {
-        next = action.runSession
+
+    switch (mode) {
+      case action.start: {
+        next = action.run
         break
       }
-      case action.startBreak: {
-        next = action.runBreak
-        break
-      }
-      case action.endSession: {
-        next = action.startBreak
-        break
-      }
-      case action.endBreak: {
-        next = action.startSession
+      case action.end: {
+        next = action.start
         break
       }
     }
+
     if (next) {
       model.present(next)
     }
+
   }
 
   // Return interface.
-  return frozen({
-    animationMode,
-    cancelInputMode,
-    inputMode,
-    presentation,
-    readInput,
-    readout,
-    registerInput,
-    render,
-    toggleMode
-  })
+  return frozen({ render })
 
 }
 

@@ -1,5 +1,7 @@
 import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from 'config'
-import { ARC_CYCLE, MILLISECOND, MINUTE, SECOND } from 'utility/constants'
+import { ARC_CYCLE, MAX_HOURS, MAX_MINUTES, MAX_SECONDS, MILLISECOND,
+         MINUTE, SECOND
+       } from 'utility/constants'
 import { action, breakDisplay, model, sessionDisplay, stateControl, view
        } from 'app'
 import { frozen, keys } from 'utility/fn'
@@ -32,7 +34,7 @@ const makeView = () => {
 
   // Declare output elements with their default content.
   const outputs = frozen({
-    digitalTime:   READOUT_START_TXT,
+    readout:       READOUT_START_TXT,
     message:       MESSAGE_RUN_TXT,
     cancelMessage: INPUT_CANCEL_TXT
   })
@@ -40,17 +42,17 @@ const makeView = () => {
   // Pull DOM targets into an object.
   const El = {}
   keys({ ...root, ...inputs, ...outputs })
-    .map( (e) => El[e] = document.getElementById(e) )
+    .map((e) => El[e] = document.getElementById(e))
 
-  // Limit the time inputs to a range of positive values
+  // Limit the time input fields to a range of positive values.
   const limitHoursInput = (event) => {
-    event.target.value = Math.min(9, Math.max(0, event.target.value))
+    event.target.value = Math.min(MAX_HOURS, Math.max(0, event.target.value))
   }
   const limitMinutesInput = (event) => {
-    event.target.value = Math.min(59, Math.max(0, event.target.value))
+    event.target.value = Math.min(MAX_MINUTES, Math.max(0, event.target.value))
   }
   const limitSecondsInput = (event) => {
-    event.target.value = Math.min(59, Math.max(0, event.target.value))
+    event.target.value = Math.min(MAX_SECONDS, Math.max(0, event.target.value))
   }
 
   // Apply numeric limits to the session/break input fields.
@@ -61,47 +63,53 @@ const makeView = () => {
   El.breakMinutes.addEventListener('input', limitMinutesInput)
   El.breakSeconds.addEventListener('input', limitSecondsInput)
 
-  // Attach presentation focus to the session/break input fields.
-  keys(sessionInputs).map( (e) => {
-    El[e].addEventListener( 'input', () => model.present(action.inputSession) )
-    El[e].addEventListener( 'click', () => {
-      stateControl.inputMode({ inSession: true })
-    })
-  })
-  keys(breakInputs).map( (e) => {
-    El[e].addEventListener( 'input', () => model.present(action.inputBreak) )
-    El[e].addEventListener( 'click', () => {
-      stateControl.inputMode({ inSession: false })
-    })
+  // Attach presentation focus to the input fields.
+  keys(inputs).map((e) => {
+    El[e].addEventListener('input', () => model.present(action.input))
+    El[e].addEventListener('click', () => model.present(action.input))
   })
 
   // Attach input handlers to the session/break input fields.
-  keys(sessionInputs).map( (e) => {
-    El[e].addEventListener( 'input', () => {
-      previewInput({ inSession: true })
-      stateControl.registerInput()
+  keys(sessionInputs).map((e) => {
+    El[e].addEventListener('input', () => {
+      previewInput({ isOnBreak: false })
     })
   })
-  keys(breakInputs).map( (e) => {
-    El[e].addEventListener( 'input', () => {
-      previewInput({ inSession: false })
-      stateControl.registerInput()
+  keys(breakInputs).map((e) => {
+    El[e].addEventListener('input', () => {
+      previewInput({ isOnBreak: true })
     })
   })
 
-  // Attach input toggle to click event on the digital display.
-  El.digitalTime.addEventListener( 'click', () => stateControl.toggleMode() )
+  // Attach callback to specified event on the provided element.
+  // Removes any existing callback that was attached on previous invocation.
+  const switchCallback = (() => {
+    // Using closure to keep a record of the last callback for removal.
+    let lastCallback
+    return ({ element, event, callback } = {}) => {
+      if (lastCallback) {
+        element.removeEventListener(event, callback)
+      }
+      lastCallback = callback
+      element.addEventListener(event, callback)
+    }
+  })()
 
-  // Attach click event for cancel input link.
-  El.cancelMessage.addEventListener('click', () => {
-    stateControl.cancelInputMode()
-  })
+  // Attach next-mode callback to click event on the digital display.
+  const attachModeToggle = (cb) => {
+    switchCallback({ element: El.readout, event: 'click', callback: cb })
+  }
+
+  // Attach cancel-input callback to click event on the cancel link.
+  const attachInputCancel = (cb) => {
+    switchCallback({ element: El.cancelMessage, event: 'click', callback: cb })
+  }
 
   // Disable input.
-  const disableInput = () => keys(inputs).map( (e) => El[e].disabled = true )
+  const disableInput = () => keys(inputs).map((e) => El[e].disabled = true)
 
   // Enable input.
-  const enableInput = () => keys(inputs).map( (e) => El[e].disabled = false )
+  const enableInput = () => keys(inputs).map((e) => El[e].disabled = false)
 
   // Calculate total time in milliseconds using hours/minutes/seconds values.
   const calcTime = ({ hours, minutes, seconds }) => {
@@ -186,32 +194,33 @@ const makeView = () => {
 
   // Display a preview of the input values being entered by the user.
   const previewInput = (data) => {
-    const { inSession } = data,
+    const { isOnBreak } = data,
           { sessionTime, breakTime } = calcPreviewTimes(data)
     clearCanvas()
-    if (inSession) {
-      sessionDisplay.draw(sessionTime)
-    } else {
+    if (isOnBreak) {
       breakDisplay.draw(breakTime)
+    } else {
+      sessionDisplay.draw(sessionTime)
     }
   }
 
   // Set the text on the digital readout.
-  const showDigitalTime = () => {
-    El.digitalTime.innerHTML = stateControl.readout()
+  const showReadout = ({ readout } = {}) => {
+    El.readout.innerHTML = readout
   }
 
   // Set presentation classes on the root element.
   const presentState = (data) => {
-    keys(root).map( (e) => El[e].className = data[e] )
+    keys(root).map((e) => El[e].className = data[e])
   }
 
   // Render current state to the DOM.
   const render = (data) => {
-    const { inInputMode, inSession } = data
     presentState(data)
-    keys(inputs).map( (e) => El[e].value = data[e] )
-    keys(outputs).map( (e) => El[e].innerHTML = data[e] )
+    keys(inputs).map((e) => El[e].value = data[e])
+    keys(outputs).map((e) => El[e].innerHTML = data[e])
+    attachModeToggle(data.onToggle)
+    attachInputCancel(data.onInputCancel)
     previewInput(data)
   }
 
@@ -219,14 +228,12 @@ const makeView = () => {
   return frozen({
     calcBreakTime,
     calcSessionTime,
-    readBreakValues,
-    readSessionValues,
     render,
-    showDigitalTime
+    showReadout
   })
 
 }
 
 // Populate the imported view object.
-Object.assign( view, makeView() )
+Object.assign(view, makeView())
 
