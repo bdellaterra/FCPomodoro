@@ -1,5 +1,13 @@
 
-// Time units from a base of one millisecond.
+// Input constraints
+// ============================================================================
+
+export const MAX_HOURS = 9
+export const MAX_MINUTES = 59
+export const MAX_SECONDS = 59
+
+
+// Time units from a base of one millisecond
 // ============================================================================
 
 export const MILLISECONDS_PER_SECOND = 1000
