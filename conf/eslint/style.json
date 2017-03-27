@@ -141,9 +141,7 @@
     }],
     "space-before-blocks": [ "warn", "always" ],
     "space-before-function-paren": [ "warn", "never" ],
-    //"space-in-parens": [ "warn", "never", {
-    //  "exceptions": [ "{}", "[]", "()" ]
-    //}],
+    "space-in-parens": [ "warn", "never" ],
     "space-infix-ops": [ "warn", {
       "int32Hint": false
     }],
