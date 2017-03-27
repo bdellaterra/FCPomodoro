@@ -30,3 +30,10 @@ export const formatTime = (t) => {
   return [hours, zeroPad(minutes), zeroPad(seconds)].join(':')
 }
 
+// Calculate total time in milliseconds using hours/minutes/seconds values.
+export const calcTime = ({ hours, minutes, seconds }) => {
+  return hoursToMsecs(hours)
+    + minutesToMsecs(minutes)
+    + secondsToMsecs(seconds)
+}
+

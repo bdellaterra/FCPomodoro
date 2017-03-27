@@ -6,8 +6,8 @@ import { frozen, keys } from 'utility/fn'
 // Actions will be presented to the model to direct app behavior.
 // Every combination of control states must map to an action.
 export const action = frozen({
-  start: frozen({ hasInput: true, isRunning: true }),
   input: frozen({ hasInput: true, isRunning: false }),
+  start: frozen({ hasInput: true, isRunning: true }),
   run:   frozen({ hasInput: false, isRunning: true }),
   end:   frozen({ hasInput: false, isRunning: false })
 })

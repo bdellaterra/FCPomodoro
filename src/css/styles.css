@@ -6,7 +6,7 @@ html {
 
 html,
 body,
-#pomodoro {
+#app {
   background: rgb(163, 179, 195);
   border-radius: 0;
   box-sizing: border-box;
@@ -14,11 +14,11 @@ body,
   padding: 0;
 }
 
-#pomodoro * {
+#app * {
   box-sizing: inherit;
 }
 
-#pomodoro {
+#app {
   text-align:center;
   font:16px sans-serif; 
   color: rgb(34, 34, 34);
@@ -77,23 +77,23 @@ select {
   padding-right: 5px;
 }
 
-#pomodoro.inSession #session textarea,
-#pomodoro.inSession #session input,
-#pomodoro.inSession #session select {
+#app.inSession #session textarea,
+#app.inSession #session input,
+#app.inSession #session select {
   border-width: 2px;
   border-color: rgb(35, 170, 250);
 }
 
-#pomodoro.onBreak #break textarea,
-#pomodoro.onBreak #break input,
-#pomodoro.onBreak #break select {
+#app.onBreak #break textarea,
+#app.onBreak #break input,
+#app.onBreak #break select {
   border-width: 2px;
   border-color: rgb(15, 190, 135);
 }
 
-#pomodoro.inAnimationMode textarea,
-#pomodoro.inAnimationMode input,
-#pomodoro.inAnimationMode select  {
+#app.inAnimationMode textarea,
+#app.inAnimationMode input,
+#app.inAnimationMode select  {
   background-color: rgb(230, 238, 252);
   border-color: rgb(136, 144, 153);
   color: rgb(17, 17, 17);
@@ -118,12 +118,12 @@ input[type=number] {
   top: 102px;
 }
 
-#readout {
+#interface {
   position: static;
   height: 100px;
 }
 
-#readout .container {
+#interface .container {
   position:static;
   width: 300px;
   height: 50px;
@@ -144,23 +144,23 @@ input[type=number] {
   z-index: 50;
 }
 
-#pomodoro.inSession #cancelMessage {
+#app.inSession #cancelMessage {
    color: rgb(0, 50, 155);
 }
 
-#pomodoro.onBreak #cancelMessage {
+#app.onBreak #cancelMessage {
    color: rgb(0, 120, 80);
 }
 
-#pomodoro.inInputMode #cancelMessage {
+#app.inInputMode #cancelMessage {
   visibility: visible;
 }
 
-#pomodoro.inInputMode.hideCancelMessage #cancelMessage {
+#app.inInputMode.hideCancelMessage #cancelMessage {
   visibility: hidden;
 }
 
-#digitalTime {
+#readout {
   line-height: 50px;
 }
 
