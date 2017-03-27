@@ -263,20 +263,6 @@ const makeView = () => {
     el.readout.innerHTML = readout
   }
 
-  // Attach handlers to user events on the DOM elements.
-  const attachHandlers = (data) => {
-    attachModeToggler(data)
-    attachInputFocuser(data)
-    attachInputCanceller(data)
-  }
-
-  // Inject content into DOM elements.
-  const populate = (data) => {
-    keys(inputs).map((e) => el[e].value = data[e])
-    keys(outputs).map((e) => el[e].innerHTML = data[e])
-    displayReadout(data)
-  }
-
   // Set presentation classes on the root element.
   const presentState = (classes = {}) => {
     el[root].className = style(classes)
@@ -285,8 +271,12 @@ const makeView = () => {
   // Render current state to the DOM.
   const render = (data) => {
     presentState(data[root])
-    populate(data)
-    attachHandlers(data)
+    keys(inputs).map((e) => el[e].value = data[e])
+    keys(outputs).map((e) => el[e].innerHTML = data[e])
+    displayReadout(data)
+    attachModeToggler(data)
+    attachInputFocuser(data)
+    attachInputCanceller(data)
     if (!data.isAnimating) {
       previewInput(data)
     }
