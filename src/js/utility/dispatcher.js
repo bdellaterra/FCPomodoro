@@ -70,8 +70,7 @@ export const makeDispatcher = (spec = {}) => {
     removeCallback
   })
 
-  // Prime and return the generator.
-  // d.next()
+  // Return the generator.
   return frozen(d)
 
 }
