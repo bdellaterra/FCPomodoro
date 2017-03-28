@@ -12,7 +12,6 @@ export const pick = lodashPick
 export const pickBy = lodashPickBy
 export const sealed = Object.seal
 
-
 // Relay the function interface of an object in a lazy manner so function calls
 // will reference a new object if the original is replaced.
 export const relay = (obj) => {
@@ -26,4 +25,13 @@ export const relay = (obj) => {
   }
   return facade
 }
+
+// Convert the provided function to a closure. It will have private access to
+// an object named 'state', which it must accept as it's first parameter.
+// The state object can be initialized via a 2nd argument to the constructor.
+// Returns function with the same signature minus the inital state parameter.
+export const enclose = (func, initialState = {}) => (() => {
+  let state = initialState
+  return (...args) => func(state, ...args)
+})()
 

@@ -2,7 +2,7 @@ import { INPUT_CANCEL_TXT, MESSAGE_RUN_TXT, READOUT_START_TXT } from 'config'
 import { MAX_HOURS, MAX_MINUTES, MAX_SECONDS, MILLISECOND
        } from 'utility/constants'
 import { breakDisplay, sessionDisplay, view } from 'app'
-import { frozen, keys } from 'utility/fn'
+import { enclose, frozen, keys } from 'utility/fn'
 import { calcTime } from 'utility/conv'
 import { clearCanvas } from 'ui/canvas'
 
@@ -93,32 +93,26 @@ const makeView = () => {
   }
 
   // Return true if last user input was for break vs. session values.
-  // Optionally set focus to break if provided value is true.
-  const isBreakFocused = (() => {
-    // Using closure to retain the last input focus.
-    let lastOnBreak = false
-    return (isOnBreak) => {
-      if (isOnBreak !== undefined) {
-        lastOnBreak = Boolean(isOnBreak)
-      }
-      return lastOnBreak
+  // Optionally set focus to break if optional value is true.
+  const isBreakFocused = enclose((state, isOnBreak) => {
+    if (isOnBreak !== undefined) {
+      state.isOnBreak = Boolean(isOnBreak)
     }
-  })()
+    return state.isOnBreak
+  }, { isOnBreak: false })
 
-  // Return style classes representing current app state.
-  const style = (() => {
-    // Using closure to retain previous styling information.
-    let lastStyles = {}
-    return (styles = {}) => {
-      Object.assign(lastStyles, styles)
-      return keys(lastStyles).reduce((classes, c) => {
-        if (lastStyles[c]) {
-          classes.push(c)
-        }
-        return classes
-      }, []).join(' ')
-    }
-  })()
+  // Return style classes to customize app presentation based on control state.
+  // Takes an object with class names as keys and boolean values declaring if
+  // they should appear in the rendered html.
+  const style = enclose((state, styles) => {
+    Object.assign(state, styles)
+    return keys(state).reduce((classes, c) => {
+      if (state[c]) {
+        classes.push(c)
+      }
+      return classes
+    }, []).join(' ')
+  }, {})
 
   // Focus user input on the session input fields.
   const focusSession = () => {
@@ -204,59 +198,51 @@ const makeView = () => {
 
   // Attach input-focus handler to the click and input events on input fields.
   // Remove it once the app is in input mode.
-  const attachInputFocuser = (() => {
-    // Using closure to keep a record of the last callback for removal.
-    let lastInputFocuser
-    return ({ inputFocuser, isAnimating }) => {
-      const isSwap = lastInputFocuser && inputFocuser !== lastInputFocuser
-      if (!isAnimating || isSwap) {
-        // Remove previous callback.
-        keys(inputs).map((e) => {
-          el[e].removeEventListener('click', lastInputFocuser)
-        })
-        keys(inputs).map((e) => {
-          el[e].removeEventListener('input', lastInputFocuser)
-        })
-        lastInputFocuser = null
-      }
-      if (isAnimating) {
-        // Attach new callback which will a trigger transition to input mode.
-        keys(inputs).map((e) => {
-          el[e].addEventListener('click', inputFocuser)
-        })
-        keys(inputs).map((e) => {
-          el[e].addEventListener('input', inputFocuser)
-        })
-        lastInputFocuser = inputFocuser
-      }
+  const attachInputFocuser = enclose((state, data = {}) => {
+    const { inputFocuser, isAnimating } = data,
+          isSwap = state.lastInputFocuser !== undefined
+                   && inputFocuser !== state.lastInputFocuser
+    if (!isAnimating || isSwap) {
+      // Remove previous callback.
+      keys(inputs).map((e) => {
+        el[e].removeEventListener('click', state.lastInputFocuser)
+      })
+      keys(inputs).map((e) => {
+        el[e].removeEventListener('input', state.lastInputFocuser)
+      })
+      state.lastInputFocuser = null
     }
-  })()
+    if (isAnimating) {
+      // Attach new callback which will a trigger transition to input mode.
+      keys(inputs).map((e) => {
+        el[e].addEventListener('click', inputFocuser)
+      })
+      keys(inputs).map((e) => {
+        el[e].addEventListener('input', inputFocuser)
+      })
+      state.lastInputFocuser = inputFocuser
+    }
+  })
 
   // Attach mode-toggle handler to click event on the digital display.
-  const attachModeToggler = (() => {
-    // Using closure to keep a record of the last callback for removal.
-    let lastModeToggler
-    return ({ modeToggler, isAnimating } = {}) => {
-      if (lastModeToggler) {
-        el.readout.removeEventListener('click', lastModeToggler)
-      }
-      el.readout.addEventListener('click', modeToggler)
-      lastModeToggler = modeToggler
+  const attachModeToggler = enclose((state, data = {}) => {
+    const { modeToggler, isAnimating } = data
+    if (state.lastModeToggler) {
+      el.readout.removeEventListener('click', state.lastModeToggler)
     }
-  })()
+    el.readout.addEventListener('click', modeToggler)
+    state.lastModeToggler = modeToggler
+  })
 
   // Attach input-cancel handler to click event on the cancel link.
-  const attachInputCanceller = (() => {
-    // Using closure to keep a record of the last callback for removal.
-    let lastInputCanceller
-    return ({ inputCanceller, isAnimating } = {}) => {
-      if (lastInputCanceller) {
-        el.cancelMessage.removeEventListener('click', lastInputCanceller)
-      }
-      el.cancelMessage.addEventListener('click', inputCanceller)
-      lastInputCanceller = inputCanceller
+  const attachInputCanceller = enclose((state, data = {}) => {
+    const { inputCanceller, isAnimating } = data
+    if (state.lastInputCanceller) {
+      el.cancelMessage.removeEventListener('click', state.lastInputCanceller)
     }
-  })()
+    el.cancelMessage.addEventListener('click', inputCanceller)
+    state.lastInputCanceller = inputCanceller
+  })
 
   // Set the text on the digital readout.
   const displayReadout = ({ readout } = {}) => {

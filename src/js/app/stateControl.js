@@ -5,7 +5,7 @@ import { INDICATOR_BREAK_TXT, INDICATOR_FLASH_DURATION, INDICATOR_SESSION_TXT,
 import { action, animator, breakControl, model,
          sessionControl, stateControl, view
        } from 'app'
-import { frozen, sealed } from 'utility/fn'
+import { enclose, frozen, sealed } from 'utility/fn'
 import { clearCanvas } from 'ui/canvas'
 import { formatTime } from 'utility/conv'
 import { once } from 'utility/iter'
@@ -125,18 +125,14 @@ const makeStateControl = () => {
   }
 
   // Return text to indicate important state transitions to the user.
-  const indicator = (() => {
-    // Using closure to keep a special message that will display temporarily.
-    let specialMessage
-    return ({ flash } = {}) => {
-      if (flash !== undefined) {
-        specialMessage = flash
-        sleep(INDICATOR_FLASH_DURATION).then(() => specialMessage = null)
-      }
-      // Return special message or null
-      return specialMessage
+  const indicator = enclose((state, { flash } = {}) => {
+    if (flash !== undefined) {
+      state.specialMessage = flash
+      sleep(INDICATOR_FLASH_DURATION).then(() => state.specialMessage = null)
     }
-  })()
+    // Return a special message or null if none.
+    return state.specialMessage
+  })
 
   // Return a formatted string for the digital time display.
   // Important state transitions will flash special alerts over the readout.
